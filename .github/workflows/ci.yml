@@ -13,55 +13,73 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify template repository layout
+      - name: Verify project layout
         run: |
-          for d in docs prompts meta launcher; do
+          for d in \
+            docs \
+            prompts/agent \
+            backend/src/domain \
+            backend/src/application \
+            backend/src/ports \
+            backend/src/adapters \
+            backend/src/api \
+            frontend/web \
+            frontend/mobile \
+            infra \
+            .goldstandard
+          do
             if [ ! -d "$d" ]; then
               echo "Missing required directory: $d"
               exit 1
             fi
           done
-          echo "Layout OK: docs, prompts, meta, launcher"
+          echo "Layout OK"
+
+      - name: Verify required documentation
+        run: |
+          for f in \
+            docs/pflichtenheft.md \
+            docs/architecture.md \
+            docs/projectstructure.md \
+            docs/projektrules.md \
+            docs/datenbankmodell.md \
+            .goldstandard/context.txt
+          do
+            if [ ! -f "$f" ]; then
+              echo "Missing required file: $f"
+              exit 1
+            fi
+          done
+          echo "Documentation OK"
 
       - name: Set up Node
-        if: hashFiles('launcher/package.json') != '' || hashFiles('frontend/package.json') != ''
+        if: hashFiles('frontend/web/package.json') != '' || hashFiles('frontend/mobile/package.json') != '' || hashFiles('frontend/package.json') != ''
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # ---------- LAUNCHER (Template-Pflicht) ----------
-
-      - name: Install launcher dependencies
-        if: hashFiles('launcher/package.json') != ''
-        run: |
-          cd launcher
-          npm install
-
-      - name: Run launcher tests
-        if: hashFiles('launcher/package.json') != ''
-        run: |
-          cd launcher
-          npm test
-
-      # ---------- FRONTEND (optional) ----------
+      # ---------- FRONTEND (optional, when package.json exists) ----------
 
       - name: Install frontend deps
-        if: hashFiles('frontend/package.json') != ''
+        if: hashFiles('frontend/web/package.json') != '' || hashFiles('frontend/mobile/package.json') != '' || hashFiles('frontend/package.json') != ''
         run: |
-          cd frontend
-          npm install
+          for dir in frontend/web frontend/mobile frontend; do
+            if [ -f "$dir/package.json" ]; then
+              echo "Installing dependencies in $dir"
+              (cd "$dir" && npm install)
+            fi
+          done
 
       - name: Run frontend lint
-        if: hashFiles('frontend/package.json') != ''
+        if: hashFiles('frontend/web/package.json') != '' || hashFiles('frontend/mobile/package.json') != '' || hashFiles('frontend/package.json') != ''
         run: |
-          cd frontend
-          if npm run | grep -q "lint"; then
-            npm run lint
-          else
-            echo "No lint script found, skipping"
-          fi
+          for dir in frontend/web frontend/mobile frontend; do
+            if [ -f "$dir/package.json" ]; then
+              (cd "$dir" && if npm run 2>/dev/null | grep -q "lint"; then npm run lint; else echo "No lint script in $dir, skipping"; fi)
+            fi
+          done
 
-      # ---------- BACKEND (nur mit Python-Projekt-Setup) ----------
+      # ---------- BACKEND (optional, when Python project setup exists) ----------
 
       - name: Set up Python
         if: hashFiles('backend/requirements.txt') != '' || hashFiles('backend/pyproject.toml') != ''

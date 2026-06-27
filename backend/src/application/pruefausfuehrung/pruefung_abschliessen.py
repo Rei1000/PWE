@@ -41,7 +41,7 @@ class PruefungAbschliessen:
         return prueflauf, snapshot
 
     def _version_fuer_prueflauf(self, prueflauf: Prueflauf) -> ProduktdefinitionsVersion:
-        version = self.katalog.get_aktive_version_fuer_kodierung(prueflauf.produktkodierung)
-        if version is None or version.version_id != prueflauf.version_id:
+        version = self.katalog.get_version(prueflauf.version_id)
+        if version is None:
             raise DomainError("Version des Prüflaufs nicht mehr im Katalog auffindbar")
         return version

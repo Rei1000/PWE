@@ -43,3 +43,31 @@ class AbschlussResponse(BaseModel):
     status: str
     ist_gueltig: bool
     snapshot_id: str
+
+
+class ProzedurSchrittEntwurfRequest(BaseModel):
+    schritt_id: str
+    vorlage_id: str
+    ist_pflicht: bool
+    reihenfolge: int
+    sollvorgaben: dict[str, Any] = Field(default_factory=dict)
+
+
+class EntwurfAnlegenRequest(BaseModel):
+    produktkodierung: str
+    prozedur_schritte: list[ProzedurSchrittEntwurfRequest]
+    sollbestueckung: list[str] = Field(default_factory=list)
+    basisprodukt_sollvorgaben: dict[str, Any] = Field(default_factory=dict)
+    kundenprofil_sollvorgaben: dict[str, Any] = Field(default_factory=dict)
+    definition_sollvorgaben: dict[str, Any] = Field(default_factory=dict)
+
+
+class EntwurfResponse(BaseModel):
+    produktdefinition_id: str
+    produktkodierung: str
+
+
+class VersionResponse(BaseModel):
+    version_id: str
+    produktdefinition_id: str
+    produktkodierung: str

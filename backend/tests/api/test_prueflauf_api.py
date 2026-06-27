@@ -88,3 +88,5 @@ def test_api_start_ohne_version_404(client: TestClient):
         },
     )
     assert response.status_code == 404
+    body = response.json()
+    assert body["code"] == "version_nicht_gefunden"

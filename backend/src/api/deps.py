@@ -25,6 +25,7 @@ class ApiDeps:
 
 
 def in_memory_deps() -> ApiDeps:
+    """Standard-Wiring für Entwicklung und Tests (kein PostgreSQL in diesem Slice)."""
     return ApiDeps(
         katalog=InMemoryKatalogRepository(),
         prueflauf_repo=InMemoryPrueflaufRepository(),

@@ -4,6 +4,14 @@ Verbindliche Grundsätze für Entwicklung, Architektur und Agent-Arbeit in diese
 
 ---
 
+## Fachliche Referenz (verbindlich)
+
+**`docs/domain-model.md`** ist die verbindliche Beschreibung der PWE-Fachdomäne.
+
+Alle Projektdokumente, Architekturentscheidungen und Implementierungen müssen sich an diesem Dokument orientieren. Bei Widersprüchen gilt das Domain Model.
+
+---
+
 ## Agent-Ausführungsregeln (verpflichtend)
 
 Vor jeder Agent-Aufgabe ist verpflichtend folgender Arbeitsrahmen anzuwenden:
@@ -70,23 +78,39 @@ Er darf bestehende Entscheidungen jederzeit hinterfragen, sofern dadurch die Arc
 
 ## Ubiquitous Language (verbindlich)
 
-Die Engine spricht generische Begriffe. Begriffe der ersten Anwendung sind **Konfigurationsinstanzen**, keine Engine-Invarianten.
+Die verbindliche Begriffswelt ist in **`docs/domain-model.md`** definiert. Kurzfassung:
 
 | Engine-Begriff | Bedeutung | Erste Anwendung (Ergometer) |
 |----------------|-----------|---------------------------|
-| **Prüfobjekt** | Das zu prüfende Objekt | Ergometer |
-| **Prüfobjekt-Kennung** | Eindeutige Identifikation des konkreten Prüfobjekts | Geräteseriennummer |
-| **Produktvariante** | Konfiguration einer prüfbaren Variante; verknüpft Stammdaten und Prüfprozedur | Artikelnummer (mit Grundmodell/Kunde/Ausstattung) |
-| **Basisprodukt** | Übergeordnete Produktfamilie mit Sollwerten und Standardinformationen | Grundmodell (erste 6 Stellen der Artikelnummer) |
-| **Prüfprozedur** | Definiert den Prüfablauf für eine Produktvariante | (gleich) |
-| **Prüfschritt** | Einzelner Schritt in einer Prozedur oder Bibliothek | (gleich) |
-| **Prüflauf** | Laufzeitinstanz einer Prüfung | (gleich) |
-| **Routine** | Automatisierbare Aktionsfolge innerhalb eines Schritts | (gleich) |
+| **Produktkodierung** | Kodierung zur Auflösung einer Produktdefinition | Artikelnummer |
+| **Produktdefinition** | Vollständige Prüfvorgabe im Entwurf (änderbar) | — |
+| **ProduktdefinitionsVersion** | Veröffentlichte, unveränderliche Prüfvorgabe | — |
+| **Basisprodukt** | Produktfamilie mit Standardinformationen | Grundmodell |
+| **Option** | Ausstattungsmerkmal | z. B. Blutdruck, WLAN |
+| **Kundenprofil** | Kundenspezifische Vorgaben und Regeln | OEM-Schlüssel (Oxx) oder Default |
+| **Prüfobjekt** | Konkret zu prüfendes Exemplar | Ergometer |
+| **Prüfobjekt-Kennung** | Eindeutige Identifikation des Exemplars | Geräteseriennummer |
+| **Prüfprozedur** | Geordnete Folge von ProzedurSchritten | — |
+| **ProzedurSchritt** | Verwendung einer PrüfschrittVorlage in einer Prozedur | — |
+| **PrüfschrittVorlage** | Wiederverwendbare Schrittdefinition (Bibliothek) | — |
+| **PrüfschrittDurchführung** | Laufzeitausführung eines ProzedurSchritts | — |
+| **Routine** | Automatisierbare Aktionsfolge | — |
 | **Externes Kommando** | Konfigurierbares Kommando an ein externes System | COM-Kommando |
-| **Komponente** | Austauschbares Teil mit optionaler Seriennummer | Platine |
-| **Prüfprotokoll** | Unveränderlicher Nachweis eines abgeschlossenen Prüflaufs | PDF-Protokoll |
+| **Sollvorgabe** | Erwarteter Wert, Bereich oder Regel | — |
+| **Sollbestückung** | Erwartete Komponenten | z. B. Mainboard, BD-Platine |
+| **Prüflauf** | Laufzeitinstanz einer Prüfung | — |
+| **Nachweis** | Beleg auf Schrittebene | Messwert, Foto, Rohantwort, … |
+| **Beurteilung** | Fachliche Bewertung eines Schritts | bestanden / nicht bestanden / mit Kommentar |
+| **ProtokollSnapshot** | Unveränderlicher Abschlussnachweis eines Prüflaufs | PDF-Ausgabe |
 
-**Abgrenzung:** „Prüfung" bezeichnet den Vorgang; „Prüflauf" ist die persistierte Laufzeitinstanz mit Zustand und Ergebnissen.
+**Abgrenzungen:**
+
+- **Prüfung** = Vorgang; **Prüflauf** = persistierte Instanz.
+- **PrüfschrittVorlage** → **ProzedurSchritt** → **PrüfschrittDurchführung** (Definition → Verwendung → Laufzeit).
+- **Nachweis** ≠ **Beurteilung** (Evidenz vs. Urteil).
+- **ProduktdefinitionsVersion** ≠ ad-hoc Snapshot pro Lauf — der Prüflauf **referenziert** die Version.
+
+Veraltete Begriffe (**Produktvariante**, **Schrittstatus**, **Prüfschritt** ohne Kontext) sind nicht mehr zu verwenden.
 
 ---
 
@@ -94,8 +118,8 @@ Die Engine spricht generische Begriffe. Begriffe der ersten Anwendung sind **Kon
 
 | Schicht | Benennung | Sprache | Beispiel |
 |---------|-----------|---------|----------|
-| **Domain** | Entitäten, Value Objects, Domain Services | Fachdomäne | `ExternesKommando`, `Prueflauf` |
-| **Ports** | Interfaces / Protocols in `ports/` | Fachdomäne | `ExternesKommandoPort` |
+| **Domain** | Domänenobjekte | Fachdomäne | `Prueflauf`, `Nachweis` |
+| **Ports** | Interfaces in `ports/` | Fachdomäne | `ExternesKommandoPort` |
 | **Adapter** | Implementierungen in `adapters/` | Technologie/Protokoll | `com/`, `postgresql/`, `pdf/` |
 
 **Regeln:**
@@ -104,16 +128,13 @@ Die Engine spricht generische Begriffe. Begriffe der ersten Anwendung sind **Kon
 - Adapter benennen die **technische Implementierung** — niemals den Port-Namen als Ordner.
 - **Ein Port, viele Adapter:** `ExternesKommandoPort` wird von `com/`, `can/`, `rest/`, `simulation/` implementiert.
 - Die Adapter-Auswahl erfolgt über Konfiguration (`infra/config/`), nicht über Domain-if/else.
-- Test-Doubles (Mock, Simulation) sind Adapter und gehören unter `adapters/simulation/` oder `tests/adapters/`.
-
-**Anti-Pattern (verboten):** `adapters/externes_kommando/` — vermischt Port-Sprache mit Adapter-Schicht und erschwert mehrere Implementierungen.
 
 ---
 
 ## 1. Produktvision
 
 - **PWE ist eine konfigurierbare Prüf-Workflow-Engine** — keine gerätespezifische Endprüf-Software.
-- **Ergometer-Endprüfung** ist die erste konkrete Anwendung und wird ausschließlich über **Stammdaten und Konfiguration** abgebildet.
+- **Ergometer-Endprüfung** ist die erste konkrete Anwendung und wird ausschließlich über **Produktdefinitionen und Konfiguration** abgebildet.
 - **Konfigurierbarkeit steht über Spezialisierung:** Neue Prüfobjekttypen, Prozeduren und Schnittstellen sollen ohne Programmcode-Änderung am Engine-Kern möglich sein.
 
 ---
@@ -122,12 +143,13 @@ Die Engine spricht generische Begriffe. Begriffe der ersten Anwendung sind **Kon
 
 | Grundsatz | Bedeutung |
 |-----------|-----------|
-| **Engine-Kern generisch** | Domain-Code modelliert Prüfprozesse, Prüfläufe, Schritte, Routinen und Protokolle — nicht Ergometer, Platinen oder COM-Protokolle. |
-| **Erste Anwendung = Konfiguration** | Artikelnummern, Grundmodelle, Platinen, Sollwerte, externe Kommandos und Protokollinhalte sind **Katalogdaten**. |
-| **Design Time / Run Time** | Katalog definiert (Design Time); Prüfausführung führt aus (Run Time); Protokoll friert Ergebnisse ein. |
+| **Engine-Kern generisch** | Domain-Code modelliert Prüfprozesse, Prüfläufe, Schritte, Routinen, Nachweise und Protokolle — nicht Ergometer oder COM-Protokolle. |
+| **Erste Anwendung = Konfiguration** | Artikelnummern, Platinen, externe Kommandos und Protokollinhalte sind **Katalogdaten**. |
+| **Design Time / Run Time / Post-Run Time** | Katalog (Entwurf/Version) → Prüfausführung → ProtokollSnapshot. |
+| **Veröffentlichte Vorgabe** | Neue Prüfläufe referenzieren ausschließlich eine **ProduktdefinitionsVersion**. |
 | **DDD + Hexagonal** | Bounded Contexts mit klaren Grenzen; externe Systeme nur über Ports/Adapter. |
 | **TDD** | Tests vor oder parallel zur Implementierung; Domain-Logik ohne Infrastruktur testbar. |
-| **Unveränderlichkeit** | Abgeschlossene Prüfläufe und Prüfprotokolle dürfen nicht nachträglich geändert werden. |
+| **Unveränderlichkeit** | Abgeschlossene Prüfläufe und ProtokollSnapshots dürfen nicht nachträglich geändert werden. |
 
 ---
 
@@ -139,15 +161,13 @@ Die Engine spricht generische Begriffe. Begriffe der ersten Anwendung sind **Kon
 - ORM- oder SQL-Abhängigkeiten in der Domain-Schicht.
 - Duplizierung von Fachregeln in Frontend oder API.
 
-**Erlaubt:** Konfigurierbare Aktionstypen (z. B. „externes Kommando senden"), deren **Definition** im Katalog und deren **Ausführung** über Ports/Adapter erfolgt.
-
 ---
 
 ## 4. Systemgrenzen
 
 - **Einzugsbereich:** Konfiguration und Durchführung von Endprüfungen, Protokollierung, Archivierung, Auswertung.
-- **Schnittstellen:** Externe Prüfobjekte über Adapter (COM in der ersten Anwendung), Drucker, externe Arbeitsanweisungen als Referenzen.
-- **Nicht-Ziele:** ERP-Integration, gerätespezifische Fachlogik im Code, grafischer Routine-Editor (v1), CSV/Excel-Export (v1), vollständige Auditierung externer Kommunikation (v1).
+- **Schnittstellen:** Externe Prüfobjekte über Adapter (COM in der ersten Anwendung), Drucker, externe Arbeitsanweisungen, Produktlaufkarte als Eingangsinformation.
+- **Nicht-Ziele:** Fertigungssteuerung, ERP-Integration, gerätespezifische Fachlogik im Code.
 
 ---
 
@@ -155,19 +175,19 @@ Die Engine spricht generische Begriffe. Begriffe der ersten Anwendung sind **Kon
 
 | Context | Phase | Kurzbeschreibung |
 |---------|-------|------------------|
-| **Katalog** | Design Time | Stammdaten und Prüfkonfiguration |
-| **Prüfausführung** | Run Time | Prüfläufe, Schritte, Routine-Orchestrierung |
-| **Protokoll** | Post-Run Time | Unveränderliches Archiv und Protokollerzeugung |
+| **Katalog** | Design Time | Produktdefinition, Versionen, Bibliothek (Vorlagen, Routinen, Kommandos) |
+| **Prüfausführung** | Run Time | Prüflauf, PrüfschrittDurchführung, Nachweise, Beurteilungen |
+| **Protokoll** | Post-Run Time | ProtokollSnapshot |
 | **Identity** | Querschnitt | Benutzer, Rollen, Berechtigungen |
-| **Auswertung** | Read Model | Dashboard und Statistiken (CQRS-Seite) |
+| **Auswertung** | Read Model | Dashboard und Statistiken |
 
-Gerätekommunikation ist **kein** Bounded Context — sie wird über den Port `ExternesKommandoPort` und technische Adapter (z. B. `adapters/com/`) angebunden.
+Gerätekommunikation ist **kein** Bounded Context — sie wird über `ExternesKommandoPort` und technische Adapter (z. B. `adapters/com/`) angebunden.
 
 ---
 
 ## 6. Validierungsprinzipien
 
-- Eingaben werden gegen konfigurierte Regeln geprüft (Definition im Katalog, Auswertung in Prüfausführung).
+- Eingaben werden gegen konfigurierte Regeln geprüft (Definition in Produktdefinition/Version, Auswertung in Prüfausführung).
 - Fehler dem Nutzer verständlich mitteilen; technische Details loggen.
 - Keine stillen Korrekturen ohne Rückmeldung.
 
@@ -175,6 +195,7 @@ Gerätekommunikation ist **kein** Bounded Context — sie wird über den Port `E
 
 ## 7. Verweise
 
+- **Fachdomäne (Referenz):** `docs/domain-model.md`
 - Fachliche Anforderungen: `docs/pflichtenheft.md`
 - Architektur: `docs/architecture.md`
 - Projektstruktur: `docs/projectstructure.md`

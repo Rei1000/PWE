@@ -1,0 +1,186 @@
+PROJEKTKONTEXT
+
+Projektname:
+PWE
+
+Kurzbeschreibung:
+PWE (Prüf-Workflow-Engine) ist eine konfigurierbare Plattform zur Durchführung und Dokumentation von Endprüfungen. Die erste konkrete Anwendung ist die Endprüfung von Ergometern. Prüfprozesse werden vollständig über Stammdaten und Konfiguration modelliert, sodass neue Gerätevarianten ohne Änderungen am Programmcode unterstützt werden können.
+
+Ziel des Projekts:
+Entwicklung einer konfigurierbaren Prüfplattform, welche Endprüfungen standardisiert, den Prüfer durch den gesamten Prüfablauf führt, manuelle Dokumentation reduziert, automatisierte Gerätekommunikation ermöglicht und vollständige Prüfprotokolle erzeugt.
+
+---
+
+USE CASES
+
+- Prüfung durchführen
+- Prüfung fortsetzen
+- Wiederholungsprüfung durchführen
+- Prüfprozeduren verwalten
+- Prüfschritte verwalten
+- Routinen verwalten
+- Stammdaten verwalten
+- Gerätekommunikation durchführen
+- Prüfprotokoll erzeugen
+- Historie durchsuchen
+- Prüfung parallel am Smartphone begleiten
+- Prüfdaten statistisch auswerten
+- Systemeinstellungen verwalten
+
+---
+
+FUNKTIONALE ANFORDERUNGEN
+
+- Benutzerverwaltung mit Rollen (Admin, User)
+- Verwaltung von Grundmodellen
+- Verwaltung von Artikelnummern
+- Verwaltung von Kunden
+- Verwaltung von Ausstattungen
+- Verwaltung von Platinen
+- Verwaltung von Sollwerten
+- Verwaltung von Arbeitsplätzen
+- Verwaltung globaler Prüfschritt-Bibliothek
+- Erstellung und Verwaltung von Prüfprozeduren
+- Kopieren bestehender Prüfprozeduren
+- Wiederverwendung von Prüfschritten
+- Benutzerindividuelle Reihenfolge der Prüfschritte
+- Verwaltung von COM-Kommandos
+- Verwaltung automatisierter Routinen
+- Verknüpfung von Arbeitsanweisungen zu Prüfschritten
+- Warn- und Sicherheitshinweise je Prüfschritt
+- Prüfschritte mit mehreren Eingabefeldern
+- Eingabefeldtypen: Text, Zahl, Auswahl, Checkbox, Datum, Seriennummer, Barcode/QR
+- Validierung von Eingabefeldern
+- Prüfung starten über Artikelnummer und Geräteseriennummer
+- Automatische Zuordnung der passenden Prüfprozedur
+- Speicherung unvollständiger Prüfungen
+- Fortsetzen unterbrochener Prüfungen
+- Wiederholungsprüfungen
+- Parallele Bearbeitung am PC und Smartphone
+- QR-Code-Kopplung zwischen PC und Smartphone
+- Smartphone für komplette Prüfungsdurchführung nutzbar
+- Fotodokumentation
+- Barcode- und QR-Code-Erfassung
+- Scanfunktion neben relevanten Eingabefeldern
+- Seriennummern manuell erfassen oder automatisch auslesen
+- COM-Kommunikation zum Lesen und Schreiben von Geräteparametern
+- Soll-Ist-Vergleich ausgelesener Werte
+- Routinen mit Aktionen:
+  - COM senden
+  - COM lesen
+  - warten
+  - Messwert speichern
+  - Sollwert vergleichen
+  - Benutzerbestätigung
+  - Kommentar
+  - Foto
+  - Fehlerbedingung
+- Routinen können nach Nachbesserung wiederholt werden
+- Prüfschrittstatus:
+  - bestanden
+  - nicht bestanden
+  - bestanden mit Kommentar
+- Pflichtschritte konfigurierbar
+- Überspringen nur mit Kommentar, sofern erlaubt
+- Automatische PDF-Erstellung
+- PDF enthält:
+  - Zusammenfassung
+  - Prüfer
+  - Datum
+  - Artikelnummer
+  - Geräteseriennummer
+  - Prüfschritte
+  - Kommentare
+  - Fotos
+  - Geräteeinstellungen
+  - Firmwareversionen
+  - Seriennummern der Platinen
+- Fotos werden im PDF komprimiert dargestellt
+- PDF-Dateiname basiert auf der Geräteseriennummer
+- Abschlussbestätigung der Prüfung
+- Optionen:
+  - Speichern
+  - Speichern und Drucken
+- Archivierung aller Prüfläufe
+- Historie aller Prüfläufe pro Geräteseriennummer
+- Suche nach Geräteseriennummer
+- Dashboard mit:
+  - häufigsten Durchfallgründen
+  - häufigsten Abbruchgründen
+  - Bauteilwechseln
+- Filter im Dashboard nach Zeitraum, Grundmodell, Kunde und Artikelnummer
+
+---
+
+NICHT-FUNKTIONALE ANFORDERUNGEN
+
+- Anwendung zunächst lokal einsetzbar
+- Datenbank von Beginn an PostgreSQL
+- Mehrere Arbeitsplätze perspektivisch möglich
+- Architektur für spätere Mehrsprachigkeit vorbereiten
+- Bedienoberfläche zunächst Deutsch
+- Protokollsprache abhängig vom Kunden
+- Smartphone und PC arbeiten im selben lokalen Netzwerk
+- Smartphone-Sitzung bleibt aktiv und wird nach 30 Minuten Inaktivität getrennt
+- Fotos dauerhaft archivieren
+- Historisierung abgeschlossener Prüfläufe
+- Bereits abgeschlossene Protokolle bleiben unveränderlich
+- Erweiterbarkeit ohne Änderungen am Programmcode durch Konfiguration
+- Konfigurierbarkeit steht über Spezialisierung
+
+---
+
+DOMÄNENLOGIK / BESONDERHEITEN
+
+- PWE ist eine konfigurierbare Prüf-Workflow-Engine.
+- Die Ergometer-Endprüfung ist die erste Anwendung der Engine.
+- Die Artikelnummer ist der zentrale Schlüssel.
+- Erste sechs Stellen der Artikelnummer definieren das Grundmodell.
+- Der restliche Teil der Artikelnummer definiert Kunde und Ausstattung.
+- Jeder Artikelnummer ist genau eine aktive Prüfprozedur zugeordnet.
+- Grundmodelle besitzen eigene Sollwerte, Platinen und Standardinformationen.
+- Prüfprozeduren bestehen aus wiederverwendbaren Prüfschritten.
+- Prüfschritte können optional Routinen enthalten.
+- Routinen bestehen aus mehreren konfigurierbaren Aktionen.
+- COM-Kommandos werden zentral verwaltet und in Routinen verwendet.
+- Benutzer dürfen ausschließlich ihre persönliche Reihenfolge der Prüfschritte verändern.
+- Administratoren verwalten Stammdaten, Prüfschritte, Routinen und Prüfprozeduren.
+- Pflichtschritte müssen erfolgreich abgeschlossen werden.
+- Nicht bestandene Pflichtschritte machen den gesamten Prüflauf ungültig.
+- Ungültige Prüfungen dürfen gespeichert und dokumentiert werden.
+- Bereits abgeschlossene Prüfungen dürfen nicht geändert werden.
+- Neue Prüfungen erzeugen einen neuen Prüflauf.
+- Frühere Prüfläufe bleiben vollständig erhalten.
+- Eine Wiederholungsprüfung kann Daten der vorherigen Prüfung übernehmen.
+- Fotos bestätigen Prüfschritte und erscheinen im PDF.
+- Kommentare werden vollständig protokolliert.
+- Bauteilwechsel werden über Kommentare dokumentiert.
+- Werden Bauteile mit Seriennummer ersetzt, muss die neue Seriennummer erfasst werden.
+- Protokollsprache richtet sich nach dem Kunden der Artikelnummer.
+- Arbeitsanweisungen werden als externe Referenzen hinterlegt.
+
+---
+
+OPTIONALE TECHNISCHE HINWEISE
+
+- Python-Anwendung
+- PostgreSQL als Datenbank
+- COM-Schnittstelle zur Gerätekommunikation
+- PC und Smartphone arbeiten synchron über lokales Netzwerk
+- QR-Code verbindet Smartphone mit laufender Sitzung
+- Standard-COM-Port und Drucker je Arbeitsplatz konfigurierbar
+- Globaler Speicherpfad für Protokolle
+- PDF-Layout mit konfigurierbarem Logo sowie Kopf- und Fußbereich
+- Das Projekt soll nach Domain-Driven Design, hexagonaler Architektur und Test-Driven Development umgesetzt werden.
+- Der fachliche Kern ist die Prüf-Workflow-Engine, nicht die Ergometerprüfung.
+
+---
+
+OFFENE PUNKTE / UNSICHERHEITEN
+
+- Automatische Erkennung eines Arbeitsplatzes noch nicht definiert.
+- Unterstützung von Bildern innerhalb von Arbeitsanweisungen wird später betrachtet.
+- Exportfunktionen (CSV/Excel) sind nicht Bestandteil der ersten Version.
+- Vollständige Auditierung der COM-Kommunikation ist zunächst nicht vorgesehen.
+- Unterstützung weiterer Gerätetypen erfolgt in späteren Projektphasen.
+- Grafischer Routine-Editor ist nicht Bestandteil der ersten Version.

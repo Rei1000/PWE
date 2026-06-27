@@ -1,0 +1,9 @@
+# CODEOWNERS (Vorlage)
+#
+# Vor dem produktiven Einsatz: Platzhalter durch echte GitHub-Nutzer:innen oder Teams ersetzen.
+# Siehe: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Beispiel (Kommentar entfernen und anpassen):
+# * @your-org/your-team
+# docs/ @your-org/docs-maintainers
+# backend/ @your-org/backend-team

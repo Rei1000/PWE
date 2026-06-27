@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -71,3 +72,41 @@ class VersionResponse(BaseModel):
     version_id: str
     produktdefinition_id: str
     produktkodierung: str
+
+
+class NachweisDetailResponse(BaseModel):
+    nachweis_id: str
+    art: str
+    erfasst_am: datetime
+    payload: dict[str, Any]
+    ist_automatisch: bool
+
+
+class BeurteilungResponse(BaseModel):
+    ergebnis: str
+    festgelegt_am: datetime
+    kommentar: str | None = None
+
+
+class SchrittDurchfuehrungResponse(BaseModel):
+    schritt_id: str
+    vorlage_id: str
+    ist_pflicht: bool
+    reihenfolge: int
+    sollvorgaben: dict[str, Any]
+    nachweise: list[NachweisDetailResponse]
+    beurteilung: BeurteilungResponse | None = None
+
+
+class PrueflaufDetailResponse(BaseModel):
+    prueflauf_id: str
+    version_id: str
+    produktkodierung: str
+    pruefobjekt_kennung: str
+    pruefer_id: str
+    status: str
+    gestartet_am: datetime
+    abgeschlossen_am: datetime | None = None
+    schritte: list[SchrittDurchfuehrungResponse]
+    sollbestueckung: list[str]
+    erfasste_komponenten: list[str]

@@ -7,12 +7,17 @@ from fastapi.responses import Response
 
 from api.schemas import (
     AbschlussResponse,
+    BeurteilungResponse,
     KomponenteErfassenRequest,
+    NachweisDetailResponse,
     NachweisErfassenRequest,
     NachweisResponse,
+    PrueflaufDetailResponse,
     PrueflaufResponse,
     PrueflaufStartenRequest,
+    SchrittDurchfuehrungResponse,
 )
+from application.pruefausfuehrung.prueflauf_lesen import PrueflaufDetailAnsicht, PrueflaufLesen
 from application.protokoll.erzeugen import ProtokollErzeugen
 from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
@@ -34,6 +39,57 @@ def _prueflauf_response(prueflauf) -> PrueflaufResponse:
         pruefer_id=prueflauf.pruefer_id,
         status=prueflauf.status.value,
     )
+
+
+def _prueflauf_detail_response(detail: PrueflaufDetailAnsicht) -> PrueflaufDetailResponse:
+    return PrueflaufDetailResponse(
+        prueflauf_id=detail.prueflauf_id,
+        version_id=detail.version_id,
+        produktkodierung=detail.produktkodierung,
+        pruefobjekt_kennung=detail.pruefobjekt_kennung,
+        pruefer_id=detail.pruefer_id,
+        status=detail.status,
+        gestartet_am=detail.gestartet_am,
+        abgeschlossen_am=detail.abgeschlossen_am,
+        schritte=[
+            SchrittDurchfuehrungResponse(
+                schritt_id=s.schritt_id,
+                vorlage_id=s.vorlage_id,
+                ist_pflicht=s.ist_pflicht,
+                reihenfolge=s.reihenfolge,
+                sollvorgaben=s.sollvorgaben,
+                nachweise=[
+                    NachweisDetailResponse(
+                        nachweis_id=n.nachweis_id,
+                        art=n.art,
+                        erfasst_am=n.erfasst_am,
+                        payload=n.payload,
+                        ist_automatisch=n.ist_automatisch,
+                    )
+                    for n in s.nachweise
+                ],
+                beurteilung=(
+                    BeurteilungResponse(
+                        ergebnis=s.beurteilung.ergebnis,
+                        festgelegt_am=s.beurteilung.festgelegt_am,
+                        kommentar=s.beurteilung.kommentar,
+                    )
+                    if s.beurteilung
+                    else None
+                ),
+            )
+            for s in detail.schritte
+        ],
+        sollbestueckung=list(detail.sollbestueckung),
+        erfasste_komponenten=list(detail.erfasste_komponenten),
+    )
+
+
+@router.get("/{prueflauf_id}", response_model=PrueflaufDetailResponse)
+def prueflauf_lesen(prueflauf_id: str, request: Request) -> PrueflaufDetailResponse:
+    deps = request.app.state.deps
+    detail = PrueflaufLesen(deps.katalog, deps.prueflauf_repo).execute(prueflauf_id)
+    return _prueflauf_detail_response(detail)
 
 
 @router.post("", status_code=201, response_model=PrueflaufResponse)

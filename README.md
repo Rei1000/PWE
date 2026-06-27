@@ -20,3 +20,4 @@ Standardisierte Endprüfungen: Prüferführung, Nachweise, Beurteilungen, Protok
 | `docs/architecture.md` | Technische Architektur |
 | `docs/projectstructure.md` | Repository-Struktur |
 | `docs/projektrules.md` | Projektregeln |
+| **`docs/roadmap.md`** | **Projektfortschritt & nächste Slices** |

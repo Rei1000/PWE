@@ -1,61 +1,122 @@
-# Projektstruktur (Template)
+# Projektstruktur – PWE (Initial)
 
-Dieses Dokument beschreibt eine **generische** Verzeichnis- und Modulstruktur. Konkrete Fachpakete oder branchenspezifische Ordner sind **nicht** vorgegeben.
+## 1. Zielbild
+
+Die Projektstruktur bildet die Bounded Contexts aus `docs/architecture.md` ab und trennt Domain, Application, Ports, Adapter und API. In dieser Phase werden Struktur und Platzhalter angelegt; keine Fachlogik implementiert.
+
+**Leitgedanke:** Ordner benennen **Engine-Fachbereiche** (Katalog, Prüfausführung, …), nicht technische Integrationen (COM, Gerät) und nicht die erste Anwendung (Ergometer).
+
+Die verbindliche Begriffswelt ist in `docs/projektrules.md` dokumentiert.
+
+Technologie-Orientierung (aus Projektkontext): Python-Backend, PostgreSQL, lokale PC-/Smartphone-Oberflächen.
 
 ---
 
-## 1. Leitidee
+## 2. Ableitung aus Architektur und Pflichtenheft
 
-- **Domain und Anwendungslogik** liegen im Backend, klar nach Schichten getrennt.
-- **Darstellung und Interaktion** liegen im Frontend, ohne Business-Regeln zu duplizieren.
-- **Konfiguration und Infrastruktur** sind vom Kern getrennt.
+| Bounded Context | Phase | Domain | Application | Adapter |
+|-----------------|-------|--------|-------------|---------|
+| **Katalog** | Design Time | `domain/katalog/` | `application/katalog/` | `adapters/persistence/postgresql/` |
+| **Prüfausführung** | Run Time | `domain/pruefausfuehrung/` | `application/pruefausfuehrung/` | — |
+| **Protokoll** | Post-Run Time | `domain/protokoll/` | `application/protokoll/` | `adapters/pdf/`, `adapters/storage/` |
+| **Identity** | Querschnitt | `domain/identity/` | `application/identity/` | `adapters/persistence/postgresql/` |
+| **Auswertung** | Read Model | — | `application/auswertung/` | `adapters/persistence/postgresql/` |
+| Externes Kommando | `ExternesKommandoPort` | — | — | `adapters/com/` (weitere: `can/`, `rest/`, `simulation/`, …) |
+| Arbeitsplatz-Konfiguration | — | — | — | `infra/config/` |
 
 ---
 
-## 2. Backend (Beispielstruktur)
+## 3. Top-Level-Struktur
 
+```text
+PWE/
+├── backend/              # Python-Kern (Domain, Application, Ports, Adapter, API)
+├── frontend/             # PC- und Mobile-Oberflächen
+├── infra/                # Docker, Deployment, DB-Migrationen, Arbeitsplatz-Config
+├── docs/                 # Pflichtenheft, Architektur, Projektstruktur
+├── prompts/agent/        # Agent-Workflow-Prompts
+├── cli/                  # Hilfsskripte für Entwicklung und Betrieb
+├── .goldstandard/        # Verbindlicher Projektkontext
+└── docker-compose.yml    # Lokale Entwicklungsumgebung
 ```
+
+---
+
+## 4. Backend-Struktur
+
+```text
 backend/
-  domain/          # Fachmodell, Regeln, Value Objects, Entities (ohne Framework)
-  application/   # Use Cases, Orchestrierung, Ports nutzend
-  ports/         # Schnittstellen / Contracts nach außen (Persistenz, Messaging, …)
-  adapters/      # Technische Implementierungen der Ports (DB, HTTP-Clients, …)
-  config/        # Umgebung, Einstellungen, Zusammenstellung der Abhängigkeiten
+├── src/
+│   ├── domain/
+│   │   ├── katalog/              # Produktvarianten, Prozeduren, Schrittvorlagen, Routinen
+│   │   ├── pruefausfuehrung/     # Prüflauf, Schrittausführung, Routine-Orchestrierung
+│   │   ├── protokoll/            # ProtokollSnapshot, Archiv-Invarianten
+│   │   └── identity/             # Benutzer, Rollen, Schrittreihenfolge
+│   ├── application/
+│   │   ├── katalog/
+│   │   ├── pruefausfuehrung/
+│   │   ├── protokoll/
+│   │   ├── identity/
+│   │   └── auswertung/           # Dashboard, Statistiken (Read Models)
+│   ├── ports/                    # Fachliche Verträge (Domänensprache)
+│   ├── adapters/                 # Technische Implementierungen (Protokoll/Technologie)
+│   │   ├── persistence/
+│   │   │   └── postgresql/       # Repository-Implementierungen
+│   │   ├── com/                  # ExternesKommandoPort (v1)
+│   │   ├── pdf/                  # ProtokollErzeugungPort
+│   │   ├── print/                # DruckPort
+│   │   └── storage/              # DateiSpeicherPort
+│   └── api/                      # HTTP/WebSocket, kein Fachwissen
+└── tests/
+    ├── domain/
+    ├── application/
+    └── adapters/
 ```
 
-| Ordner | Rolle |
-|--------|--------|
-| `domain/` | Reine Fachlogik; keine Datenbank-, HTTP- oder Framework-Details. |
-| `application/` | Abläufe und Anwendungsfälle; koordiniert Domain und Ports. |
-| `ports/` | Abstraktionen für alles Technische; richten den Fluss nach außen. |
-| `adapters/` | Konkrete Technik (ORM, REST, Dateien, Queues, …). |
-| `config/` | Verdrahtung, Umgebungsprofile, Start der Anwendung. |
+**Hinweis zu `domain/katalog/`:** Interne Unterteilung in `stammdaten/` und `konfiguration/` ist zulässig, wenn die Komplexität wächst. Bis dahin reicht eine flache Struktur unter `katalog/`.
 
 ---
 
-## 3. Frontend (Beispielstruktur)
+## 5. Frontend-Struktur
 
-```
+```text
 frontend/
-  app/           # Routing, Seiten, Layout (frameworkspezifisch anpassen)
-  features/      # Feature-orientierte Module (UI + lokaler State)
-  components/    # Wiederverwendbare UI-Bausteine
-  lib/           # Hilfen: API-Client, Formatierung, reine Utilities ohne Fachlogik
+├── web/                  # PC-Oberfläche (Prüfung, Verwaltung, Dashboard)
+│   ├── src/
+│   └── tests/
+└── mobile/               # Smartphone-Oberfläche (QR-Kopplung, Scan, Foto)
+    ├── src/
+    └── tests/
 ```
-
-| Ordner | Rolle |
-|--------|--------|
-| `app/` | Einstieg, Navigation, ggf. Meta-Layout; möglichst dünn halten. |
-| `features/` | Ein Feature pro Bereich; kapselt Screens und zugehörige UI-Logik. |
-| `components/` | Wiederverwendbare, fachlich neutrale Bausteine. |
-| `lib/` | Technische Hilfen; **keine** Domänenregeln duplizieren. |
 
 ---
 
-## 4. Weitere übliche Bereiche (optional, projektspezifisch)
+## 6. Infrastruktur
 
-- `infra/` – Container, Deployment, IaC (falls genutzt)
-- `scripts/` – Wartungs- und Entwicklungsskripte
-- `docs/` – zentrale Dokumentation (dieses Repository)
+```text
+infra/
+├── docker/               # Dockerfiles
+├── db/                   # Migrationen, Seeds (Platzhalter)
+└── config/               # Arbeitsplatz-Konfiguration (Schnittstellen, Drucker, Pfade)
+```
 
-Pfade und Namen können an den gewählten Stack angepasst werden; die **Trennung der Verantwortlichkeiten** soll erhalten bleiben.
+---
+
+## 7. Verantwortlichkeitstrennung
+
+- `domain/katalog` enthält Konfigurations-Fachlogik, keine Protokoll- oder DB-Details.
+- `domain/pruefausfuehrung` orchestriert Routinen fachlich; externe Kommandos nur über `ExternesKommandoPort`.
+- `adapters/com/` implementiert den Port technisch — weitere Protokolle als sibling-Ordner (`can/`, `rest/`, `simulation/`).
+- `ports/` spricht Domänensprache; `adapters/` benennt Technologien.
+- `application` koordiniert Use Cases über Context-Grenzen hinweg.
+- `frontend` repliziert keine serverseitigen Fachregeln.
+- Ergometer-spezifische Begriffe erscheinen nur in Konfigurationsdaten und im Pflichtenheft, nicht in Modulnamen.
+
+---
+
+## 8. Offene Strukturpunkte
+
+- Interne Aufteilung von `domain/katalog/` bei wachsender Komplexität.
+- Mobile-Technologie (responsive Web vs. native/hybrid).
+- Weitere Adapter neben `com/` (z. B. `can/`, `rest/`, `simulation/`) ohne Domain- oder Port-Änderung.
+- Migrations-Tooling für PostgreSQL.

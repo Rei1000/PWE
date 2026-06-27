@@ -44,6 +44,9 @@ Brücke Domain Model → Code. Fachliche Referenz: `docs/domain-model.md` §4.15
 | Port | Adapter (V1) | Use Case |
 |------|--------------|----------|
 | `ExternesKommandoPort` | `adapters/simulation/externes_kommando.py` | `ExternesKommandoAusfuehren` |
+| `ExternesKommandoPort` | `adapters/com/externes_kommando.py` | `ExternesKommandoAusfuehren` |
+
+COM-Adapter nutzt injizierbaren `SeriellerTransport` (`adapters/com/transport.py`); Hardware-Transport folgt über Konfiguration.
 
 Laufzeit-VOs: `domain/pruefausfuehrung/kommando_ausfuehrung.py` (`ExternesKommandoAnfrage`, `ExternesKommandoAntwort`).
 
@@ -55,6 +58,6 @@ Keine.
 
 ## Nicht im Domain-Kern
 
-- COM-Hardware, Fotospeicher
+- PySerial-Hardware-Transport (`adapters/com/`), Fotospeicher
 - Vollständige Routine-Orchestrierung (folgt)
 - Istbestückung (ADR-0006 — implementiert)

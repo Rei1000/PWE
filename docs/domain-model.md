@@ -4,7 +4,7 @@ Dieses Dokument beschreibt die **Fachdomäne** der Prüf-Workflow-Engine (PWE).
 
 Es ist unabhängig von Programmiersprache, Datenbank, API oder technischer Architektur verständlich.
 
-Verbindliche Ergänzungen zu Projektkontext und Anforderungen: `docs/pflichtenheft.md`, `.goldstandard/context.txt`.
+Project DNA und Einstieg: `.goldstandard/context.txt`. Anforderungen: `docs/pflichtenheft.md`.
 
 ---
 

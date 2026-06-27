@@ -14,7 +14,7 @@ Brücke Domain Model → Code. Fachliche Referenz: `docs/domain-model.md` §4.19
 
 **`ProtokollSnapshot`** — `domain/protokoll/snapshot.py`
 
-Factory: `ProtokollSnapshot.aus_prueflauf()` — nur für abgeschlossenen Prüflauf.
+Factory: `ProtokollSnapshot.aus_abschluss(view)` — importiert nur `PrueflaufAbschlussView`, nicht `Prueflauf` (ADR-0008).
 
 ## Value Objects
 

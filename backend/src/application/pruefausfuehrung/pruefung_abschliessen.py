@@ -30,13 +30,13 @@ class PruefungAbschliessen:
             raise PrueflaufNichtGefunden(prueflauf_id)
 
         version = self._version_fuer_prueflauf(prueflauf)
-        pflicht_ids = {s.schritt_id for s in version.prozedur_schritte if s.ist_pflicht}
         pflicht_map = {s.schritt_id: s.ist_pflicht for s in version.prozedur_schritte}
 
-        prueflauf.abschliessen(pflicht_ids)
+        prueflauf.abschliessen(version.pflicht_schritt_ids(), version.sollbestueckung)
         self.prueflauf_repo.save(prueflauf)
 
-        snapshot = ProtokollSnapshot.aus_prueflauf(str(uuid4()), prueflauf, pflicht_map)
+        view = prueflauf.to_abschluss_view(pflicht_map)
+        snapshot = ProtokollSnapshot.aus_abschluss(str(uuid4()), view)
         self.protokoll_repo.save(snapshot)
         return prueflauf, snapshot
 

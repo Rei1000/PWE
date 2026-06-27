@@ -21,7 +21,9 @@ Brücke Domain Model → Code. Fachliche Referenz: `docs/domain-model.md` §4.15
 |---------|-------|
 | `starten()` | Legt Durchführungen für alle aktiven ProzedurSchritte an |
 | `add_nachweis()` | Nur bei offenem Lauf; Wellen via append |
-| `set_beurteilung()` | Einmal pro Durchführung (V1) |
+| `beurteilen_schritt(schritt_id, sollvorgaben)` | ADR-0007 — Beurteilung via `BeurteilungService` |
+| `erfasse_komponente(typ, seriennummer)` | ADR-0006 — Istbestückung |
+| `to_abschluss_view(pflicht_map)` | ADR-0008 — Übergabe an Protokoll |
 | `abschliessen()` | Pflichtschritte müssen beurteilt sein; NICHT_BESTANDEN → ungültig |
 
 ## Entities / Value Objects

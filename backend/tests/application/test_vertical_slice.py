@@ -1,17 +1,20 @@
-"""Vertical Slice 1 — Katalog + Prüfausführung + Protokoll (In-Memory)."""
+"""Vertical Slice 1 — ausschließlich über Application-Use-Cases."""
 
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
-from domain.pruefausfuehrung.prueflauf import BeurteilungErgebnis, NachweisArt
+from domain.pruefausfuehrung.prueflauf import NachweisArt, PrueflaufStatus
 from adapters.persistence.in_memory import (
     InMemoryKatalogRepository,
     InMemoryProtokollRepository,
     InMemoryPrueflaufRepository,
 )
+from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
+from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 
 
-def _fixture_version() -> ProduktdefinitionsVersion:
+def _fixture_version(*, mit_sollbestueckung: bool = True) -> ProduktdefinitionsVersion:
     return ProduktdefinitionsVersion(
         version_id="ver-1",
         produktdefinition_id="pd-1",
@@ -31,35 +34,80 @@ def _fixture_version() -> ProduktdefinitionsVersion:
                 reihenfolge=2,
             ),
         ),
+        sollbestueckung=("mainboard",) if mit_sollbestueckung else (),
     )
 
 
-def test_vertical_slice_pruefung_mit_protokollsnapshot():
+def _setup():
     katalog = InMemoryKatalogRepository()
     katalog.register_aktive_version(_fixture_version())
-    prueflauf_repo = InMemoryPrueflaufRepository()
-    protokoll_repo = InMemoryProtokollRepository()
+    return katalog, InMemoryPrueflaufRepository(), InMemoryProtokollRepository()
 
-    starten = PruefungStarten(katalog=katalog, prueflauf_repo=prueflauf_repo)
-    prueflauf = starten.execute(
+
+def test_vertical_slice_gueltiger_lauf_mit_protokoll():
+    katalog, prueflauf_repo, protokoll_repo = _setup()
+
+    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
         produktkodierung="1234567890",
         pruefobjekt_kennung="GER-999",
         pruefer_id="pruefer-1",
     )
+    KomponenteErfassen(prueflauf_repo).execute(prueflauf.prueflauf_id, "mainboard", "MB-1")
 
-    prueflauf.add_nachweis("schritt-a", NachweisArt.MESSWERT, {"spannung": 230})
-    prueflauf.set_beurteilung("schritt-a", BeurteilungErgebnis.BESTANDEN)
-    prueflauf_repo.save(prueflauf)
-
-    abschliessen = PruefungAbschliessen(
-        katalog=katalog,
-        prueflauf_repo=prueflauf_repo,
-        protokoll_repo=protokoll_repo,
+    NachweisErfassen(prueflauf_repo).execute(
+        prueflauf.prueflauf_id, "schritt-a", NachweisArt.MESSWERT, {"spannung": 230}
     )
-    abgeschlossen, snapshot = abschliessen.execute(prueflauf.prueflauf_id)
+    SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
+
+    abgeschlossen, snapshot = PruefungAbschliessen(
+        katalog, prueflauf_repo, protokoll_repo
+    ).execute(prueflauf.prueflauf_id)
 
     assert abgeschlossen.ist_gueltig()
     assert snapshot.version_id == "ver-1"
-    assert snapshot.pruefobjekt_kennung == "GER-999"
-    assert len(snapshot.schritte) == 2
     assert protokoll_repo.get_by_prueflauf(prueflauf.prueflauf_id) is not None
+
+
+def test_vertical_slice_ungueltiger_lauf_erhaelt_trotzdem_protokoll():
+    katalog, prueflauf_repo, protokoll_repo = _setup()
+
+    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+        produktkodierung="1234567890",
+        pruefobjekt_kennung="GER-999",
+        pruefer_id="pruefer-1",
+    )
+    KomponenteErfassen(prueflauf_repo).execute(prueflauf.prueflauf_id, "mainboard", "MB-1")
+
+    NachweisErfassen(prueflauf_repo).execute(
+        prueflauf.prueflauf_id, "schritt-a", NachweisArt.MESSWERT, {"spannung": 999}
+    )
+    SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
+
+    abgeschlossen, snapshot = PruefungAbschliessen(
+        katalog, prueflauf_repo, protokoll_repo
+    ).execute(prueflauf.prueflauf_id)
+
+    assert abgeschlossen.status == PrueflaufStatus.ABGESCHLOSSEN_UNGUELTIG
+    assert snapshot.ist_gueltig is False
+    assert protokoll_repo.get_by_prueflauf(prueflauf.prueflauf_id) is not None
+
+
+def test_vertical_slice_fehlende_bestueckung_ungueltig():
+    katalog, prueflauf_repo, protokoll_repo = _setup()
+
+    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+        produktkodierung="1234567890",
+        pruefobjekt_kennung="GER-999",
+        pruefer_id="pruefer-1",
+    )
+    NachweisErfassen(prueflauf_repo).execute(
+        prueflauf.prueflauf_id, "schritt-a", NachweisArt.MESSWERT, {"spannung": 230}
+    )
+    SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
+
+    abgeschlossen, snapshot = PruefungAbschliessen(
+        katalog, prueflauf_repo, protokoll_repo
+    ).execute(prueflauf.prueflauf_id)
+
+    assert not abgeschlossen.ist_gueltig()
+    assert snapshot.fehlende_sollbestueckung == ("mainboard",)

@@ -18,6 +18,8 @@ Domain Model §12: Verhalten bei fehlender oder zusätzlicher Komponente gegenü
 
 Istbestückung ist Teil des Prüflaufs (Run Time), Sollbestückung der Version (Design Time).
 
+**Slice V1 (minimal):** `erfasse_komponente()`, `fehlende_sollbestueckung()`, Ungültigkeit bei fehlender Sollbestückung beim Abschluss. Aktivierungsregeln für Schritte folgen später.
+
 ## Konsequenzen
 
 - Kein automatisches Neuberechnen der Version bei Ist-Abweichung

@@ -29,6 +29,7 @@ class ProduktdefinitionsVersion:
     produktdefinition_id: str
     produktkodierung: str
     prozedur_schritte: tuple[MaterialisierterProzedurSchritt, ...]
+    sollbestueckung: tuple[str, ...] = ()
 
     def schritt_by_id(self, schritt_id: str) -> MaterialisierterProzedurSchritt | None:
         for schritt in self.prozedur_schritte:
@@ -39,3 +40,6 @@ class ProduktdefinitionsVersion:
     def aktive_schritte(self) -> tuple[MaterialisierterProzedurSchritt, ...]:
         """V1: alle materialisierten Schritte (Aktivierungsregeln später)."""
         return tuple(sorted(self.prozedur_schritte, key=lambda s: s.reihenfolge))
+
+    def pflicht_schritt_ids(self) -> frozenset[str]:
+        return frozenset(s.schritt_id for s in self.prozedur_schritte if s.ist_pflicht)

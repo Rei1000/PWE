@@ -196,6 +196,8 @@ Gerätekommunikation ist **kein** Bounded Context — sie wird über `ExternesKo
 ## 7. Verweise
 
 - **Fachdomäne (Referenz):** `docs/domain-model.md`
+- Architekturentscheidungen: `docs/adr/`
+- Technical Domain Design: `docs/technical-domain/`
 - Fachliche Anforderungen: `docs/pflichtenheft.md`
 - Architektur: `docs/architecture.md`
 - Projektstruktur: `docs/projectstructure.md`

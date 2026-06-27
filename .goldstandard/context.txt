@@ -169,6 +169,8 @@ in context.txt wiederholen.
 
   docs/projektrules.md      Entwicklungsregeln, Ubiquitous Language, Verbote
 
+  docs/adr/                 Architekturentscheidungen (langfristig)
+
   README.md                 Einstieg für Menschen
 
 ================================================================================

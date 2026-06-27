@@ -32,10 +32,12 @@ class BeurteilungService:
 
 def _messwert_fuer_feld(nachweise: list[Nachweis], feld: str) -> float | int | None:
     for n in reversed(nachweise):
-        if n.art != NachweisArt.MESSWERT:
-            continue
-        if feld in n.payload:
+        if n.art == NachweisArt.MESSWERT and feld in n.payload:
             raw = n.payload[feld]
+            if isinstance(raw, (int, float)):
+                return raw
+        if n.art == NachweisArt.EXTRAHIERTER_WERT and n.payload.get("feld") == feld:
+            raw = n.payload.get("wert")
             if isinstance(raw, (int, float)):
                 return raw
     return None

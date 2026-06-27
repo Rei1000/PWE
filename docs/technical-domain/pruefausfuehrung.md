@@ -39,11 +39,22 @@ Brücke Domain Model → Code. Fachliche Referenz: `docs/domain-model.md` §4.15
 
 `PrueflaufRepository` — `save`, `get`
 
+## Ports (Slice — Externes Kommando)
+
+| Port | Adapter (V1) | Use Case |
+|------|--------------|----------|
+| `ExternesKommandoPort` | `adapters/simulation/externes_kommando.py` | `ExternesKommandoAusfuehren` |
+
+Laufzeit-VOs: `domain/pruefausfuehrung/kommando_ausfuehrung.py` (`ExternesKommandoAnfrage`, `ExternesKommandoAntwort`).
+
+Invariante §4.11: Rohantwort → `NachweisArt.ROHANTWORT` (automatisch); extrahierte Werte → `EXTRAHIERTER_WERT` mit Bezug.
+
 ## Domain Events (V1)
 
 Keine.
 
 ## Nicht im Domain-Kern
 
-- COM, Fotospeicher, Sollvergleich-Algorithmus (Application/Domain-Service später)
-- Istbestückung (ADR-0006 — folgt)
+- COM-Hardware, Fotospeicher
+- Vollständige Routine-Orchestrierung (folgt)
+- Istbestückung (ADR-0006 — implementiert)

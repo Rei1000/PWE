@@ -1,0 +1,2 @@
+# PWE Backend — dev dependencies via: pip install -e ".[dev]"
+-e ".[dev]"

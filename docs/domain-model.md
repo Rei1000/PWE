@@ -542,15 +542,17 @@ Standard: **aktuelle freigegebene Version**. Frühere Läufe dokumentieren ihre 
 
 ## 12. Offene fachliche Punkte
 
+Entschiedene Punkte: **`docs/adr/`**. V1-Zurückstellungen: ADR-0001.
+
 | Thema | Status |
 |-------|--------|
-| Parallele Bearbeitung (PC + Smartphone) | Synchronisationsmodell fachlich noch nicht final |
-| Routine-Wiederholung nach Nachbesserung | Ein Durchführungsobjekt mit mehreren Nachweis-Wellen vs. explizite Versuche |
-| Schrittspezifische Sollvorgaben | Gültigkeitsbereich in V1 materialisiert — Override-Kette Basisprodukt → Kundenprofil → Produktdefinition noch detaillieren |
-| ProtokollSnapshot-Inhalt | Mindestumfang für Langzeitarchiv vs. reine Versionsreferenz |
-| Prüfgegenstand außerhalb „Produkt" | Für spätere Domänen (Prüfstand, Industrie) ggf. übergeordneter Begriff neben Produktdefinition |
-| Persönliche Schrittreihenfolge | Rein Darstellung oder fachlich relevant für Protokoll |
-| Aktive Schritte bei geänderter Istbestückung | Verhalten wenn Komponente fehlt/zusätzlich vorhanden |
+| Parallele Bearbeitung (PC + Smartphone) | **V2** — ADR-0001 (kein Sync in V1) |
+| Routine-Wiederholung nach Nachbesserung | **Entschieden** — ADR-0003 (Nachweis-Wellen) |
+| Schrittspezifische Sollvorgaben | **Entschieden** — ADR-0005 (Materialisierung bei Veröffentlichung) |
+| ProtokollSnapshot-Inhalt | **Entschieden** — ADR-0004 (Mindestinhalt V1) |
+| Prüfgegenstand außerhalb „Produkt" | **V2+** — kein V1-Blocker |
+| Persönliche Schrittreihenfolge | **Entschieden** — ADR-0001 (UI-only in V1) |
+| Aktive Schritte bei geänderter Istbestückung | **Entschieden** — ADR-0006 |
 
 ---
 

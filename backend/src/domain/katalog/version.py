@@ -1,4 +1,6 @@
-"""Katalog — materialisierte ProduktdefinitionsVersion (Slice-V1).
+"""Katalog — materialisierte ProduktdefinitionsVersion.
+
+Entsteht durch Veröffentlichen einer Produktdefinition (Katalog-Slice 2).
 
 Fachliche Referenz: docs/domain-model.md §4.7, §10
 Materialisierung: docs/adr/0005-sollvorgaben-materialisierung.md

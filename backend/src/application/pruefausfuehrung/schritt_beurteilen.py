@@ -27,8 +27,8 @@ class SchrittBeurteilen:
         if prueflauf is None:
             raise PrueflaufNichtGefunden(prueflauf_id)
 
-        version = self.katalog.get_aktive_version_fuer_kodierung(prueflauf.produktkodierung)
-        if version is None or version.version_id != prueflauf.version_id:
+        version = self.katalog.get_version(prueflauf.version_id)
+        if version is None:
             raise VersionNichtAufloesbar(prueflauf.produktkodierung)
 
         schritt = version.schritt_by_id(prozedur_schritt_id)

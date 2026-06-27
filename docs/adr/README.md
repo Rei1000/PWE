@@ -12,3 +12,4 @@ Langfristig relevante Architekturentscheidungen. Fachdomäne: `docs/domain-model
 | [0006](0006-istbestueckung-abweichung.md) | Istbestückung: Abweichungen (minimal im Slice) |
 | [0007](0007-beurteilung-sollvergleich-v1.md) | Beurteilung: Soll/Ist-Vergleich V1 |
 | [0008](0008-prueflauf-abschluss-view.md) | PrueflaufAbschlussView — Protokoll-Integration |
+| [0009](0009-frontend-stack.md) | Frontend-Technologiestack (Driving Adapter) |

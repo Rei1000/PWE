@@ -9,7 +9,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 | **Domain** | Aggregate-Invarianten, Wertobjekte | pytest, rein | keine |
 | **Application** | Use-Case-Orchestrierung | pytest + In-Memory-Repos | Domain, Ports |
 | **Adapter** | Mapping, SQL, COM-Simulation | pytest | extern |
-| **API** | HTTP-Contract | pytest + httpx (später) | Application |
+| **API** | HTTP-Contract | pytest + httpx | Application |
 
 ## Regeln
 

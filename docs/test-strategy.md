@@ -16,7 +16,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 - Domain-Tests **ohne** Datenbank, COM, Dateisystem.
 - Ein **Vertical-Slice-Test** pro Kern-Use-Case in `tests/application/`.
 - In-Memory-Repos in `adapters/persistence/in_memory.py` — nicht in Tests duplizieren.
-- Persistenz-Tests erst nach PostgreSQL-Adapter (Gate 5).
+- PostgreSQL-Adapter in `adapters/persistence/postgresql/` — Mapping-Tests ohne DB; Repository-Tests mit `DATABASE_URL` (CI: Postgres-Service).
 
 ## V1-Pflicht vor Merge
 

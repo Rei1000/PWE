@@ -7,10 +7,14 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+persistence = ["sqlalchemy>=2.0", "psycopg[binary]>=3.1"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+markers = [
+    "postgresql: Tests gegen PostgreSQL (DATABASE_URL erforderlich)",
+]
 
 [tool.ruff]
 line-length = 100

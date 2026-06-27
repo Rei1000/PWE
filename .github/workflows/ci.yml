@@ -9,6 +9,24 @@ jobs:
   basic-checks:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/app
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -98,8 +116,8 @@ jobs:
         if: hashFiles('backend/pyproject.toml') != ''
         run: |
           cd backend
-          pip install .
-          pip install pytest httpx
+          pip install ".[dev,persistence]"
+          pip install httpx
 
       - name: Run backend tests
         if: hashFiles('backend/requirements.txt') != '' || hashFiles('backend/pyproject.toml') != ''

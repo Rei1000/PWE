@@ -200,4 +200,4 @@ Gerätekommunikation ist **kein** Bounded Context — sie wird über `ExternesKo
 - Architektur: `docs/architecture.md`
 - Projektstruktur: `docs/projectstructure.md`
 - Datenmodell-Leitlinien: `docs/datenbankmodell.md`
-- Projektkontext: `.goldstandard/context.txt`
+- Project DNA: `.goldstandard/context.txt`

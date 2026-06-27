@@ -14,9 +14,9 @@ Standardisierte Endprüfungen: Prüferführung, Nachweise, Beurteilungen, Protok
 
 | Dokument | Inhalt |
 |----------|--------|
+| `.goldstandard/context.txt` | Project DNA (Einstieg für Agenten) |
 | **`docs/domain-model.md`** | **Verbindliche Fachdomäne** (Referenz) |
 | `docs/pflichtenheft.md` | Fachliche Anforderungen |
 | `docs/architecture.md` | Technische Architektur |
 | `docs/projectstructure.md` | Repository-Struktur |
 | `docs/projektrules.md` | Projektregeln |
-| `.goldstandard/context.txt` | Project DNA (Einstieg für Agenten) |

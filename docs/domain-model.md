@@ -511,7 +511,7 @@ Referenzen auf Bibliotheksobjekte dürfen **zusätzlich** dokumentiert werden.
 
 ### Wann entsteht eine neue Version?
 
-Beim expliziten **Veröffentlichen** nach Änderung am Entwurf — unabhängig davon, ob Sollwert, Firmware, Schritt, Routine oder Reihenfolge geändert wurde.
+Beim expliziten **Veröffentlichen** nach Änderung am Entwurf — unabhängig davon, ob Sollvorgabe, Firmware, Schritt, Routine oder Reihenfolge geändert wurde.
 
 ### Wiederholungsprüfung
 

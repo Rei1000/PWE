@@ -116,7 +116,7 @@ jobs:
         if: hashFiles('backend/pyproject.toml') != ''
         run: |
           cd backend
-          pip install ".[dev,persistence,pdf]"
+          pip install ".[dev,persistence,pdf,api]"
           pip install httpx
 
       - name: Run backend tests

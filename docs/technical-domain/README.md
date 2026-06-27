@@ -7,6 +7,7 @@ Brücke zwischen `docs/domain-model.md` und Implementierung. **Keine** fachliche
 | Katalog | [katalog.md](katalog.md) |
 | Prüfausführung | [pruefausfuehrung.md](pruefausfuehrung.md) |
 | Protokoll | [protokoll.md](protokoll.md) |
+| API | [api.md](api.md) |
 
 Entscheidungen: `docs/adr/`. Tests: `docs/test-strategy.md`.
 

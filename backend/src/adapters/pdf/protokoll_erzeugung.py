@@ -52,7 +52,7 @@ class PdfProtokollErzeugungAdapter:
             )
             pdf.ln(5)
 
-        inhalt = pdf.output()
+        inhalt = bytes(pdf.output())
         return ProtokollDokument(
             inhalt=inhalt,
             medientyp="application/pdf",

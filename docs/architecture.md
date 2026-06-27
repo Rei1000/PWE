@@ -1,32 +1,32 @@
 # Architektur – PWE (Initialversion)
 
-## 1. Ziel der Architektur
-
-Die Architektur von PWE stellt sicher, dass die **Prüf-Workflow-Engine** als konfigurierbarer Kern wartbar, erweiterbar und von technischen Details entkoppelt bleibt. Fachlogik, Anwendungssteuerung und Infrastruktur werden strikt getrennt.
-
-Leitprinzipien:
-
-- **Domain-Driven Design (DDD)** für fachliche Klarheit und Bounded Contexts.
-- **Hexagonale Architektur (Ports/Adapter)** für Austauschbarkeit technischer Komponenten (Datenbank, externe Schnittstellen, PDF, Druck).
-- **Test-Driven Development (TDD)** als Umsetzungsprinzip in der Implementierungsphase.
-
-**Engine vs. erste Anwendung:** Der fachliche Kern modelliert Prüfprozesse, Prüfläufe, Schritte, Routinen und Protokolle generisch. Die Ergometer-Endprüfung ist die erste **Konfiguration** dieser Engine — nicht der Architekturmittelpunkt.
-
-Die verbindliche Begriffswelt ist in `docs/projektrules.md` (Ubiquitous Language) dokumentiert.
+Technische Architektur. Verbindliche Fachdomäne: **`docs/domain-model.md`**.
 
 ---
 
-## 2. Design Time und Run Time
+## 1. Ziel der Architektur
 
-Die Domäne lässt sich entlang des Lebenszyklus von Prüfdefinitionen und Prüfinstanzen trennen. Diese Sicht vereinfacht Bounded-Context-Grenzen — sie ist kein zusätzlicher technischer Layer.
+Die Architektur stellt sicher, dass die **Prüf-Workflow-Engine** als konfigurierbarer Kern wartbar, erweiterbar und von technischen Details entkoppelt bleibt.
 
-| Phase | Context | Frage |
-|-------|---------|-------|
-| **Design Time** | Katalog | *Was* darf geprüft werden und *wie* ist der Prozess definiert? |
-| **Run Time** | Prüfausführung | *Wie* wird ein konkreter Prüfvorgang ausgeführt und bewertet? |
-| **Post-Run Time** | Protokoll | *Was* ist der unveränderliche Nachweis eines abgeschlossenen Prüflaufs? |
+Leitprinzipien:
 
-**Identity** und **Auswertung** sind querschnittlich: Identity steuert Zugriff und Präferenzen; Auswertung liest abgeschlossene Daten (CQRS-Read-Seite) ohne den Prüflauf-Kern zu verändern.
+- **Domain-Driven Design (DDD)** — Bounded Contexts entlang der Fachdomäne
+- **Hexagonale Architektur (Ports/Adapter)**
+- **Test-Driven Development (TDD)** in der Implementierungsphase
+
+**Engine vs. erste Anwendung:** Der Kern modelliert Produktdefinitionen, Prüfläufe, Nachweise und ProtokollSnapshots generisch. Die Ergometer-Endprüfung ist erste **Konfiguration**.
+
+---
+
+## 2. Design Time, Run Time und Post-Run Time
+
+| Phase | Context | Fachliche Objekte (Auszug) |
+|-------|---------|----------------------------|
+| **Design Time** | Katalog | Produktdefinition (Entwurf), ProduktdefinitionsVersion, Basisprodukt, Option, Kundenprofil, Prüfprozedur, ProzedurSchritt, PrüfschrittVorlage, Routine, Externes Kommando |
+| **Run Time** | Prüfausführung | Prüflauf, PrüfschrittDurchführung, Nachweis, Beurteilung |
+| **Post-Run Time** | Protokoll | ProtokollSnapshot |
+
+**Identity** und **Auswertung** sind querschnittlich.
 
 ---
 
@@ -34,14 +34,14 @@ Die Domäne lässt sich entlang des Lebenszyklus von Prüfdefinitionen und Prüf
 
 | Akteur / System | Rolle |
 |-----------------|-------|
-| Prüfer (PC) | Hauptarbeitsplatz für Prüfungsdurchführung und Konfiguration (Admin) |
-| Prüfer (Smartphone) | Parallele Prüfungsbegleitung im lokalen Netzwerk |
-| Externes Prüfobjekt | Über konfigurierte Schnittstellen angebunden (z. B. COM in der ersten Anwendung) |
-| Drucker | Ausgabe von Prüfprotokollen |
-| PostgreSQL | Persistenz von Katalogdaten, Prüfläufen und Archivdaten |
-| Externe Arbeitsanweisungen | Referenzierte Dokumente, nicht im Systemkern |
+| Prüfer (PC) | Prüfungsdurchführung und Konfiguration (Admin) |
+| Prüfer (Smartphone) | Parallele Prüfungsbegleitung |
+| Externes Prüfobjekt | Über Adapter angebunden (erste Anwendung: COM) |
+| Drucker | Ausgabe von ProtokollSnapshots (PDF) |
+| PostgreSQL | Persistenz |
+| Produktlaufkarte | Externe Eingangsinformation (Produktion) |
 
-**Systemgrenze:** PWE modelliert und führt konfigurierbare Prüfworkflows aus, erzeugt Protokolle und wertet Prüfdaten aus. ERP-Systeme und gerätespezifische Fachlogik außerhalb der Konfiguration gehören nicht zum Kern.
+**Systemgrenze:** Konfigurierbare Prüfworkflows, Protokollierung, Auswertung — keine Fertigungssteuerung.
 
 ---
 
@@ -49,37 +49,30 @@ Die Domäne lässt sich entlang des Lebenszyklus von Prüfdefinitionen und Prüf
 
 | Context | Phase | Verantwortung |
 |---------|-------|---------------|
-| **Katalog** | Design Time | Produktvarianten, Basisprodukte, Stammdaten, Prüfschritt-Bibliothek, Prüfprozeduren, Routinen, externe Kommandos, Arbeitsanweisungs-Referenzen |
-| **Prüfausführung** | Run Time | Prüflauf-Lebenszyklus, Schrittausführung, Eingaben, Pflichtschritte, Status, Wiederholungsprüfung, Routine-Orchestrierung |
-| **Protokoll** | Post-Run Time | Unveränderliches Archiv, Protokollerzeugung, Fotos, Historie |
-| **Identity** | Querschnitt | Benutzer, Rollen (Admin/User), persönliche Schrittreihenfolge |
-| **Auswertung** | Read Model | Dashboard, Statistiken, Filter — liest abgeschlossene Prüfläufe, verändert keine Prüfdaten |
+| **Katalog** | Design Time | Produktdefinition, ProduktdefinitionsVersion, Bibliothek, Sollvorgaben, Sollbestückung, Aktivierungsregeln |
+| **Prüfausführung** | Run Time | Prüflauf, PrüfschrittDurchführung, Nachweise, Beurteilungen, Routine-Orchestrierung |
+| **Protokoll** | Post-Run Time | ProtokollSnapshot, Archiv |
+| **Identity** | Querschnitt | Benutzer, Rollen, Prüferpräferenzen |
+| **Auswertung** | Read Model | Dashboard, Statistiken |
 
-In der ersten Anwendung sind z. B. Artikelnummer, Grundmodell und Platine **Konfigurationsinstanzen** von Produktvariante, Basisprodukt und Komponente.
+**Kein eigener Context:** Gerätekommunikation — erfolgt über `ExternesKommandoPort` und Adapter (z. B. `com/`).
 
-**Bewusst kein eigener Context:**
-
-- **Gerätekommunikation / COM:** Kein Bounded Context. Externe Kommunikation ist ein **Port** mit technischem **Adapter** (z. B. COM-Treiber). Die fachliche Semantik (Kommando senden/lesen, Soll-Ist-Vergleich) gehört zu **Katalog** (Definition) bzw. **Prüfausführung** (Ausführung).
-- **Arbeitsplatz:** Kein Domain-Context. Konfiguration von COM-Port, Drucker und Speicherpfad ist **Infrastruktur-/Deployment-Konfiguration**, nicht Fachdomäne.
-
-Abhängigkeiten zwischen Contexts laufen über Application Services und Ports, nicht über direkte Infrastruktur-Kopplung.
+In der ersten Anwendung: Artikelnummer = **Produktkodierung**; Platine = **Komponente**.
 
 ---
 
-## 5. Aggregate (fachliche Konsistenzgrenzen)
+## 5. Fachliche Konsistenzgrenzen (Orientierung)
 
-| Context | Aggregate Root | Konsistenzgrenze |
-|---------|----------------|------------------|
-| **Katalog** | `Produktvariante` | Zuordnung Produktvariante → Prüfprozedur, verknüpfte Stammdaten |
-| **Katalog** | `Pruefprozedur` | Zusammenstellung und Versionierung einer Prozedur |
-| **Katalog** | `PruefschrittVorlage` | Wiederverwendbare Schrittdefinition in der Bibliothek |
-| **Katalog** | `Routine` | Aktionsfolge inkl. Referenzen auf externe Kommandos |
-| **Katalog** | `ExternesKommando` | Definition eines externen Kommandos |
-| **Prüfausführung** | `Prueflauf` | Gesamter Laufzeitstatus: Schritte, Eingaben, Messwerte, Kommentare |
-| **Protokoll** | `ProtokollSnapshot` | Unveränderlicher Nachweis eines abgeschlossenen Prüflaufs |
-| **Identity** | `Benutzer` | Konto, Rolle, persönliche Schrittreihenfolge |
+Aus **`docs/domain-model.md`** — technische Aggregate folgen in einer späteren Phase.
 
-**Keine Aggregate:** Einzelne Eingabefelder, Messwerte oder Fotos sind Entitäten/Wertobjekte *innerhalb* von `Prueflauf` bzw. `ProtokollSnapshot` — keine eigenen Aggregate Roots.
+| Context | Zentrale Objekte | Konsistenz |
+|---------|------------------|------------|
+| **Katalog** | Produktdefinition, ProduktdefinitionsVersion, Prüfprozedur, ProzedurSchritt, PrüfschrittVorlage, Routine, Externes Kommando | Entwurf änderbar; Version unveränderlich |
+| **Prüfausführung** | Prüflauf | Referenz auf ProduktdefinitionsVersion; enthält PrüfschrittDurchführungen und Nachweise |
+| **Protokoll** | ProtokollSnapshot | Unveränderlich nach Erstellung |
+| **Identity** | Benutzer | Rollen und Präferenzen |
+
+**Keine eigenständigen Wurzeln:** Einzelne Nachweise, Beurteilungen — Teil von PrüfschrittDurchführung bzw. Prüflauf.
 
 ---
 
@@ -87,15 +80,12 @@ Abhängigkeiten zwischen Contexts laufen über Application Services und Ports, n
 
 | Schicht | Zweck |
 |---------|-------|
-| **Frontend (PC)** | Bedienoberfläche für Prüfung, Verwaltung und Dashboard |
-| **Frontend (Mobile)** | Smartphone-Oberfläche für parallele Prüfungsbegleitung (Scan, Foto, Eingaben) |
-| **API** | Transportschicht (HTTP/WebSocket), Session- und Zugriffsrahmen, kein Fachwissen |
-| **Application** | Use-Case-Orchestrierung über Bounded Contexts hinweg |
-| **Domain** | Fachregeln, Entitäten, Wertobjekte, Invarianten je Context |
-| **Ports** | Technologieneutrale Verträge (Persistenz, externe Kommandos, PDF, Druck, Dateispeicher) |
-| **Adapter/Infrastruktur** | Technische Implementierungen: `com/`, `postgresql/`, `pdf/`, … |
-
-**Abhängigkeitsregel:** Abhängigkeiten zeigen nach innen. Domain kennt weder Framework noch Datenbank noch konkrete Kommunikationsprotokolle.
+| **Frontend (PC / Mobile)** | Bedienoberfläche |
+| **API** | Transport, Session, kein Fachwissen |
+| **Application** | Use-Case-Orchestrierung |
+| **Domain** | Fachregeln je Context |
+| **Ports** | Domänensprachliche Verträge |
+| **Adapter** | Technische Implementierungen |
 
 ---
 
@@ -103,44 +93,25 @@ Abhängigkeiten zwischen Contexts laufen über Application Services und Ports, n
 
 ### Domain (je Context)
 
-- **Katalog:** Produktvariante, Prüfprozedur, PrüfschrittVorlage, Routine, Aktion, Sollwert, ExternesKommando.
-- **Prüfausführung:** Prüflauf, Schrittstatus, Eingabefelder, Pflichtschritt-Regeln, Routine-Ausführungslogik (ohne Kenntnis konkreter Kommunikationsprotokolle).
-- **Protokoll:** Archiv-Invarianten, Protokollzusammenstellung.
-- **Identity:** Rollen, Berechtigungsregeln, persönliche Schrittreihenfolge.
-- **Auswertung:** Aggregations- und Filterbegriffe (Read Model, keine Domain-Invarianten).
+- **Katalog:** Produktdefinition, ProduktdefinitionsVersion, Basisprodukt, Option, Kundenprofil, Prüfprozedur, ProzedurSchritt, PrüfschrittVorlage, Routine, Sollvorgabe, Sollbestückung, Aktivierungsregel, ExternesKommando.
+- **Prüfausführung:** Prüflauf, PrüfschrittDurchführung, Nachweis, Beurteilung, Pflichtschritt-Regeln, Routine-Ausführung.
+- **Protokoll:** ProtokollSnapshot, Archiv-Invarianten.
+- **Identity:** Rollen, Berechtigungen, Prüferpräferenzen.
 
-### Application
-
-- Use Cases aus dem Pflichtenheft orchestrieren.
-- Koordination zwischen Domain-Contexts und Ports.
-- Synchronisation PC/Smartphone-Sitzungen.
-
-### Ports (fachliche Verträge — Domänensprache)
+### Ports
 
 | Port | Verantwortung |
 |------|---------------|
-| `KatalogRepository` | Persistenz von Katalog-Aggregaten |
-| `PrueflaufRepository` | Persistenz von Prüfläufen |
-| `ExternesKommandoPort` | Senden/Lesen externer Kommandos an Prüfobjekte |
-| `ProtokollErzeugungPort` | Erzeugung eines Prüfprotokolls (Ausgabeformat) |
-| `DruckPort` | Ausgabe eines Protokolls auf Drucker |
-| `DateiSpeicherPort` | Speicherung und Abruf von Dateien (Fotos, Archive) |
+| `KatalogRepository` | Persistenz Katalog |
+| `PrueflaufRepository` | Persistenz Prüfläufe |
+| `ExternesKommandoPort` | Externe Kommandos an Prüfobjekte |
+| `ProtokollErzeugungPort` | PDF-Erzeugung aus ProtokollSnapshot |
+| `DruckPort` | Druck |
+| `DateiSpeicherPort` | Fotos, Dateien |
 
-Ports sprechen ausschließlich Domänensprache — keine Protokoll-, Format- oder Framework-Details.
+### Adapter
 
-### Adapter (technische Implementierungen)
-
-Adapter benennen die **Technologie oder das Protokoll**, nicht den Port. Ein Port kann mehrere Adapter haben (Open/Closed Principle).
-
-| Port | Adapter (Beispiele) |
-|------|---------------------|
-| `ExternesKommandoPort` | `com/` (v1), später `can/`, `usb/`, `tcp/`, `rest/`, `simulation/` |
-| `KatalogRepository`, `PrueflaufRepository`, … | `persistence/postgresql/` |
-| `ProtokollErzeugungPort` | `pdf/` |
-| `DruckPort` | `print/` |
-| `DateiSpeicherPort` | `storage/filesystem/` |
-
-Die Auswahl des Adapters erfolgt zur Laufzeit über Arbeitsplatz-Konfiguration (`infra/config/`), nicht über Domain-Code.
+Technologie benennen (`com/`, `postgresql/`, `pdf/`), nicht Port-Namen.
 
 ---
 
@@ -148,41 +119,39 @@ Die Auswahl des Adapters erfolgt zur Laufzeit über Arbeitsplatz-Konfiguration (
 
 ### Prüfung starten
 
-1. Prüfer gibt Produktvariante und Prüfobjekt-Kennung ein (in der ersten Anwendung: Artikelnummer und Geräteseriennummer).
-2. Application ermittelt über **Katalog** die passende Prüfprozedur.
-3. **Prüfausführung** legt neuen Prüflauf an.
-4. Frontend erhält Schrittliste (ggf. benutzerindividuelle Reihenfolge aus **Identity**).
+1. Prüfer gibt **Produktkodierung** und **Prüfobjekt-Kennung** ein.
+2. Application löst die **aktive ProduktdefinitionsVersion** auf.
+3. **Prüfausführung** legt **Prüflauf** an — mit unveränderlicher Versionsreferenz.
+4. Frontend erhält aktive **ProzedurSchritte** (ggf. gefiltert durch Aktivierungsregeln).
 
-### Prüfschritt mit Routine ausführen
+### PrüfschrittDurchführung mit Routine
 
-1. **Prüfausführung** startet Schritt; Routine wird aus Katalog-Definition geladen.
-2. Application führt Aktionen sequenziell aus (warten, Sollwertvergleich, Benutzerbestätigung, externes Kommando).
-3. Bei Aktion „externes Kommando": Application ruft **Port** auf; Adapter (z. B. COM) führt technische Kommunikation aus.
-4. Ergebnisse fließen zurück in **Prüfausführung** für Statusentscheidung.
-5. Bei paralleler Nutzung: Synchronisation an gekoppelte Sitzung.
+1. **PrüfschrittDurchführung** für ProzedurSchritt wird angelegt.
+2. Routine erzeugt **Nachweise** (Ist-Werte, Rohantworten, Fotos, …).
+3. **Beurteilung** vergleicht Nachweise mit **Sollvorgaben** der Version.
+4. Externe Kommandos über **Port** und Adapter (z. B. COM).
 
 ### Prüfung abschließen
 
-1. **Prüfausführung** prüft Pflichtschritte und Gesamtstatus.
-2. **Protokoll** erzeugt unveränderliches Archiv (PDF über Port).
-3. Optional: Druck über Port.
+1. Pflichtschritte und Gesamtvalidität prüfen (gültig/ungültig).
+2. **ProtokollSnapshot** erzeugen — auch bei ungültigem Lauf.
+3. Optional: PDF über `ProtokollErzeugungPort`.
 
 ---
 
 ## 9. Wichtige Abgrenzungen
 
-- Keine Fachlogik in API, UI oder Infrastruktur-Adaptern.
-- Keine gerätespezifische oder ergometerspezifische Logik im Domain-Kern — nur konfigurierbare Definitionen im Katalog.
-- Externe Kommandos und Routinen sind konfigurierbar, nicht hardcodiert.
-- Abgeschlossene Prüfläufe sind schreibgeschützt.
-- Technologiehinweise (Python, PostgreSQL, COM) sind Orientierung für die erste Anwendung, keine Architektur-Festlegung.
+- Keine Fachlogik in API, UI oder Adaptern.
+- Keine gerätespezifische Logik im Domain-Kern.
+- Prüflauf referenziert **ProduktdefinitionsVersion** — kein ad-hoc Snapshot, kein Live-Entwurf.
+- Abgeschlossene Prüfläufe und ProtokollSnapshots sind unveränderlich.
 
 ---
 
 ## 10. Offene Architekturfragen
 
-- Automatische Erkennung eines Arbeitsplatzes (Konfiguration vs. Erkennung).
-- Synchronisationsmechanismus PC/Smartphone (Polling vs. Push/WebSocket).
-- Speicherstrategie für Fotos (Dateisystem vs. Datenbank vs. Hybrid).
-- Mehrsprachigkeit: i18n-Schicht vs. kundenspezifische Protokolltemplates.
-- Skalierung auf mehrere Arbeitsplätze (zentrale DB, dezentrale Adapter-Anbindung).
+- Synchronisation PC/Smartphone
+- Speicherstrategie für Fotos/Nachweise
+- Mehrsprachigkeit Protokoll vs. UI
+
+Siehe auch offene Punkte in `docs/domain-model.md`.

@@ -1,14 +1,22 @@
-# PWE
+# PWE — Prüf-Workflow-Engine
 
 ## Kurzbeschreibung
 
-PWE (Prüf-Workflow-Engine) ist eine konfigurierbare Plattform zur Durchführung und Dokumentation von Endprüfungen. Die erste konkrete Anwendung ist die Endprüfung von Ergometern. Prüfprozesse werden vollständig über Stammdaten und Konfiguration modelliert, sodass neue Gerätevarianten ohne Änderungen am Programmcode unterstützt werden können.
+PWE ist eine **konfigurierbare Prüf-Workflow-Engine** zur Durchführung und Dokumentation von Endprüfungen. Die erste Anwendung ist die Ergometer-Endprüfung — als **Konfiguration** der Engine, nicht als fachlicher Kern.
 
-## Ziel des Projekts
+Prüfprozesse werden vollständig über **Produktdefinitionen** modelliert: Der Administrator pflegt vollständige Prüfvorgaben, veröffentlicht sie als **ProduktdefinitionsVersion**, und neue **Prüfläufe** referenzieren diese unveränderliche Version.
 
-Die fachliche Grundlage ist im Projektkontext dokumentiert und dient als verbindlicher Ausgangspunkt.
+## Ziel
 
-## Hinweise
+Standardisierte Endprüfungen: Prüferführung, Nachweise, Beurteilungen, ProtokollSnapshots — erweiterbar für weitere Gerätetypen ohne Engine-Änderung.
 
-- Vollständiger Kontext: `.goldstandard/context.txt`
-- Projektdokumentation: `docs/pflichtenheft.md`, `docs/architecture.md`, `docs/projectstructure.md`
+## Dokumentation
+
+| Dokument | Inhalt |
+|----------|--------|
+| `.goldstandard/context.txt` | Project DNA (Einstieg für Agenten) |
+| **`docs/domain-model.md`** | **Verbindliche Fachdomäne** (Referenz) |
+| `docs/pflichtenheft.md` | Fachliche Anforderungen |
+| `docs/architecture.md` | Technische Architektur |
+| `docs/projectstructure.md` | Repository-Struktur |
+| `docs/projektrules.md` | Projektregeln |

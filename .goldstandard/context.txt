@@ -1,186 +1,181 @@
-PROJEKTKONTEXT
+PROJECT DNA — PWE (Prüf-Workflow-Engine)
 
-Projektname:
-PWE
+================================================================================
+ZWECK DIESER DATEI
+================================================================================
 
-Kurzbeschreibung:
-PWE (Prüf-Workflow-Engine) ist eine konfigurierbare Plattform zur Durchführung und Dokumentation von Endprüfungen. Die erste konkrete Anwendung ist die Endprüfung von Ergometern. Prüfprozesse werden vollständig über Stammdaten und Konfiguration modelliert, sodass neue Gerätevarianten ohne Änderungen am Programmcode unterstützt werden können.
+Diese Datei ist die **Project DNA** des Projekts — nicht seine Spezifikation.
 
-Ziel des Projekts:
-Entwicklung einer konfigurierbaren Prüfplattform, welche Endprüfungen standardisiert, den Prüfer durch den gesamten Prüfablauf führt, manuelle Dokumentation reduziert, automatisierte Gerätekommunikation ermöglicht und vollständige Prüfprotokolle erzeugt.
+Sie vermittelt in wenigen Minuten:
+  • wer wir sind (Vision, Ziel, Engine-Philosophie)
+  • wie wir denken (Grundprinzipien, Phasen, Architektur-Leitplanken)
+  • wo die verbindlichen Details stehen (Dokumentenverweise)
 
----
+Sie ersetzt keine Fachdomäne, keine Anforderungen und keine Architektur.
+Bei fachlichen Fragen gilt immer docs/domain-model.md.
 
-USE CASES
+================================================================================
+VISION
+================================================================================
 
-- Prüfung durchführen
-- Prüfung fortsetzen
-- Wiederholungsprüfung durchführen
-- Prüfprozeduren verwalten
-- Prüfschritte verwalten
-- Routinen verwalten
-- Stammdaten verwalten
-- Gerätekommunikation durchführen
-- Prüfprotokoll erzeugen
-- Historie durchsuchen
-- Prüfung parallel am Smartphone begleiten
-- Prüfdaten statistisch auswerten
-- Systemeinstellungen verwalten
+PWE ist eine konfigurierbare Prüf-Workflow-Engine für Endprüfungen.
 
----
+Der Kern ist generisch. Konkrete Anwendungen — beginnend mit der
+Ergometer-Endprüfung — sind Konfiguration, nicht Programmcode-Spezialisierung.
 
-FUNKTIONALE ANFORDERUNGEN
+Neue Prüfobjekttypen sollen durch Produktdefinitionen und Adapter entstehen,
+nicht durch gerätespezifische Fachlogik im Engine-Kern.
 
-- Benutzerverwaltung mit Rollen (Admin, User)
-- Verwaltung von Grundmodellen
-- Verwaltung von Artikelnummern
-- Verwaltung von Kunden
-- Verwaltung von Ausstattungen
-- Verwaltung von Platinen
-- Verwaltung von Sollwerten
-- Verwaltung von Arbeitsplätzen
-- Verwaltung globaler Prüfschritt-Bibliothek
-- Erstellung und Verwaltung von Prüfprozeduren
-- Kopieren bestehender Prüfprozeduren
-- Wiederverwendung von Prüfschritten
-- Benutzerindividuelle Reihenfolge der Prüfschritte
-- Verwaltung von COM-Kommandos
-- Verwaltung automatisierter Routinen
-- Verknüpfung von Arbeitsanweisungen zu Prüfschritten
-- Warn- und Sicherheitshinweise je Prüfschritt
-- Prüfschritte mit mehreren Eingabefeldern
-- Eingabefeldtypen: Text, Zahl, Auswahl, Checkbox, Datum, Seriennummer, Barcode/QR
-- Validierung von Eingabefeldern
-- Prüfung starten über Artikelnummer und Geräteseriennummer
-- Automatische Zuordnung der passenden Prüfprozedur
-- Speicherung unvollständiger Prüfungen
-- Fortsetzen unterbrochener Prüfungen
-- Wiederholungsprüfungen
-- Parallele Bearbeitung am PC und Smartphone
-- QR-Code-Kopplung zwischen PC und Smartphone
-- Smartphone für komplette Prüfungsdurchführung nutzbar
-- Fotodokumentation
-- Barcode- und QR-Code-Erfassung
-- Scanfunktion neben relevanten Eingabefeldern
-- Seriennummern manuell erfassen oder automatisch auslesen
-- COM-Kommunikation zum Lesen und Schreiben von Geräteparametern
-- Soll-Ist-Vergleich ausgelesener Werte
-- Routinen mit Aktionen:
-  - COM senden
-  - COM lesen
-  - warten
-  - Messwert speichern
-  - Sollwert vergleichen
-  - Benutzerbestätigung
-  - Kommentar
-  - Foto
-  - Fehlerbedingung
-- Routinen können nach Nachbesserung wiederholt werden
-- Prüfschrittstatus:
-  - bestanden
-  - nicht bestanden
-  - bestanden mit Kommentar
-- Pflichtschritte konfigurierbar
-- Überspringen nur mit Kommentar, sofern erlaubt
-- Automatische PDF-Erstellung
-- PDF enthält:
-  - Zusammenfassung
-  - Prüfer
-  - Datum
-  - Artikelnummer
-  - Geräteseriennummer
-  - Prüfschritte
-  - Kommentare
-  - Fotos
-  - Geräteeinstellungen
-  - Firmwareversionen
-  - Seriennummern der Platinen
-- Fotos werden im PDF komprimiert dargestellt
-- PDF-Dateiname basiert auf der Geräteseriennummer
-- Abschlussbestätigung der Prüfung
-- Optionen:
-  - Speichern
-  - Speichern und Drucken
-- Archivierung aller Prüfläufe
-- Historie aller Prüfläufe pro Geräteseriennummer
-- Suche nach Geräteseriennummer
-- Dashboard mit:
-  - häufigsten Durchfallgründen
-  - häufigsten Abbruchgründen
-  - Bauteilwechseln
-- Filter im Dashboard nach Zeitraum, Grundmodell, Kunde und Artikelnummer
+================================================================================
+ZIEL
+================================================================================
 
----
+Endprüfungen standardisieren: Prüferführung, Nachweise, Beurteilungen,
+ProtokollSnapshots — vollständig dokumentiert und langfristig archivierbar.
 
-NICHT-FUNKTIONALE ANFORDERUNGEN
+Konfigurierbarkeit steht über Spezialisierung.
 
-- Anwendung zunächst lokal einsetzbar
-- Datenbank von Beginn an PostgreSQL
-- Mehrere Arbeitsplätze perspektivisch möglich
-- Architektur für spätere Mehrsprachigkeit vorbereiten
-- Bedienoberfläche zunächst Deutsch
-- Protokollsprache abhängig vom Kunden
-- Smartphone und PC arbeiten im selben lokalen Netzwerk
-- Smartphone-Sitzung bleibt aktiv und wird nach 30 Minuten Inaktivität getrennt
-- Fotos dauerhaft archivieren
-- Historisierung abgeschlossener Prüfläufe
-- Bereits abgeschlossene Protokolle bleiben unveränderlich
-- Erweiterbarkeit ohne Änderungen am Programmcode durch Konfiguration
-- Konfigurierbarkeit steht über Spezialisierung
+================================================================================
+ENGINE-PHILOSOPHIE
+================================================================================
 
----
+Engine First     Der fachliche Kern ist die Prüf-Workflow-Engine, nicht ein
+                 einzelnes Gerät oder eine einzelne Schnittstelle.
 
-DOMÄNENLOGIK / BESONDERHEITEN
+Domain First     Fachdomäne vor Technik. Ports und Adapter folgen der Domäne.
 
-- PWE ist eine konfigurierbare Prüf-Workflow-Engine.
-- Die Ergometer-Endprüfung ist die erste Anwendung der Engine.
-- Die Artikelnummer ist der zentrale Schlüssel.
-- Erste sechs Stellen der Artikelnummer definieren das Grundmodell.
-- Der restliche Teil der Artikelnummer definiert Kunde und Ausstattung.
-- Jeder Artikelnummer ist genau eine aktive Prüfprozedur zugeordnet.
-- Grundmodelle besitzen eigene Sollwerte, Platinen und Standardinformationen.
-- Prüfprozeduren bestehen aus wiederverwendbaren Prüfschritten.
-- Prüfschritte können optional Routinen enthalten.
-- Routinen bestehen aus mehreren konfigurierbaren Aktionen.
-- COM-Kommandos werden zentral verwaltet und in Routinen verwendet.
-- Benutzer dürfen ausschließlich ihre persönliche Reihenfolge der Prüfschritte verändern.
-- Administratoren verwalten Stammdaten, Prüfschritte, Routinen und Prüfprozeduren.
-- Pflichtschritte müssen erfolgreich abgeschlossen werden.
-- Nicht bestandene Pflichtschritte machen den gesamten Prüflauf ungültig.
-- Ungültige Prüfungen dürfen gespeichert und dokumentiert werden.
-- Bereits abgeschlossene Prüfungen dürfen nicht geändert werden.
-- Neue Prüfungen erzeugen einen neuen Prüflauf.
-- Frühere Prüfläufe bleiben vollständig erhalten.
-- Eine Wiederholungsprüfung kann Daten der vorherigen Prüfung übernehmen.
-- Fotos bestätigen Prüfschritte und erscheinen im PDF.
-- Kommentare werden vollständig protokolliert.
-- Bauteilwechsel werden über Kommentare dokumentiert.
-- Werden Bauteile mit Seriennummer ersetzt, muss die neue Seriennummer erfasst werden.
-- Protokollsprache richtet sich nach dem Kunden der Artikelnummer.
-- Arbeitsanweisungen werden als externe Referenzen hinterlegt.
+Simplicity First Keine Abstraktion ohne fachlichen Nutzen. Kleines, klares
+                 Modell vor vorzeitiger Modularisierung.
 
----
+Konfiguration    Spezialisierung ausschließlich über Produktdefinitionen,
+statt Code       Routinen, Adapter und Katalogdaten — niemals über if/else
+                 im Domain-Kern.
 
-OPTIONALE TECHNISCHE HINWEISE
+================================================================================
+FACHLICHE GRUNDPRINZIPIEN (Kurz)
+================================================================================
 
-- Python-Anwendung
-- PostgreSQL als Datenbank
-- COM-Schnittstelle zur Gerätekommunikation
-- PC und Smartphone arbeiten synchron über lokales Netzwerk
-- QR-Code verbindet Smartphone mit laufender Sitzung
-- Standard-COM-Port und Drucker je Arbeitsplatz konfigurierbar
-- Globaler Speicherpfad für Protokolle
-- PDF-Layout mit konfigurierbarem Logo sowie Kopf- und Fußbereich
-- Das Projekt soll nach Domain-Driven Design, hexagonaler Architektur und Test-Driven Development umgesetzt werden.
-- Der fachliche Kern ist die Prüf-Workflow-Engine, nicht die Ergometerprüfung.
+Vollständige Produktdefinition   Der Administrator pflegt immer die gesamte
+                                  Prüfvorgabe — nicht lose Einzelteile.
 
----
+Veröffentlichte Vorgabe           Neue Prüfläufe starten nur gegen eine
+                                  freigegebene, unveränderliche
+                                  ProduktdefinitionsVersion.
 
-OFFENE PUNKTE / UNSICHERHEITEN
+Trennung Soll / Ist / Beurteilung Sollvorgaben in der Version; Routinen
+                                  beschaffen Ist-Werte; Beurteilung urteilt.
 
-- Automatische Erkennung eines Arbeitsplatzes noch nicht definiert.
-- Unterstützung von Bildern innerhalb von Arbeitsanweisungen wird später betrachtet.
-- Exportfunktionen (CSV/Excel) sind nicht Bestandteil der ersten Version.
-- Vollständige Auditierung der COM-Kommunikation ist zunächst nicht vorgesehen.
-- Unterstützung weiterer Gerätetypen erfolgt in späteren Projektphasen.
-- Grafischer Routine-Editor ist nicht Bestandteil der ersten Version.
+Trennung Option / Routine         Option = Ausstattung. Routine = Prüf- oder
+                                  Automatisierungsvorgehen.
+
+Nachweis statt Annahme            Jede relevante Feststellung wird belegt.
+                                  Automatische Nachweise sind unveränderlich.
+
+Historie                          Abgeschlossene Prüfläufe und ProtokollSnapshots
+                                  sind unveränderlich — auch wenn die Vorgabe
+                                  später geändert wurde.
+
+Ungültigkeit dokumentieren        Ungültige Prüfläufe werden gespeichert und
+                                  erhalten einen ProtokollSnapshot.
+
+Details und Invarianten: docs/domain-model.md
+
+================================================================================
+PHASEN: DESIGN TIME / RUN TIME / POST-RUN TIME
+================================================================================
+
+Design Time       Katalog — Entwurf pflegen, veröffentlichen, versionieren
+                  (Produktdefinition → ProduktdefinitionsVersion)
+
+Run Time          Prüfausführung — Prüflauf, PrüfschrittDurchführung,
+                  Nachweise, Beurteilungen
+
+Post-Run Time     Protokoll — ProtokollSnapshot als unveränderlicher
+                  Abschlussnachweis (PDF ist Ausgabeformat)
+
+Querschnitt       Identity (Benutzer, Rollen) · Auswertung (Read Model)
+
+================================================================================
+WICHTIGSTE DOMÄNENBEGRIFFE (Auswahl)
+================================================================================
+
+Engine-Begriffe (verbindliche Definitionen in docs/domain-model.md):
+
+  Produktkodierung · Produktdefinition · ProduktdefinitionsVersion
+  Basisprodukt · Option · Kundenprofil · Sollbestückung · Aktivierungsregel
+  Prüfobjekt · Prüfobjekt-Kennung
+  Prüfprozedur · ProzedurSchritt · PrüfschrittVorlage
+  Routine · Externes Kommando · Sollvorgabe
+  Prüflauf · PrüfschrittDurchführung · Nachweis · Beurteilung
+  ProtokollSnapshot
+
+Erste Anwendung (Ergometer) = Konfigurationsinstanzen, keine Engine-Begriffe:
+  Artikelnummer · Grundmodell · Geräteseriennummer · COM-Kommando · Platine
+
+Veraltete Begriffe nicht verwenden: Produktvariante, Schrittstatus,
+Prüfschritt ohne Kontext (Vorlage/Prozedur/Durchführung).
+
+================================================================================
+ARCHITEKTURPRINZIPIEN (Kurz)
+================================================================================
+
+DDD + Hexagonal     Bounded Contexts mit klaren Grenzen; externe Systeme
+                    nur über Ports/Adapter.
+
+Bounded Contexts    Katalog · Prüfausführung · Protokoll · Identity · Auswertung
+                    (kein Context „Gerätekommunikation" — das ist Adapter)
+
+Ports vs. Adapter   Ports = Domänensprache (z. B. ExternesKommandoPort)
+                    Adapter = Technologie (z. B. com/, postgresql/, pdf/)
+
+TDD                 Domain-Logik ohne Infrastruktur testbar.
+
+Details: docs/architecture.md · docs/projectstructure.md
+
+================================================================================
+PROJEKTREGELN (Kurz)
+================================================================================
+
+Fachliche Referenz    docs/domain-model.md — bei Widersprüchen gilt das
+                      Domain Model.
+
+Agent-Arbeit          prompts/agent/00-agent-task-frame.md vor jeder Aufgabe.
+
+Architecture Reflection  Größere Architekturentscheidungen kritisch hinterfragen,
+                         bevor sie als abgeschlossen gelten.
+
+Verboten im Domain-Kern  Gerätespezifische if/else-Logik, COM/PDF/SQL-Details,
+                         technische Bounded Contexts, duplizierte Fachregeln.
+
+Details: docs/projektrules.md
+
+================================================================================
+VERBINDLICHE PROJEKTDOKUMENTE
+================================================================================
+
+Lies diese Datei zuerst. Für Details das passende Dokument — nicht alles
+in context.txt wiederholen.
+
+  docs/domain-model.md      Fachdomäne, Begriffe, Objekte, Invarianten
+                            → fachliche Referenz des gesamten Projekts
+
+  docs/pflichtenheft.md     Anforderungen, Use Cases, Akzeptanzkriterien
+
+  docs/architecture.md      Bounded Contexts, Schichten, Datenflüsse, Ports
+
+  docs/datenbankmodell.md   Persistenz-Leitlinien (kein Schema)
+
+  docs/projectstructure.md  Repository- und Modulstruktur
+
+  docs/projektrules.md      Entwicklungsregeln, Ubiquitous Language, Verbote
+
+  README.md                 Einstieg für Menschen
+
+================================================================================
+FÜR NEUE AGENTEN — LESEPFAD
+================================================================================
+
+1. Diese Datei (Project DNA — Denkweise verstehen)
+2. docs/domain-model.md (Fachdomäne — bei fachlichen Entscheidungen)
+3. docs/projektrules.md (Arbeitsregeln — vor Implementierung)
+4. Je nach Aufgabe: pflichtenheft · architecture · projectstructure

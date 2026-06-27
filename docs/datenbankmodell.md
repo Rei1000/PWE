@@ -1,94 +1,101 @@
 # Datenbankmodell – Leitlinien (PWE)
 
-Dieses Dokument beschreibt Regeln für persistierte Daten in PWE. Es enthält **keine** konkreten Tabellen, Spalten oder Beispieldaten — diese werden abgeleitet, sobald das Domain-Modell pro Bounded Context steht.
-
-Die verbindliche Begriffswelt ist in `docs/projektrules.md` (Ubiquitous Language) dokumentiert.
+Regeln für persistierte Daten. Fachliche Referenz: **`docs/domain-model.md`**. Keine Tabellen oder Spalten in diesem Dokument.
 
 ---
 
-## 1. Entities, Value Objects und Aggregate
+## 1. Fachliche Persistenzobjekte
 
-- **Entity:** Objekt mit identitätsstiftendem Merkmal; Lebenszyklus über die Zeit hinweg nachverfolgbar.
-- **Value Object:** Unveränderlicher Wert ohne eigene Identität außerhalb des Aggregats (z. B. Schrittstatus, Eingabewert).
-- **Aggregat:** Konsistenzgrenze; Änderungen erfolgen ausschließlich über die Aggregate Root.
+Persistenz folgt der Fachdomäne — nicht umgekehrt. Das Domänenmodell beschreibt **was** gespeichert wird; dieses Dokument beschreibt **Leitlinien** für die spätere technische Abbildung.
 
-### Aggregate Roots (verbindlich)
+### Design Time (Katalog)
 
-| Context | Aggregate Root | Enthält (Beispiele) | Nicht eigenständige Aggregate |
-|---------|----------------|---------------------|-------------------------------|
-| **Katalog** | `Produktvariante` | Zuordnung zur Prüfprozedur, Stammdaten-Referenzen | — |
-| **Katalog** | `Pruefprozedur` | Schrittfolge, Verweise auf Schrittvorlagen | Einzelne Schrittpositionen |
-| **Katalog** | `PruefschrittVorlage` | Eingabefelddefinitionen, Hinweise, Routine-Referenz | Eingabefelder als Entitäten innerhalb |
-| **Katalog** | `Routine` | Aktionen, Reihenfolge, Bedingungen | Einzelne Aktionen |
-| **Katalog** | `ExternesKommando` | Kommando-Definition, Parameter | — |
-| **Prüfausführung** | `Prueflauf` | Schrittergebnisse, Eingaben, Messwerte, Kommentare, Fotos | Messwerte, Fotos, Kommentare |
-| **Protokoll** | `ProtokollSnapshot` | Unveränderlicher Zustand eines abgeschlossenen Prüflaufs | — |
-| **Identity** | `Benutzer` | Rolle, persönliche Schrittreihenfolge | — |
+| Fachliches Objekt | Persistenz-Hinweis |
+|-------------------|-------------------|
+| Basisprodukt | Katalog |
+| Option | Katalog |
+| Kundenprofil | Katalog |
+| Produktdefinition (Entwurf) | Änderbar |
+| ProduktdefinitionsVersion | **Unveränderlich** nach Veröffentlichung; materialisierte Prüfvorgabe |
+| Prüfprozedur, ProzedurSchritt | Im Entwurf änderbar; in Version materialisiert |
+| PrüfschrittVorlage, Routine, Externes Kommando | Bibliothek; in Version materialisiert |
+| Sollvorgabe, Sollbestückung, Aktivierungsregel | Teil von Produktdefinition / Version |
 
-**Auswertung** hat keine eigenen Aggregate — sie liest denormalisierte Read Models aus abgeschlossenen Prüfläufen.
+### Run Time (Prüfausführung)
 
-In der ersten Anwendung: Artikelnummer = Instanz von `Produktvariante`; Geräteseriennummer = `Prüfobjekt-Kennung`; Platine = `Komponente`.
+| Fachliches Objekt | Persistenz-Hinweis |
+|-------------------|-------------------|
+| Prüflauf | Referenz auf `ProduktdefinitionsVersion` (unveränderlich) |
+| PrüfschrittDurchführung | Kind von Prüflauf |
+| Nachweis | Kind von PrüfschrittDurchführung; automatische unveränderlich |
+| Beurteilung | Teil der PrüfschrittDurchführung |
+| Istbestückung | Teil des Prüflaufs |
+
+### Post-Run Time (Protokoll)
+
+| Fachliches Objekt | Persistenz-Hinweis |
+|-------------------|-------------------|
+| ProtokollSnapshot | Unveränderlich; referenziert ProduktdefinitionsVersion |
 
 ---
 
-## 2. Beziehungen
+## 2. Beziehungen (fachlich)
 
-- Beziehungen folgen der **fachlichen** Modellierung, nicht der UI-Bequemlichkeit.
-- Kardinalitäten explizit dokumentieren (1:1, 1:n, n:m).
-- Referenzielle Integrität: DB-Constraints vs. Anwendungslogik projektspezifisch festlegen.
-- `Prueflauf` referenziert `Pruefprozedur` per ID (Snapshot der verwendeten Version bei Abschluss im `ProtokollSnapshot`).
+- `Prueflauf` → referenziert genau eine `ProduktdefinitionsVersion` (Referenz ändert sich nie).
+- `ProtokollSnapshot` → gehört zu `Prueflauf`; referenziert dieselbe Version.
+- `PruefschrittDurchfuehrung` → gehört zu `Prueflauf`; bezieht sich auf materialisierten `ProzedurSchritt`.
+- `Nachweis` → gehört zu `PruefschrittDurchfuehrung`.
+- Kardinalitäten und Integrität folgen dem Domain Model.
 
 ---
 
 ## 3. Namensregeln
 
-- Einheitliche Konvention für Tabellen und Spalten (z. B. `snake_case` in der DB).
-- Fachbegriffe aus der Ubiquitous Language bevorzugen — keine ergometerspezifischen Tabellennamen.
-- Migrationen beschreibend und versioniert benennen.
+- Fachbegriffe aus **`docs/domain-model.md`** bevorzugen.
+- Keine ergometerspezifischen Tabellennamen (`ergometer`, `platine_firmware`, …).
+- Keine veralteten Begriffe (`produktvariante`, `schrittstatus`).
 
 ---
 
 ## 4. Migrationen
 
 - Schemaänderungen versioniert und nachvollziehbar.
-- Keine stillen Änderungen auf Produktionssystemen ohne Freigabeprozess.
-- Rollback-Strategie für riskante Änderungen definieren.
+- Veröffentlichte ProduktdefinitionsVersionen werden **nicht** nachträglich geändert — nur neue Versionen angelegt.
 
 ---
 
-## 5. Trennung Domain vs. ORM / Persistenz
+## 5. Trennung Fachdomäne vs. Persistenz
 
-- Das **Domänenmodell** beschreibt Regeln und Invarianten; es ist nicht identisch mit der Tabellenstruktur.
-- **Persistenzmodelle** (ORM-Entities, Row-DTOs) sind Adapter-Sichten in `adapters/persistence/`.
-- ORM-Annotationen und DB-Details dürfen die **Domain-Schicht** nicht durchziehen.
+- Domänenmodell ≠ Tabellenstruktur.
+- Persistenzmodelle leben in `adapters/persistence/` — nicht in der Domain-Schicht.
+- ORM-Details dürfen die Fachdomäne nicht durchziehen.
 
 ---
 
-## 6. Engine-Leitlinien (PWE-spezifisch)
+## 6. Engine-Leitlinien
 
 | Regel | Begründung |
 |-------|------------|
-| **Keine anwendungsspezifischen Tabellen** | Keine Tabellen wie `ergometer`, `com_port_log` oder `platine_firmware` als Domain-Kern. |
-| **Generische Strukturen für Laufzeitdaten** | Schrittergebnisse, Eingaben, Messwerte über `(schritt_id, feld_id, wert)` — nicht über spaltenfixe Ergometer-Felder. |
-| **Externe Kommandos als Konfiguration** | Kommandodefinitionen im Katalog speichern; Protokollimplementierung (COM, Modbus, …) nur im Adapter. |
-| **Protokoll-Snapshot unveränderlich** | `ProtokollSnapshot` nach Erstellung schreibgeschützt. |
-| **Auswertung als Read Model** | Dashboard-Tabellen/Views denormalisiert; ändern nie `Prueflauf` oder `ProtokollSnapshot`. |
-| **Arbeitsplatz-Konfiguration außerhalb des Domain-Schemas** | Schnittstellenports, Drucker und Pfade in `infra/config/`, nicht im fachlichen Datenmodell. |
+| **Keine anwendungsspezifischen Tabellen** | Ergometer-Begriffe nur als Konfigurationsdaten |
+| **Generische Laufzeitstrukturen** | Nachweise, Eingaben über `(schritt_durchfuehrung_id, feld_id, wert)` — nicht spaltenfix |
+| **Version unveränderlich** | ProduktdefinitionsVersion schreibgeschützt nach Veröffentlichung |
+| **ProtokollSnapshot unveränderlich** | Nach Erstellung keine Updates |
+| **Auswertung als Read Model** | Denormalisiert; ändert nie Prüflauf oder ProtokollSnapshot |
+| **Arbeitsplatz-Konfiguration extern** | COM-Port, Drucker in `infra/config/` |
 
 ---
 
 ## 7. Qualität und Konsistenz
 
-- Transaktionsgrenzen an Aggregat-Grenzen ausrichten (z. B. ein Schrittabschluss = eine konsistente Änderung am `Prueflauf`).
-- Indizes nach Zugriffsmustern aus Use Cases ableiten.
-- Testdaten getrennt von Produktion; keine echten personenbezogenen Daten in Repositories.
+- Transaktionsgrenzen an fachlichen Grenzen (z. B. Schrittabschluss = konsistente Änderung am Prüflauf).
+- Indizes nach Use Cases aus dem Domain Model ableiten.
 
 ---
 
-## 8. Nächster Schritt im Projekt
+## 8. Nächster Schritt
 
-Sobald die Domain-Modelle pro Bounded Context definiert sind:
+Nach Modellierung von Aggregates, Entities und Value Objects:
 
-- logisches Datenmodell je Context ableiten,
-- physisches Schema dokumentieren,
-- Migrationen und Zugriffspfade mit `docs/architecture.md` abstimmen.
+- logisches Schema je Bounded Context,
+- physisches Schema,
+- Abstimmung mit `docs/architecture.md`.

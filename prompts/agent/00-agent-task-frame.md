@@ -29,7 +29,9 @@ Fehlt einer dieser Punkte, gilt die Aufgabe als NICHT korrekt ausgeführt.
 
 Vor jeder Aufgabe MUSS der Agent folgende Dokumente berücksichtigen:
 
-- projektrules.md
+- `.goldstandard/context.txt` (Project DNA)
+- `docs/domain-model.md` (fachliche Referenz)
+- `docs/projektrules.md`
 - cursor rules
 - vorhandene Architektur-Dokumentation
 - Pflichtenheft (falls vorhanden)

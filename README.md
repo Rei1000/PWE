@@ -21,3 +21,16 @@ Standardisierte Endprüfungen: Prüferführung, Nachweise, Beurteilungen, Protok
 | `docs/projectstructure.md` | Repository-Struktur |
 | `docs/projektrules.md` | Projektregeln |
 | **`docs/roadmap.md`** | **Projektfortschritt & nächste Slices** |
+
+## Schnellstart (Entwicklung)
+
+```bash
+# Backend-API
+cd backend && pip install ".[dev,persistence,pdf,api]"
+uvicorn api.app:create_app --factory --reload --port 8000
+
+# Frontend (separates Terminal)
+cd frontend/web && npm install && npm run dev
+```
+
+Details: `frontend/web/README.md`

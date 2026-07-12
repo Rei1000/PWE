@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from enum import Enum
+
 from pydantic import BaseModel, Field
 
 
@@ -28,8 +30,19 @@ class KomponenteErfassenRequest(BaseModel):
     seriennummer: str
 
 
+class NachweisArtEnum(str, Enum):
+    MESSWERT = "messwert"
+    FOTO = "foto"
+    KOMMENTAR = "kommentar"
+    MANUELLE_EINGABE = "manuelle_eingabe"
+    ROHANTWORT = "rohantwort"
+    EXTRAHIERTER_WERT = "extrahierter_wert"
+    ERGAENZUNG = "ergaenzung"
+    KOMPONENTENERFASSUNG = "komponentenerfassung"
+
+
 class NachweisErfassenRequest(BaseModel):
-    art: str
+    art: NachweisArtEnum
     payload: dict[str, Any] = Field(default_factory=dict)
     ist_automatisch: bool = False
 
@@ -96,6 +109,8 @@ class SchrittDurchfuehrungResponse(BaseModel):
     sollvorgaben: dict[str, Any]
     nachweise: list[NachweisDetailResponse]
     beurteilung: BeurteilungResponse | None = None
+    kann_nachweis_erfassen: bool = False
+    kann_beurteilt_werden: bool = False
 
 
 class PrueflaufDetailResponse(BaseModel):
@@ -110,3 +125,7 @@ class PrueflaufDetailResponse(BaseModel):
     schritte: list[SchrittDurchfuehrungResponse]
     sollbestueckung: list[str]
     erfasste_komponenten: list[str]
+    ist_abgeschlossen: bool = False
+    fehlende_komponenten: list[str] = Field(default_factory=list)
+    kann_komponente_erfassen: bool = False
+    kann_abgeschlossen_werden: bool = False

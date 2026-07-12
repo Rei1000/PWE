@@ -2,6 +2,7 @@
 
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.pruefausfuehrung.prueflauf import NachweisArt, PrueflaufStatus
+from helpers import in_memory_abschluss_persistenz
 from adapters.persistence.in_memory import (
     InMemoryKatalogRepository,
     InMemoryProtokollRepository,
@@ -60,7 +61,7 @@ def test_vertical_slice_gueltiger_lauf_mit_protokoll():
     SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
 
     abgeschlossen, snapshot = PruefungAbschliessen(
-        katalog, prueflauf_repo, protokoll_repo
+        katalog, prueflauf_repo, in_memory_abschluss_persistenz(prueflauf_repo, protokoll_repo)
     ).execute(prueflauf.prueflauf_id)
 
     assert abgeschlossen.ist_gueltig()
@@ -84,7 +85,7 @@ def test_vertical_slice_ungueltiger_lauf_erhaelt_trotzdem_protokoll():
     SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
 
     abgeschlossen, snapshot = PruefungAbschliessen(
-        katalog, prueflauf_repo, protokoll_repo
+        katalog, prueflauf_repo, in_memory_abschluss_persistenz(prueflauf_repo, protokoll_repo)
     ).execute(prueflauf.prueflauf_id)
 
     assert abgeschlossen.status == PrueflaufStatus.ABGESCHLOSSEN_UNGUELTIG
@@ -106,7 +107,7 @@ def test_vertical_slice_fehlende_bestueckung_ungueltig():
     SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
 
     abgeschlossen, snapshot = PruefungAbschliessen(
-        katalog, prueflauf_repo, protokoll_repo
+        katalog, prueflauf_repo, in_memory_abschluss_persistenz(prueflauf_repo, protokoll_repo)
     ).execute(prueflauf.prueflauf_id)
 
     assert not abgeschlossen.ist_gueltig()

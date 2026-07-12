@@ -1,5 +1,6 @@
 """Vertical Slice — Protokoll abschließen und PDF erzeugen."""
 
+from helpers import in_memory_abschluss_persistenz
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.pruefausfuehrung.prueflauf import NachweisArt
 from adapters.pdf.protokoll_erzeugung import PdfProtokollErzeugungAdapter
@@ -48,7 +49,9 @@ def test_protokoll_pdf_slice_nach_laufabschluss():
         prueflauf.prueflauf_id, "schritt-a", NachweisArt.MESSWERT, {"spannung": 230}
     )
     SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
-    PruefungAbschliessen(katalog, prueflauf_repo, protokoll_repo).execute(prueflauf.prueflauf_id)
+    PruefungAbschliessen(
+        katalog, prueflauf_repo, in_memory_abschluss_persistenz(prueflauf_repo, protokoll_repo)
+    ).execute(prueflauf.prueflauf_id)
 
     dokument = ProtokollErzeugen(protokoll_repo, PdfProtokollErzeugungAdapter()).execute(
         prueflauf.prueflauf_id

@@ -77,11 +77,17 @@ def _prueflauf_detail_response(detail: PrueflaufDetailAnsicht) -> PrueflaufDetai
                     if s.beurteilung
                     else None
                 ),
+                kann_nachweis_erfassen=s.kann_nachweis_erfassen,
+                kann_beurteilt_werden=s.kann_beurteilt_werden,
             )
             for s in detail.schritte
         ],
         sollbestueckung=list(detail.sollbestueckung),
         erfasste_komponenten=list(detail.erfasste_komponenten),
+        ist_abgeschlossen=detail.ist_abgeschlossen,
+        fehlende_komponenten=list(detail.fehlende_komponenten),
+        kann_komponente_erfassen=detail.kann_komponente_erfassen,
+        kann_abgeschlossen_werden=detail.kann_abgeschlossen_werden,
     )
 
 
@@ -131,7 +137,7 @@ def nachweis_erfassen(
     nachweis = NachweisErfassen(deps.prueflauf_repo).execute(
         prueflauf_id,
         schritt_id,
-        NachweisArt(body.art),
+        NachweisArt(body.art.value),
         body.payload,
         ist_automatisch=body.ist_automatisch,
     )
@@ -153,7 +159,7 @@ def schritt_beurteilen(prueflauf_id: str, schritt_id: str, request: Request) -> 
 def prueflauf_abschliessen(prueflauf_id: str, request: Request) -> AbschlussResponse:
     deps = request.app.state.deps
     prueflauf, snapshot = PruefungAbschliessen(
-        deps.katalog, deps.prueflauf_repo, deps.protokoll_repo
+        deps.katalog, deps.prueflauf_repo, deps.abschluss_persistenz
     ).execute(prueflauf_id)
     return AbschlussResponse(
         prueflauf_id=prueflauf.prueflauf_id,

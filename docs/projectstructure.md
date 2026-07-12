@@ -1,12 +1,12 @@
-# Projektstruktur – PWE (Initial)
+# Projektstruktur – PWE
 
 Ordnerstruktur orientiert sich an **`docs/architecture.md`**; Fachbegriffe gemäß **`docs/domain-model.md`**.
+
+**Stand:** Gate 6.2 — Domain, Application, Ports, Adapter und API sind implementiert; Identity und Auswertung sind Platzhalter.
 
 ---
 
 ## 1. Zielbild
-
-Die Projektstruktur bildet die Bounded Contexts ab und trennt Domain, Application, Ports, Adapter und API. In dieser Phase: Struktur und Platzhalter — keine Fachlogik.
 
 **Leitgedanke:** Ordner benennen **Engine-Fachbereiche** (Katalog, Prüfausführung, …), nicht technische Integrationen oder die erste Anwendung (Ergometer).
 

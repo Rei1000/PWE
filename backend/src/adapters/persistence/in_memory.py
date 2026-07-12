@@ -6,6 +6,7 @@ from domain.katalog.produktdefinition import Produktdefinition
 from domain.katalog.version import ProduktdefinitionsVersion
 from domain.pruefausfuehrung.prueflauf import Prueflauf
 from domain.protokoll.snapshot import ProtokollSnapshot
+from domain.shared.errors import UnveraenderlichesObjektBereitsVorhanden
 
 
 class InMemoryKatalogRepository:
@@ -26,6 +27,10 @@ class InMemoryKatalogRepository:
         return self._versionen.get(version_id)
 
     def save_version(self, version: ProduktdefinitionsVersion) -> None:
+        if version.version_id in self._versionen:
+            raise UnveraenderlichesObjektBereitsVorhanden(
+                f"ProduktdefinitionsVersion {version.version_id} existiert bereits"
+            )
         self._versionen[version.version_id] = version
         self._aktive_versionen[version.produktkodierung] = version
 
@@ -52,6 +57,10 @@ class InMemoryProtokollRepository:
         self._by_prueflauf: dict[str, ProtokollSnapshot] = {}
 
     def save(self, snapshot: ProtokollSnapshot) -> None:
+        if snapshot.prueflauf_id in self._by_prueflauf:
+            raise UnveraenderlichesObjektBereitsVorhanden(
+                f"ProtokollSnapshot für Prüflauf {snapshot.prueflauf_id} existiert bereits"
+            )
         self._by_prueflauf[snapshot.prueflauf_id] = snapshot
 
     def get_by_prueflauf(self, prueflauf_id: str) -> ProtokollSnapshot | None:

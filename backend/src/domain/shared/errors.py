@@ -9,3 +9,7 @@ class DomainError(Exception):
 
 class InvariantViolation(DomainError):
     """Aggregate-Invariante verletzt."""
+
+
+class UnveraenderlichesObjektBereitsVorhanden(InvariantViolation):
+    """Insert-only-Regel: unveränderliches Objekt existiert bereits."""

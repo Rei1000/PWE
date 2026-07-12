@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from domain.pruefausfuehrung.typen import Beurteilung
 from domain.shared.errors import DomainError
 from ports.katalog_repository import KatalogRepository
 from ports.prueflauf_repository import PrueflaufRepository

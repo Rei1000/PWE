@@ -91,10 +91,8 @@ export function PrueflaufPage() {
     );
   }
 
-  const fehlendeKomponenten = data.sollbestueckung.filter(
-    (typ) => !data.erfasste_komponenten.includes(typ),
-  );
-  const istAbgeschlossen = data.status.startsWith("abgeschlossen");
+  const fehlendeKomponenten = data.fehlende_komponenten;
+  const istAbgeschlossen = data.ist_abgeschlossen;
 
   return (
     <div className="space-y-6">
@@ -107,7 +105,7 @@ export function PrueflaufPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {fehlendeKomponenten.length > 0 && !istAbgeschlossen && (
+          {data.kann_komponente_erfassen && (
             <form
               className="space-y-3 rounded-lg border p-4"
               onSubmit={komponenteForm.handleSubmit((values) => komponenteMutation.mutate(values))}
@@ -161,9 +159,10 @@ export function PrueflaufPage() {
                   </p>
                 )}
 
-                {!istAbgeschlossen && !schritt.beurteilung && fehlendeKomponenten.length === 0 && (
+                {!istAbgeschlossen &&
+                  (schritt.kann_nachweis_erfassen || schritt.kann_beurteilt_werden) && (
                   <div className="space-y-2 border-t pt-3">
-                    {schritt.nachweise.length === 0 && (
+                    {schritt.kann_nachweis_erfassen && (
                       <form
                         className="flex flex-wrap items-end gap-2"
                         onSubmit={nachweisForm.handleSubmit((values) =>
@@ -187,7 +186,7 @@ export function PrueflaufPage() {
                         </Button>
                       </form>
                     )}
-                    {schritt.nachweise.length > 0 && (
+                    {schritt.kann_beurteilt_werden && (
                       <Button
                         type="button"
                         size="sm"
@@ -205,17 +204,15 @@ export function PrueflaufPage() {
             ))}
           </div>
 
-          {!istAbgeschlossen &&
-            fehlendeKomponenten.length === 0 &&
-            data.schritte.every((s) => s.beurteilung) && (
-              <Button
-                type="button"
-                onClick={() => abschlussMutation.mutate()}
-                disabled={abschlussMutation.isPending}
-              >
-                Prüflauf abschließen
-              </Button>
-            )}
+          {data.kann_abgeschlossen_werden && (
+            <Button
+              type="button"
+              onClick={() => abschlussMutation.mutate()}
+              disabled={abschlussMutation.isPending}
+            >
+              Prüflauf abschließen
+            </Button>
+          )}
 
           {istAbgeschlossen && (
             <Link to={`/prueflaeufe/${prueflaufId}/abschluss`}>

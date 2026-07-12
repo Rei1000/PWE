@@ -25,8 +25,8 @@ def test_domain_fehler_hat_code(client: TestClient):
     )
     assert response.status_code == 404
     body = response.json()
-    assert body == {"detail": body["detail"], "code": "version_nicht_gefunden"}
-    assert isinstance(body["detail"], str)
+    assert body["code"] == "version_nicht_gefunden"
+    assert body["detail"] == "Die referenzierte Produktdefinitionsversion wurde nicht gefunden."
 
 
 def test_validierungsfehler_hat_code(client: TestClient):

@@ -56,8 +56,9 @@ Invariante §4.11: Rohantwort → `NachweisArt.ROHANTWORT` (automatisch); extrah
 
 Keine.
 
-## Nicht im Domain-Kern
+## Nicht im Domain-Kern (noch offen)
 
 - PySerial-Hardware-Transport (`adapters/com/`), Fotospeicher
 - Vollständige Routine-Orchestrierung (folgt)
-- Istbestückung (ADR-0006 — implementiert)
+
+**Istbestückung** ist im Domain-Kern implementiert: `Prueflauf.erfasse_komponente()` (ADR-0006, Slice minimal).

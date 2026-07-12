@@ -1,18 +1,4 @@
-version: "3.9"
-
 services:
-  backend:
-    build:
-      context: .
-      dockerfile: infra/docker/backend.Dockerfile
-    ports:
-      - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/app
-      ENV: development
-    depends_on:
-      - db
-
   db:
     image: postgres:15
     environment:
@@ -21,3 +7,26 @@ services:
       POSTGRES_DB: app
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: infra/docker/backend.Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/app
+      ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

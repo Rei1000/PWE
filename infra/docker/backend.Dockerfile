@@ -1,9 +1,14 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /app/backend
 
-COPY backend /app/backend
+COPY backend/pyproject.toml .
+COPY backend/src ./src
 
-RUN if [ -f /app/backend/requirements.txt ]; then pip install -r /app/backend/requirements.txt; fi
+RUN pip install --no-cache-dir ".[persistence,pdf,api]"
 
-CMD ["python", "-m", "http.server", "8000"]
+ENV PYTHONPATH=/app/backend/src
+
+EXPOSE 8000
+
+CMD ["uvicorn", "api.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]

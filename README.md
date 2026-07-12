@@ -24,8 +24,10 @@ Standardisierte Endprüfungen: Prüferführung, Nachweise, Beurteilungen, Protok
 
 ## Schnellstart (Entwicklung)
 
+### Variante A — lokal ohne Docker (In-Memory)
+
 ```bash
-# Backend-API
+# Backend-API (In-Memory, kein PostgreSQL nötig)
 cd backend && pip install ".[dev,persistence,pdf,api]"
 uvicorn api.app:create_app --factory --reload --port 8000
 
@@ -33,4 +35,11 @@ uvicorn api.app:create_app --factory --reload --port 8000
 cd frontend/web && npm install && npm run dev
 ```
 
-Details: `frontend/web/README.md`
+### Variante B — Docker (API + PostgreSQL)
+
+```bash
+docker compose up --build
+# Frontend separat: cd frontend/web && npm run dev
+```
+
+Details: [`README-docker.md`](README-docker.md)

@@ -5,7 +5,7 @@ Driving Adapter für die PWE-HTTP-API. Stack: [ADR-0009](../../docs/adr/0009-fro
 ## Voraussetzungen
 
 - Node.js 20+
-- Backend-API lokal auf Port 8000
+- Backend-API lokal auf Port 8000 (In-Memory oder via `docker compose up`, siehe [`README-docker.md`](../../README-docker.md))
 
 ## Entwicklung
 

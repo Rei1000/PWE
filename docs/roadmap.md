@@ -42,7 +42,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 — Schritt **7.0 Architecture Debt** (🔄 in Branch)
+**▶ Aktueller Stand:** Gate 7 — Schritt **7.1 API ↔ PostgreSQL Wiring** (🔄 in Branch)
 
 ---
 
@@ -105,8 +105,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | # | Schritt | Status | Prio | Referenz | Abhängigkeit |
 |---|---------|--------|------|----------|--------------|
-| 7.0 | **Architecture Debt** — Persistenz-Parität, Abschluss-Transaktion, API-Fehler, UI-Fortschritt | 🔄 | **P1** | Branch `fix/gate-7-architecture-debt` | 6.2, Architektur-Review |
-| 7.1 | API ↔ PostgreSQL Wiring (`DATABASE_URL`, Session pro Request) | ⏳ | P2 | — | 7.0 |
+| 7.0 | **Architecture Debt** — Persistenz-Parität, Abschluss-Transaktion, API-Fehler, UI-Fortschritt | ✅ | **P1** | PR [#13](https://github.com/Rei1000/PWE/pull/13) — Merge `479ea9e` | 6.2, Architektur-Review |
+| 7.1 | API ↔ PostgreSQL Wiring (`DATABASE_URL`, Session pro Request) | 🔄 | P2 | Branch `feat/gate-7-1-postgresql-wiring` | 7.0 |
 | 7.2 | docker-compose Dev-Stack (API + Postgres) | ⏸ | P2 | 7.1 |
 | 7.3 | Routinen / Externes Kommando über API | ⏸ | P2 | 5.3–5.4, 6.2 |
 
@@ -136,7 +136,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | Thema | Gate | Begründung |
 |-------|------|------------|
 | Auth / Identity-Context | 8.1 | V1 PC-only, ein Prüfer; ADR-0001 |
-| API In-Memory-Default | 7.1 | Transport-Slice ok; Postgres-Adapter existiert (PR #5) |
+| API In-Memory-Default | 7.1 | Bleibt expliziter Dev-/Test-Modus ohne `DATABASE_URL`; PG über Konfiguration (Gate 7.1) |
 | Vollständige Katalogverwaltung | 8.2 | Minimal-API (Entwurf/Veröffentlichen) reicht für Frontend-Slice 1 |
 | OpenAPI-Codegen / erweiterte 422-Details | 6.1+ | Optional mit Frontend Bootstrap |
 | Aggregate Discovery als eigene Phase | — | In Technical Domain integriert (Gate 1) |
@@ -147,6 +147,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-07-12 | Gate 7.0 abgeschlossen (PR #13, Merge `479ea9e`) | Persistenz-Parität, Abschluss-Port, API-Fehler, UI-Fortschritt |
+| 2026-07-12 | Gate 7.1 API ↔ PostgreSQL Wiring gestartet | Branch `feat/gate-7-1-postgresql-wiring` — konfigurierbare PG-Persistenz |
 | 2026-07-12 | Gate 7.0 Architecture Debt eingefügt vor 7.1 | Architektur-Review: PG-Parität, Transaktion, API, UI-Fortschritt |
 | 2026-07-12 | Gate 6.2 abgeschlossen (PR #12) | Frontend Happy Path + Prozess-Doku |
 | 2026-07-12 | Entwicklungsprozess in projektrules §7; Cursor-Rules entschlackt | Slice-Workflow verbindlich ohne Doppel-Doku |
@@ -159,4 +161,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**7.0 abschließen** auf Branch `fix/gate-7-architecture-debt` — danach **Gate 7.1** API ↔ PostgreSQL Wiring.
+**7.1 abschließen** auf Branch `feat/gate-7-1-postgresql-wiring` — danach **Gate 7.2** docker-compose Dev-Stack.

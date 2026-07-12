@@ -13,7 +13,7 @@ class PostgresPrueflaufRepository:
     def __init__(self, session: Session) -> None:
         self._session = session
 
-    def save(self, prueflauf: Prueflauf, *, commit: bool = True) -> None:
+    def save(self, prueflauf: Prueflauf, *, commit: bool = False) -> None:
         row = self._session.get(PrueflaufRow, prueflauf.prueflauf_id)
         payload = prueflauf_to_payload(prueflauf)
         if row is None:

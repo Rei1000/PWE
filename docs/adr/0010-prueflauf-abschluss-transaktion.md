@@ -30,5 +30,5 @@ Alternativen:
 ## Konsequenzen
 
 - `PruefungAbschliessen` nutzt `PrueflaufAbschlussPersistenz` statt `ProtokollRepository.save()` direkt
-- PostgreSQL-Repositories unterstützen `commit=False` für Teiloperationen innerhalb der Abschluss-Transaktion
-- Weitere Use Cases committen weiterhin pro Repository-Save (bis UoW in 7.1)
+- PostgreSQL-Repositories committen standardmäßig nicht; Commit erfolgt über Request-UoW ([ADR-0011](0011-api-postgresql-unit-of-work.md))
+- Application bleibt frei von SQLAlchemy-Session-Details

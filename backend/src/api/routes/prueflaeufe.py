@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Request
 from fastapi.responses import Response
 
+from api.deps import get_request_deps
 from api.schemas import (
     AbschlussResponse,
     BeurteilungResponse,
@@ -93,14 +94,14 @@ def _prueflauf_detail_response(detail: PrueflaufDetailAnsicht) -> PrueflaufDetai
 
 @router.get("/{prueflauf_id}", response_model=PrueflaufDetailResponse)
 def prueflauf_lesen(prueflauf_id: str, request: Request) -> PrueflaufDetailResponse:
-    deps = request.app.state.deps
+    deps = get_request_deps(request)
     detail = PrueflaufLesen(deps.katalog, deps.prueflauf_repo).execute(prueflauf_id)
     return _prueflauf_detail_response(detail)
 
 
 @router.post("", status_code=201, response_model=PrueflaufResponse)
 def prueflauf_starten(body: PrueflaufStartenRequest, request: Request) -> PrueflaufResponse:
-    deps = request.app.state.deps
+    deps = get_request_deps(request)
     prueflauf = PruefungStarten(deps.katalog, deps.prueflauf_repo).execute(
         produktkodierung=body.produktkodierung,
         pruefobjekt_kennung=body.pruefobjekt_kennung,
@@ -115,7 +116,7 @@ def komponente_erfassen(
     body: KomponenteErfassenRequest,
     request: Request,
 ) -> NachweisResponse:
-    deps = request.app.state.deps
+    deps = get_request_deps(request)
     nachweis = KomponenteErfassen(deps.prueflauf_repo).execute(
         prueflauf_id, body.komponenten_typ, body.seriennummer
     )
@@ -133,7 +134,7 @@ def nachweis_erfassen(
     body: NachweisErfassenRequest,
     request: Request,
 ) -> NachweisResponse:
-    deps = request.app.state.deps
+    deps = get_request_deps(request)
     nachweis = NachweisErfassen(deps.prueflauf_repo).execute(
         prueflauf_id,
         schritt_id,
@@ -150,14 +151,14 @@ def nachweis_erfassen(
     response_class=Response,
 )
 def schritt_beurteilen(prueflauf_id: str, schritt_id: str, request: Request) -> Response:
-    deps = request.app.state.deps
+    deps = get_request_deps(request)
     SchrittBeurteilen(deps.katalog, deps.prueflauf_repo).execute(prueflauf_id, schritt_id)
     return Response(status_code=204)
 
 
 @router.post("/{prueflauf_id}/abschluss", response_model=AbschlussResponse)
 def prueflauf_abschliessen(prueflauf_id: str, request: Request) -> AbschlussResponse:
-    deps = request.app.state.deps
+    deps = get_request_deps(request)
     prueflauf, snapshot = PruefungAbschliessen(
         deps.katalog, deps.prueflauf_repo, deps.abschluss_persistenz
     ).execute(prueflauf_id)
@@ -171,7 +172,7 @@ def prueflauf_abschliessen(prueflauf_id: str, request: Request) -> AbschlussResp
 
 @router.get("/{prueflauf_id}/protokoll/pdf")
 def protokoll_pdf(prueflauf_id: str, request: Request) -> Response:
-    deps = request.app.state.deps
+    deps = get_request_deps(request)
     dokument = ProtokollErzeugen(deps.protokoll_repo, deps.erzeugung_port).execute(prueflauf_id)
     return Response(
         content=dokument.inhalt,

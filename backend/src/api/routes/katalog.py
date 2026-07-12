@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 
+from api.deps import get_request_deps
 from api.schemas import EntwurfAnlegenRequest, EntwurfResponse, VersionResponse
 from application.katalog.entwurf_anlegen import EntwurfAnlegen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/katalog", tags=["Katalog"])
 
 @router.post("/entwuerfe", status_code=201, response_model=EntwurfResponse)
 def entwurf_anlegen(body: EntwurfAnlegenRequest, request: Request) -> EntwurfResponse:
-    deps = request.app.state.deps
+    deps = get_request_deps(request)
     schritte = tuple(
         ProzedurSchrittEntwurf(
             schritt_id=s.schritt_id,
@@ -47,7 +48,7 @@ def entwurf_anlegen(body: EntwurfAnlegenRequest, request: Request) -> EntwurfRes
 def entwurf_veroeffentlichen(
     produktdefinition_id: str, request: Request
 ) -> VersionResponse:
-    deps = request.app.state.deps
+    deps = get_request_deps(request)
     version = ProduktdefinitionVeroeffentlichen(deps.katalog).execute(produktdefinition_id)
     return VersionResponse(
         version_id=version.version_id,

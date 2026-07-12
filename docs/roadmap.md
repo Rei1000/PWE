@@ -47,7 +47,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7.3a implementiert (Branch `feat/gate-7-3a-katalog-externes-kommando`) — **Nächster geplanter Slice: Gate 7.3b** (⏳, Freigabe ausstehend)
+**▶ Aktueller Stand:** Gate 7.3a ✅ (PR #16) — **Gate 7.3b in Arbeit** (Branch `feat/gate-7-3b-api-kommando-ausfuehren`)
 
 ---
 
@@ -114,8 +114,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 7.1 | API ↔ PostgreSQL Wiring (`DATABASE_URL`, Session pro Request) | ✅ | P2 | PR [#14](https://github.com/Rei1000/PWE/pull/14) — Merge `48ab29e` | 7.0 |
 | 7.2 | docker-compose Dev-Stack (API + Postgres) | ✅ | P2 | PR [#15](https://github.com/Rei1000/PWE/pull/15) — Merge `f526767` | 7.1 |
 | 7.3 | **Routinen / Externes Kommando über API** (Gesamtfeature) | ⏸ | P2 | Aufgeteilt in 7.3a → 7.3b → 7.3c → vollständig 7.3 | 5.3–5.4, 6.2 |
-| 7.3a | Katalog: Externes Kommando minimal | ✅ | P2 | Branch `feat/gate-7-3a-katalog-externes-kommando`, [ADR-0012](adr/0012-katalog-bibliothek-externes-kommando.md) | 7.2, Domain Model §4.11 |
-| 7.3b | API: Einzelkommando ausführen (`kommando_id`) | ⏳ | P2 | — | 7.3a |
+| 7.3a | Katalog: Externes Kommando minimal | ✅ | P2 | PR [#16](https://github.com/Rei1000/PWE/pull/16) — Merge `b59d769`, [ADR-0012](adr/0012-katalog-bibliothek-externes-kommando.md) | 7.2, Domain Model §4.11 |
+| 7.3b | API: Einzelkommando ausführen (`kommando_id`) | 🔄 | P2 | Branch `feat/gate-7-3b-api-kommando-ausfuehren` | 7.3a |
 | 7.3c | COM-Härtung (Timeout, Transport, Fehler) | ⏳ | P2 | — | 7.3b |
 
 ### Roadmap-Anpassung (2026-07-12) — Gate 7.3 Zerlegung
@@ -167,7 +167,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
-| 2026-07-12 | Gate 7.3a abgeschlossen (Branch `feat/gate-7-3a-katalog-externes-kommando`) | ExternesKommando, BibliothekRepository, Materialisierung, ADR-0012 |
+| 2026-07-12 | Gate 7.3a abgeschlossen (PR #16, Merge `b59d769`) | ExternesKommando, BibliothekRepository, Materialisierung, ADR-0012 |
+| 2026-07-12 | Gate 7.3b gestartet — API Einzelkommando über `kommando_id` | Ausführung nur aus materialisiertem Snapshot |
 | 2026-07-12 | Gate 7.3 in 7.3a/7.3b/7.3c zerlegt; Katalog vor API | Keine freien Kommandostrings im HTTP-Contract; minimales Katalogmodell zuerst |
 | 2026-07-12 | Gate 7.2 abgeschlossen (PR #15, Merge `f526767`) | docker-compose Dev-Stack API + PostgreSQL |
 | 2026-07-12 | Gate 7.0–7.2 abgeschlossen (Betriebsreife-Basis) | Architecture Debt, PG-Wiring, Dev-Stack |
@@ -186,4 +187,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 7.3b — API: Einzelkommando ausführen (`kommando_id`)** (⏳) — Freigabe durch Nutzer erforderlich.
+**Gate 7.3b — API: Einzelkommando ausführen (`kommando_id`)** (🔄) — Implementierung auf Branch `feat/gate-7-3b-api-kommando-ausfuehren`.

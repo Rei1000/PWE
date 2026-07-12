@@ -17,6 +17,7 @@ from adapters.persistence.postgresql.protokoll_repository import PostgresProtoko
 from adapters.persistence.postgresql.prueflauf_repository import PostgresPrueflaufRepository
 from adapters.persistence.postgresql.schema import init_schema
 from adapters.pdf.protokoll_erzeugung import PdfProtokollErzeugungAdapter
+from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
 from api.deps import ApiDeps
 
 PersistenceMode = Literal["in-memory", "postgresql"]
@@ -73,6 +74,7 @@ def postgres_deps(session: Session) -> ApiDeps:
         protokoll_repo=protokoll_repo,
         abschluss_persistenz=PostgresPrueflaufAbschlussPersistenz(session),
         erzeugung_port=PdfProtokollErzeugungAdapter(),
+        kommando_port=SimuliertesExternesKommandoPort(),
     )
 
 

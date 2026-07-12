@@ -57,6 +57,10 @@ class NachweisResponse(BaseModel):
     art: str
 
 
+class ExternesKommandoAusfuehrenResponse(BaseModel):
+    nachweise: list[NachweisResponse]
+
+
 class AbschlussResponse(BaseModel):
     prueflauf_id: str
     status: str

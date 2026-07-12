@@ -45,6 +45,9 @@ Brücke Domain Model → Code. Fachliche Referenz: `docs/domain-model.md` §4.15
 |------|--------------|----------|
 | `ExternesKommandoPort` | `adapters/simulation/externes_kommando.py` | `ExternesKommandoAusfuehren` |
 | `ExternesKommandoPort` | `adapters/com/externes_kommando.py` | `ExternesKommandoAusfuehren` |
+| `KatalogRepository` | — | `ExternesKommandoAusfuehren` (nur Version/Snapshot lesen) |
+
+Gate 7.3b: Ausführung bindet `kommando_id` an materialisierten Snapshot in der `ProduktdefinitionsVersion` — **kein** Zugriff auf `BibliothekRepository` zur Laufzeit.
 
 COM-Adapter nutzt injizierbaren `SeriellerTransport` (`adapters/com/transport.py`); Hardware-Transport folgt über Konfiguration.
 

@@ -54,7 +54,7 @@ Der Port beschreibt **save** als fachliche Persistierung des Aggregate-Zustands.
 - `ProduktdefinitionVeroeffentlichen` benötigt `BibliothekRepository` zur Auflösung von `kommando_id`
 - PostgreSQL: Tabelle `externes_kommando`; JSON-Payload für Entwurf/Version enthält Referenz bzw. Snapshot
 - PostgreSQL-Adapter darf für mutable Bibliotheksobjekte SQL-Upsert nutzen — semantisch äquivalent zu mutable save
-- Gate 7.3b: API-Ausführung über materialisierten Snapshot / `kommando_id`, nicht freie Strings
+- Gate 7.3b: API-Ausführung über materialisierten Snapshot / `kommando_id`, nicht freie Strings; Laufzeit liest **keine** mutable Bibliothek
 
 ## Bezug
 

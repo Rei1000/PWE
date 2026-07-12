@@ -2,7 +2,7 @@
 
 Verbindliche Übersicht über Projektfortschritt, Prioritäten und Abhängigkeiten.
 
-**Pflege-Regel:** Bei jedem abgeschlossenen Roadmap-Slice dieses Dokument aktualisieren (Status, PR/Commit, Changelog unten). Neue Erkenntnisse dürfen die Roadmap ändern — mit begründetem Changelog-Eintrag.
+**Pflege-Regel:** Bei jedem abgeschlossenen Roadmap-Slice dieses Dokument aktualisieren (Status, PR/Commit, Changelog unten). Prozess: `docs/projektrules.md` §7. Neue Erkenntnisse dürfen die Roadmap ändern — mit begründetem Changelog-Eintrag.
 
 Referenzen: `docs/architecture.md`, ADRs in `docs/adr/`, Fachdomäne `docs/domain-model.md`.
 
@@ -88,7 +88,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 |---|---------|--------|------|----------|--------------|
 | 6.0 | **API Read-Slice** — `GET /prueflaeufe/{id}` (Schritte, Status, Nachweise) | ✅ | **P0** | PR [#10](https://github.com/Rei1000/PWE/pull/10) | 5.6 |
 | 6.1 | Frontend Bootstrap (Vite, React, API-Client, Dev-Proxy) | ✅ | P1 | PR [#11](https://github.com/Rei1000/PWE/pull/11) — Merge `f94387b` | 6.0, ADR-0009 |
-| 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path | 🔄 | P1 | PR #12 — `feat/frontend-prueflauf-ui` | 6.1 |
+| 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path | 🔄 | P1 | PR ausstehend — `feat/frontend-prueflauf-ui` | 6.1 |
 
 ### Roadmap-Anpassung (2026-06-27)
 
@@ -154,4 +154,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**6.2 abschließen** (PR #12) — danach **Gate 7.1** API ↔ PostgreSQL Wiring (P2, deferred bis Bedarf).
+**6.2 abschließen** (PR ausstehend auf `feat/frontend-prueflauf-ui`) — danach **Gate 7.1** API ↔ PostgreSQL Wiring (P2, deferred bis Bedarf).

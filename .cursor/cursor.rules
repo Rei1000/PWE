@@ -33,7 +33,7 @@ Weitere: `docs/pflichtenheft.md`, `docs/projectstructure.md`, `docs/test-strateg
 - Nur explizit erlaubte Dateien ändern
 - Keine Commits auf `main`
 - Ein Feature-Branch pro Roadmap-Slice
-- PR erst nach Architektur-Review; nur P0 vor PR fixen
+- PR erst nach Architektur-Review, Abschlussbericht und expliziter Nutzer-Freigabe; nur P0 vor PR fixen
 - Bei Widerspruch zwischen Dateien: `docs/domain-model.md` (Fach) bzw. `docs/projektrules.md` (Prozess)
 
 Details: `docs/projektrules.md` §7 Entwicklungsprozess (Roadmap-Slices).

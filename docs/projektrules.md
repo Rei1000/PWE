@@ -217,12 +217,14 @@ Verbindlicher Ablauf für Implementierungsarbeit. Details zum Fortschritt: **`do
 1. `main` aktualisieren, Feature-Branch anlegen
 2. Roadmap prüfen und ggf. begründet anpassen
 3. **Nur** den aktuellen Slice implementieren (TDD wo sinnvoll)
-4. Betroffene Dokumentation aktualisieren (Roadmap Pflicht)
-5. **Architektur-Review** vor PR (siehe unten)
-6. **Selbstkritik:** eigene Lösung bewusst widerlegen
-7. **Nur P0-Blocker** vor PR beheben; P1/P2 dokumentieren
-8. Commit → Push → Pull Request
-9. Merge **erst** nach Review-Freigabe und grünem CI
+4. **Tests** für betroffenes Verhalten ergänzen oder anpassen (`docs/test-strategy.md`)
+5. Betroffene **Dokumentation** aktualisieren (`docs/roadmap.md` ist Pflicht)
+6. **Architektur-Review** vor PR (siehe unten)
+7. **Selbstkritik:** eigene Lösung bewusst widerlegen (adversarial)
+8. **Nur P0-Blocker** vor PR beheben; **P1/P2 dokumentieren**, nicht ohne Roadmap-Entscheidung in den Slice ziehen
+9. **Abschlussbericht** erstellen; **Pull Request erst erst nach expliziter Freigabe** durch den Nutzer
+10. Commit → Push → Pull Request
+11. Merge **erst** nach Review-Freigabe und grünem CI
 
 ### Architektur-Review vor Pull Request
 
@@ -241,6 +243,11 @@ Ergebnis im PR oder Abschlussbericht festhalten.
 - Squash-Merge bevorzugt, wenn sinnvoll
 - Kein Merge bei rotem CI oder offenen P0-Punkten
 
+### Nach Merge
+
+- `docs/roadmap.md`: Slice-Status auf ✅ setzen, PR/Commit verlinken, Changelog ergänzen
+- Lauffähigkeit von `main` und CI-Status verifizieren
+
 ### Unveränderte Architekturprinzipien
 
 Domain First, Engine First, hexagonale Architektur und Frontend als Driving Adapter gelten in jedem Slice unverändert (siehe oben und `docs/architecture.md`).
@@ -250,6 +257,7 @@ Domain First, Engine First, hexagonale Architektur und Frontend als Driving Adap
 ## 8. Verweise
 
 - **Fachdomäne (Referenz):** `docs/domain-model.md`
+- **Umsetzungsweg & Slice-Status:** `docs/roadmap.md`
 - Architekturentscheidungen: `docs/adr/`
 - Technical Domain Design: `docs/technical-domain/`
 - Fachliche Anforderungen: `docs/pflichtenheft.md`

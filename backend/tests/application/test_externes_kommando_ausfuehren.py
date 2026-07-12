@@ -80,10 +80,12 @@ def test_materialisiertes_kommando_wird_ausgefuehrt():
         pruefer_id="pruefer-1",
     )
 
-    nachweise = ExternesKommandoAusfuehren(
+    ergebnis = ExternesKommandoAusfuehren(
         katalog, prueflauf_repo, _simulation_port()
     ).execute(prueflauf.prueflauf_id, "schritt-a", KOMMANDO_ID)
 
+    assert ergebnis.fehlgeschlagen is False
+    nachweise = ergebnis.nachweise
     assert len(nachweise) == 2
     assert nachweise[0].art == NachweisArt.ROHANTWORT
     assert nachweise[0].payload["kommando_id"] == KOMMANDO_ID
@@ -224,7 +226,82 @@ def test_bibliotheksaenderung_beeinflusst_ausfuehrung_nicht():
         prueflauf.prueflauf_id,
         "schritt-a",
         kommando.kommando_id,
-    )
+    ).nachweise
 
     assert nachweise[0].payload["kommandocode"] == KOMMANDOCODE
     assert nachweise[0].payload["rohdaten"] == "RAW:230"
+
+
+def test_geraete_err_persistiert_rohantwort():
+    katalog = _katalog_mit_kommando()
+    prueflauf_repo = InMemoryPrueflaufRepository()
+    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+        produktkodierung="1234567890",
+        pruefobjekt_kennung="GER-1",
+        pruefer_id="pruefer-1",
+    )
+    port = SimuliertesExternesKommandoPort(
+        {
+            KOMMANDOCODE: ExternesKommandoAntwort(
+                rohdaten="ERR OUT_OF_RANGE",
+                erfolgreich=False,
+            ),
+        }
+    )
+
+    ergebnis = ExternesKommandoAusfuehren(
+        katalog, prueflauf_repo, port
+    ).execute(prueflauf.prueflauf_id, "schritt-a", KOMMANDO_ID)
+
+    assert ergebnis.fehlgeschlagen is True
+    assert len(ergebnis.nachweise) == 1
+    assert ergebnis.nachweise[0].art == NachweisArt.ROHANTWORT
+    assert ergebnis.nachweise[0].payload["rohdaten"] == "ERR OUT_OF_RANGE"
+    assert ergebnis.nachweise[0].payload["erfolgreich"] is False
+
+    reloaded = prueflauf_repo.get(prueflauf.prueflauf_id)
+    assert len(reloaded.durchfuehrungen["schritt-a"].nachweise) == 1
+
+
+def test_parserfehler_mit_rohantwort_persistiert_nur_roh():
+    katalog = _katalog_mit_kommando()
+    prueflauf_repo = InMemoryPrueflaufRepository()
+    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+        produktkodierung="1234567890",
+        pruefobjekt_kennung="GER-1",
+        pruefer_id="pruefer-1",
+    )
+    port = SimuliertesExternesKommandoPort(
+        {
+            KOMMANDOCODE: ExternesKommandoAntwort(
+                rohdaten="OK unparseable payload",
+                erfolgreich=False,
+            ),
+        }
+    )
+
+    ergebnis = ExternesKommandoAusfuehren(
+        katalog, prueflauf_repo, port
+    ).execute(prueflauf.prueflauf_id, "schritt-a", KOMMANDO_ID)
+
+    assert ergebnis.fehlgeschlagen is True
+    assert len(ergebnis.nachweise) == 1
+    assert ergebnis.nachweise[0].art == NachweisArt.ROHANTWORT
+
+
+def test_transportfehler_ohne_rohantwort_wirft_und_persistiert_nicht():
+    katalog = _katalog_mit_kommando()
+    prueflauf_repo = InMemoryPrueflaufRepository()
+    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+        produktkodierung="1234567890",
+        pruefobjekt_kennung="GER-1",
+        pruefer_id="pruefer-1",
+    )
+
+    with pytest.raises(ExternesKommandoAdapterFehler):
+        ExternesKommandoAusfuehren(
+            katalog, prueflauf_repo, SimuliertesExternesKommandoPort()
+        ).execute(prueflauf.prueflauf_id, "schritt-a", KOMMANDO_ID)
+
+    reloaded = prueflauf_repo.get(prueflauf.prueflauf_id)
+    assert len(reloaded.durchfuehrungen["schritt-a"].nachweise) == 0

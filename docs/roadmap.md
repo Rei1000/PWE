@@ -47,7 +47,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7.3a ✅ (PR #16) — **Gate 7.3b in Arbeit** (Branch `feat/gate-7-3b-api-kommando-ausfuehren`)
+**▶ Aktueller Stand:** Gate 7.3b ✅ (PR #17) — **Gate 7.3c in Arbeit** (Branch `feat/gate-7-3c-com-hardening`)
 
 ---
 
@@ -115,8 +115,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 7.2 | docker-compose Dev-Stack (API + Postgres) | ✅ | P2 | PR [#15](https://github.com/Rei1000/PWE/pull/15) — Merge `f526767` | 7.1 |
 | 7.3 | **Routinen / Externes Kommando über API** (Gesamtfeature) | ⏸ | P2 | Aufgeteilt in 7.3a → 7.3b → 7.3c → vollständig 7.3 | 5.3–5.4, 6.2 |
 | 7.3a | Katalog: Externes Kommando minimal | ✅ | P2 | PR [#16](https://github.com/Rei1000/PWE/pull/16) — Merge `b59d769`, [ADR-0012](adr/0012-katalog-bibliothek-externes-kommando.md) | 7.2, Domain Model §4.11 |
-| 7.3b | API: Einzelkommando ausführen (`kommando_id`) | 🔄 | P2 | Branch `feat/gate-7-3b-api-kommando-ausfuehren` | 7.3a |
-| 7.3c | COM-Härtung (Timeout, Transport, Fehler) | ⏳ | P2 | — | 7.3b |
+| 7.3b | API: Einzelkommando ausführen (`kommando_id`) | ✅ | P2 | PR [#17](https://github.com/Rei1000/PWE/pull/17) — Merge `b3d3761` | 7.3a |
+| 7.3c | COM-Härtung (Wiring, Transport, PySerialTransport) | 🔄 | P2 | Branch `feat/gate-7-3c-com-hardening`, [ADR-0013](adr/0013-com-adapter-wiring-fehlerabbildung.md) | 7.3b |
 
 ### Roadmap-Anpassung (2026-07-12) — Gate 7.3 Zerlegung
 
@@ -126,7 +126,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 |-------|--------|---------------|
 | **7.3a** | `ExternesKommando` in Bibliothek, `kommando_id`, Materialisierung in Version/Schritt | API-Ausführung, Routine, Frontend |
 | **7.3b** | HTTP-Ausführung nur über `kommando_id`, Simulation-Default | Freie Kommandostrings, COM-Härtung |
-| **7.3c** | Timeout, Transport-Config, Fehlerklassifikation | Routine-Orchestrierung |
+| **7.3c** | COM-Wiring, Transport-Robustheit, `PySerialTransport`, Fehlerabbildung | Hardwaretests, Retry, Routinen, PySerial außerhalb Adapter |
 | **7.3 (später)** | Routine-Domain, Orchestrierung, Wiederholung, Frontend | — |
 
 ---
@@ -167,6 +167,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-07-12 | Gate 7.3c gestartet — COM-Wiring, PySerialTransport, ADR-0013 | Produktionsfähiger serieller Transport ohne Hardwaretests/Retry |
+| 2026-07-12 | Gate 7.3b abgeschlossen (PR #17, Merge `b3d3761`) | HTTP-Ausführung über `kommando_id`, Simulation-Default, `postgres_deps_factory` |
 | 2026-07-12 | Gate 7.3a abgeschlossen (PR #16, Merge `b59d769`) | ExternesKommando, BibliothekRepository, Materialisierung, ADR-0012 |
 | 2026-07-12 | Gate 7.3b gestartet — API Einzelkommando über `kommando_id` | Ausführung nur aus materialisiertem Snapshot |
 | 2026-07-12 | Gate 7.3 in 7.3a/7.3b/7.3c zerlegt; Katalog vor API | Keine freien Kommandostrings im HTTP-Contract; minimales Katalogmodell zuerst |
@@ -187,4 +189,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 7.3b — API: Einzelkommando ausführen (`kommando_id`)** (🔄) — Implementierung auf Branch `feat/gate-7-3b-api-kommando-ausfuehren`.
+**Gate 7.3c — COM-Härtung** (🔄) — COM-Wiring und Transport-Robustheit inkl. `PySerialTransport`; **ohne** Hardwaretests und **ohne** Retry. Branch `feat/gate-7-3c-com-hardening`.

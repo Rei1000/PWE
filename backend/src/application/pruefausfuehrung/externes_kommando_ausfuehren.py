@@ -18,6 +18,14 @@ from ports.katalog_repository import KatalogRepository
 from ports.prueflauf_repository import PrueflaufRepository
 
 
+@dataclass(frozen=True)
+class ExternesKommandoAusfuehrungErgebnis:
+    """Ergebnis der Kommandoausführung — Nachweise und fachlicher Ausführungsstatus."""
+
+    nachweise: list[Nachweis]
+    fehlgeschlagen: bool
+
+
 @dataclass
 class ExternesKommandoAusfuehren:
     katalog: KatalogRepository
@@ -29,7 +37,7 @@ class ExternesKommandoAusfuehren:
         prueflauf_id: str,
         prozedur_schritt_id: str,
         kommando_id: str,
-    ) -> list[Nachweis]:
+    ) -> ExternesKommandoAusfuehrungErgebnis:
         prueflauf = self.prueflauf_repo.get(prueflauf_id)
         if prueflauf is None:
             raise PrueflaufNichtGefunden(f"Kein Prüflauf: {prueflauf_id}")
@@ -56,7 +64,8 @@ class ExternesKommandoAusfuehren:
         antwort = self.kommando_port.ausfuehren(
             ExternesKommandoAnfrage(kommandocode=kommandocode)
         )
-        if not antwort.erfolgreich:
+
+        if not _hat_audit_relevante_rohantwort(antwort):
             raise ExternesKommandoAdapterFehler(
                 f"Ausführung des Kommandos {kommando_id} fehlgeschlagen"
             )
@@ -74,20 +83,29 @@ class ExternesKommandoAusfuehren:
         )
         nachweise: list[Nachweis] = [roh_nachweis]
 
-        for feld, wert in antwort.extrahierte_werte.items():
-            nachweise.append(
-                prueflauf.add_nachweis(
-                    prozedur_schritt_id,
-                    NachweisArt.EXTRAHIERTER_WERT,
-                    {
-                        "kommando_id": kommando_id,
-                        "feld": feld,
-                        "wert": wert,
-                    },
-                    ist_automatisch=True,
-                    bezug_nachweis_id=roh_nachweis.nachweis_id,
+        if antwort.erfolgreich:
+            for feld, wert in antwort.extrahierte_werte.items():
+                nachweise.append(
+                    prueflauf.add_nachweis(
+                        prozedur_schritt_id,
+                        NachweisArt.EXTRAHIERTER_WERT,
+                        {
+                            "kommando_id": kommando_id,
+                            "feld": feld,
+                            "wert": wert,
+                        },
+                        ist_automatisch=True,
+                        bezug_nachweis_id=roh_nachweis.nachweis_id,
+                    )
                 )
-            )
 
         self.prueflauf_repo.save(prueflauf)
-        return nachweise
+        return ExternesKommandoAusfuehrungErgebnis(
+            nachweise=nachweise,
+            fehlgeschlagen=not antwort.erfolgreich,
+        )
+
+
+def _hat_audit_relevante_rohantwort(antwort) -> bool:
+    """True, wenn eine Geräte-Rohantwort für Audit vorliegt (Domain §4.11, Invariante 16)."""
+    return bool(antwort.rohdaten.strip())

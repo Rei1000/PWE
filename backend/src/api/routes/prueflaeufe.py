@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Body, Request
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
 
 from api.deps import get_request_deps
+from api.fehler import fehler_response, oeffentliche_fehlermeldung
 from api.schemas import (
     AbschlussResponse,
     BeurteilungResponse,
@@ -28,6 +29,7 @@ from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
+from domain.pruefausfuehrung.errors import ExternesKommandoAdapterFehler
 from domain.pruefausfuehrung.typen import NachweisArt
 
 
@@ -139,18 +141,29 @@ def externes_kommando_ausfuehren(
     _body: ExternesKommandoAusfuehrenRequest = Body(
         default_factory=ExternesKommandoAusfuehrenRequest
     ),
-) -> ExternesKommandoAusfuehrenResponse:
+) -> ExternesKommandoAusfuehrenResponse | JSONResponse:
     deps = get_request_deps(request)
-    nachweise = ExternesKommandoAusfuehren(
+    ergebnis = ExternesKommandoAusfuehren(
         deps.katalog,
         deps.prueflauf_repo,
         deps.kommando_port,
     ).execute(prueflauf_id, schritt_id, kommando_id)
-    return ExternesKommandoAusfuehrenResponse(
-        nachweise=[
-            NachweisResponse(nachweis_id=n.nachweis_id, art=n.art.value) for n in nachweise
-        ]
-    )
+    nachweis_responses = [
+        NachweisResponse(nachweis_id=n.nachweis_id, art=n.art.value)
+        for n in ergebnis.nachweise
+    ]
+    if ergebnis.fehlgeschlagen:
+        return JSONResponse(
+            status_code=409,
+            content={
+                **fehler_response(
+                    detail=oeffentliche_fehlermeldung(ExternesKommandoAdapterFehler()),
+                    code="externes_kommando_adapter_fehler",
+                ),
+                "nachweise": [n.model_dump() for n in nachweis_responses],
+            },
+        )
+    return ExternesKommandoAusfuehrenResponse(nachweise=nachweis_responses)
 
 
 @router.post(

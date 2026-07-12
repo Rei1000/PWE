@@ -57,7 +57,7 @@ Führt ein **bereits materialisiertes** Einzelkommando aus der referenzierten `P
 | Kommandocode-Quelle | Ausschließlich `MaterialisiertesExternesKommando` in der Version |
 | Mutable Bibliothek | Wird zur Laufzeit **nicht** gelesen |
 | Idempotenz | **Nicht idempotent** — jeder Aufruf erzeugt neue Nachweis-Wellen |
-| Adapter (V1) | `SimuliertesExternesKommandoPort` (Dev/Tests); COM über Konfiguration später |
+| Adapter (V1) | `SimuliertesExternesKommandoPort` (Default Dev/CI); COM via `EXTERNES_KOMMANDO_ADAPTER=com` + `[com]`-Extra |
 
 **Response (201):**
 
@@ -76,8 +76,20 @@ Führt ein **bereits materialisiertes** Einzelkommando aus der referenzierten `P
 | 404 | `materialisierter_prozedur_schritt_nicht_gefunden` | Schritt nicht in referenzierter Version |
 | 409 | `kommando_nicht_freigegeben` | `kommando_id` passt nicht zum materialisierten Schritt |
 | 409 | `invariant_verletzt` | Prüflauf bereits abgeschlossen |
-| 409 | `externes_kommando_adapter_fehler` | Adapter meldet fehlgeschlagene Ausführung |
+| 409 | `externes_kommando_adapter_fehler` | Adapter meldet fehlgeschlagene Ausführung **ohne** audit-relevante Rohantwort |
+| 409 | `externes_kommando_adapter_fehler` | Geräte-/Parserfehler **mit** Rohantwort — Body enthält zusätzlich `nachweise` (ROHANTWORT persistiert, Request commit) |
 | 422 | `validation` | Unerlaubter Request-Body (z. B. `kommandocode`) |
+
+### Kommando-Adapter (Gate 7.3c)
+
+| Variable | Default | Bedeutung |
+|----------|---------|-----------|
+| `EXTERNES_KOMMANDO_ADAPTER` | `simulation` | `simulation` oder `com` |
+| `SERIELL_PORT` | — | Pflicht bei `com` (z. B. `/dev/ttyUSB0`, `COM3`) |
+| `SERIELL_BAUDRATE` | `9600` | Positive Ganzzahl |
+| `SERIELL_TIMEOUT_MS` | `3000` | Timeout in Millisekunden (> 0) |
+
+Ungültige Konfiguration → Startfehler (`KommandoAdapterConfigurationError`). Kein Fallback auf Simulation bei `com`. PySerial: optionales Backend-Extra `[com]`.
 
 ## NachweisArt — API-Contract
 
@@ -129,7 +141,7 @@ Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruef
 
 **Tests:** API-Tests injizieren explizit `in_memory_deps()` — unabhängig von CI-`DATABASE_URL`. PostgreSQL-API-Integration separat (`@pytest.mark.postgresql`).
 
-**Startfehler:** Ungültige oder nicht erreichbare `DATABASE_URL` → Anwendung startet nicht (`PersistenceConfigurationError`).
+**Startfehler:** Ungültige oder nicht erreichbare `DATABASE_URL` → Anwendung startet nicht (`PersistenceConfigurationError`). Ungültige Kommando-Adapter-Konfiguration → `KommandoAdapterConfigurationError` ([ADR-0013](../adr/0013-com-adapter-wiring-fehlerabbildung.md)).
 
 **Dev-Stack:** `docker compose up --build` startet API + PostgreSQL — siehe [`README-docker.md`](../../README-docker.md).
 

@@ -55,12 +55,14 @@ def test_com_adapter_slice_bis_gueltiger_lauf():
         pruefer_id="pruefer-1",
     )
 
-    nachweise = ExternesKommandoAusfuehren(katalog, prueflauf_repo, kommando_port).execute(
+    ergebnis = ExternesKommandoAusfuehren(katalog, prueflauf_repo, kommando_port).execute(
         prueflauf.prueflauf_id,
         "schritt-a",
         KOMMANDO_ID,
     )
+    nachweise = ergebnis.nachweise
 
+    assert ergebnis.fehlgeschlagen is False
     assert nachweise[0].art == NachweisArt.ROHANTWORT
     assert nachweise[1].art == NachweisArt.EXTRAHIERTER_WERT
 

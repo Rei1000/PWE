@@ -76,7 +76,8 @@ Führt ein **bereits materialisiertes** Einzelkommando aus der referenzierten `P
 | 404 | `materialisierter_prozedur_schritt_nicht_gefunden` | Schritt nicht in referenzierter Version |
 | 409 | `kommando_nicht_freigegeben` | `kommando_id` passt nicht zum materialisierten Schritt |
 | 409 | `invariant_verletzt` | Prüflauf bereits abgeschlossen |
-| 409 | `externes_kommando_adapter_fehler` | Adapter meldet fehlgeschlagene Ausführung |
+| 409 | `externes_kommando_adapter_fehler` | Adapter meldet fehlgeschlagene Ausführung **ohne** audit-relevante Rohantwort |
+| 409 | `externes_kommando_adapter_fehler` | Geräte-/Parserfehler **mit** Rohantwort — Body enthält zusätzlich `nachweise` (ROHANTWORT persistiert, Request commit) |
 | 422 | `validation` | Unerlaubter Request-Body (z. B. `kommandocode`) |
 
 ### Kommando-Adapter (Gate 7.3c)

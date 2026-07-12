@@ -47,7 +47,7 @@ class ComExternesKommandoPort:
 
     def ausfuehren(self, anfrage: ExternesKommandoAnfrage) -> ExternesKommandoAntwort:
         wire = f"{anfrage.kommandocode}\r\n".encode("utf-8")
-        logger.info("COM command execute code=%s", anfrage.kommandocode)
+        logger.debug("COM command execute code_len=%s", len(anfrage.kommandocode))
         try:
             roh_bytes = self._transport.send_and_receive(wire)
         except TransportTimeout:

@@ -62,6 +62,20 @@ Application mappt `erfolgreich=False` → `ExternesKommandoAdapterFehler` → HT
 
 Technische Details nur ins Log — nicht in Nachweise oder öffentliche API-Antworten.
 
+### Audit-Regel für Rohantwort-Nachweise (Domain §4.11, Invariante 16)
+
+| Situation | Rohantwort-Nachweis | HTTP |
+|-----------|---------------------|------|
+| Transport/Decode ohne verwertbare Gerätedaten | **keiner** | 409 (Exception → Rollback) |
+| Geräte-`ERR …` oder Parserfehler **mit** empfangenen Rohdaten | **ja** (unveränderlich, `erfolgreich=false` im Payload) | 409 **ohne** Exception — Request commit ([ADR-0011](../adr/0011-api-postgresql-unit-of-work.md)) |
+| Erfolg | ROHANTWORT + EXTRAHIERTER_WERT | 201 |
+
+**Trennung:** „Kommando fehlgeschlagen" ≠ „keine Evidenz". Fehlgeschlagene Ausführung mit Geräteantwort ist **beobachtete Evidenz** (Nachweis), getrennt von Beurteilung.
+
+Application liefert `ExternesKommandoAusfuehrungErgebnis(nachweise, fehlgeschlagen)`. Die API mappt `fehlgeschlagen=True` auf HTTP 409 **mit** `nachweise` im Body — kein Domain-Exception-Wurf, damit die Request-Transaktion committed.
+
+`ExternesKommandoAntwort.erfolgreich` plus `rohdaten` reicht — keine zusätzliche Fehlerklassifikation in der Domain.
+
 ### Kein automatischer Retry
 
 - Kein Retry im Transport, COM-Adapter oder Application Use Case

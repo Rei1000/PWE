@@ -1,4 +1,4 @@
-"""PostgreSQL-Implementierung — PrueflaufAbschlussPersistenz (eine Transaktion)."""
+"""PostgreSQL-Implementierung — PrueflaufAbschlussPersistenz (Request-Transaktion)."""
 
 from __future__ import annotations
 
@@ -17,10 +17,5 @@ class PostgresPrueflaufAbschlussPersistenz:
         self._protokoll_repo = PostgresProtokollRepository(session)
 
     def speichern(self, prueflauf: Prueflauf, snapshot: ProtokollSnapshot) -> None:
-        try:
-            self._prueflauf_repo.save(prueflauf, commit=False)
-            self._protokoll_repo.save(snapshot, commit=False)
-            self._session.commit()
-        except Exception:
-            self._session.rollback()
-            raise
+        self._prueflauf_repo.save(prueflauf, commit=False)
+        self._protokoll_repo.save(snapshot, commit=False)

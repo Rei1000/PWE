@@ -38,7 +38,7 @@ class PostgresKatalogRepository:
             return None
         return version_from_payload(row.payload)
 
-    def save_version(self, version: ProduktdefinitionsVersion) -> None:
+    def save_version(self, version: ProduktdefinitionsVersion, *, commit: bool = False) -> None:
         existing = self._session.get(ProduktdefinitionsVersionRow, version.version_id)
         if existing is not None:
             raise UnveraenderlichesObjektBereitsVorhanden(
@@ -64,7 +64,8 @@ class PostgresKatalogRepository:
         else:
             aktiv.version_id = version.version_id
 
-        self._session.commit()
+        if commit:
+            self._session.commit()
 
     def get_entwurf(self, produktdefinition_id: str) -> Produktdefinition | None:
         row = self._session.get(ProduktdefinitionEntwurfRow, produktdefinition_id)
@@ -72,7 +73,7 @@ class PostgresKatalogRepository:
             return None
         return entwurf_from_payload(row.payload)
 
-    def save_entwurf(self, entwurf: Produktdefinition) -> None:
+    def save_entwurf(self, entwurf: Produktdefinition, *, commit: bool = False) -> None:
         row = self._session.get(ProduktdefinitionEntwurfRow, entwurf.produktdefinition_id)
         payload = entwurf_to_payload(entwurf)
         if row is None:
@@ -86,4 +87,5 @@ class PostgresKatalogRepository:
         else:
             row.produktkodierung = entwurf.produktkodierung
             row.payload = payload
-        self._session.commit()
+        if commit:
+            self._session.commit()

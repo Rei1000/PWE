@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from fastapi import Request
+
 from adapters.persistence.in_memory import (
     InMemoryKatalogRepository,
     InMemoryProtokollRepository,
@@ -28,7 +30,7 @@ class ApiDeps:
 
 
 def in_memory_deps() -> ApiDeps:
-    """Standard-Wiring für Entwicklung und Tests (kein PostgreSQL in diesem Slice)."""
+    """Explizites In-Memory-Wiring für Entwicklung, Tests und CI ohne PostgreSQL."""
     katalog = InMemoryKatalogRepository()
     prueflauf_repo = InMemoryPrueflaufRepository()
     protokoll_repo = InMemoryProtokollRepository()
@@ -42,3 +44,11 @@ def in_memory_deps() -> ApiDeps:
         ),
         erzeugung_port=PdfProtokollErzeugungAdapter(),
     )
+
+
+def get_request_deps(request: Request) -> ApiDeps:
+    """Request-scoped Deps (PostgreSQL) oder app-weite Deps (In-Memory / injiziert)."""
+    request_deps = getattr(request.state, "deps", None)
+    if request_deps is not None:
+        return request_deps
+    return request.app.state.deps

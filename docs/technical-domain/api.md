@@ -8,7 +8,7 @@ Brücke Application → HTTP. Fachliche Referenz: `docs/architecture.md` §6–�
 |-------|-----------|
 | Keine Fachlogik | Routen delegieren ausschließlich an Application-Use-Cases |
 | Keine Domain in DTOs | Pydantic-Schemas nur in `api/schemas.py` |
-| Wiring | `api/deps.py` — Repositories und Adapter injizierbar |
+| Wiring | `api/deps.py`, `api/persistence.py` — Repositories injizierbar, PG request-scoped |
 
 ## Endpunkte (V1-Slice)
 
@@ -57,12 +57,16 @@ Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruef
 
 ## Wiring (Persistenz)
 
-| Modus | Status | Begründung |
-|-------|--------|------------|
-| **In-Memory (Default)** | ✅ V1-Slice | `in_memory_deps()` — ausreichend für Transport-Slice, lokale Entwicklung und CI. Kein DB-Setup nötig. |
-| **PostgreSQL via Konfiguration** | ⏸ P2 | Session-Lifecycle pro Request und Ops-Anbindung gehören zum nächsten Härtungsschritt (Deployment/Frontend-Integration). Application- und Persistence-Layer sind bereits postgres-fähig (ADR-0002, Gate 5). |
+| Modus | Auswahl | Verhalten |
+|-------|---------|-----------|
+| **In-Memory** | `DATABASE_URL` fehlt oder leer | `in_memory_deps()` — Dev, Tests, lokale Entwicklung ohne DB |
+| **PostgreSQL** | `DATABASE_URL` gesetzt | Request-scoped Session, Commit/Rollback pro HTTP-Request ([ADR-0011](../adr/0011-api-postgresql-unit-of-work.md)) |
 
-**Entscheidung:** In-Memory-Default ist für diesen API-Slice **akzeptabel**. Kein ADR-Update nötig — ADR-0002 trennt Transport von Persistenz; die API injiziert Repositories über `ApiDeps`.
+**Composition Root:** `api/persistence.py` (Konfiguration, PG-Wiring), `api/app.py` (Lifespan, Middleware), `api/deps.py` (`get_request_deps`).
+
+**Tests:** API-Tests injizieren explizit `in_memory_deps()` — unabhängig von CI-`DATABASE_URL`. PostgreSQL-API-Integration separat (`@pytest.mark.postgresql`).
+
+**Startfehler:** Ungültige oder nicht erreichbare `DATABASE_URL` → Anwendung startet nicht (`PersistenceConfigurationError`).
 
 ## Authentifizierung / Identity
 
@@ -84,5 +88,4 @@ Keine Admin-UI, keine vollständige Katalogverwaltung in diesem Slice.
 ## Bewusst offen (nach Merge)
 
 - OpenAPI-Versionierung / erweiterte Validierungsdetails (`errors[]` bei 422)
-- PostgreSQL-Wiring in `create_app()` / `deps.py`
 - Authentifizierung und serverseitiger Identity-Context

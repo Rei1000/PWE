@@ -15,7 +15,7 @@ class PostgresProtokollRepository:
     def __init__(self, session: Session) -> None:
         self._session = session
 
-    def save(self, snapshot: ProtokollSnapshot, *, commit: bool = True) -> None:
+    def save(self, snapshot: ProtokollSnapshot, *, commit: bool = False) -> None:
         existing_id = self._session.get(ProtokollSnapshotRow, snapshot.snapshot_id)
         if existing_id is not None:
             raise UnveraenderlichesObjektBereitsVorhanden(

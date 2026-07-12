@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Body, Request
 from fastapi.responses import Response
 
 from api.deps import get_request_deps
 from api.schemas import (
     AbschlussResponse,
     BeurteilungResponse,
+    ExternesKommandoAusfuehrenRequest,
+    ExternesKommandoAusfuehrenResponse,
     KomponenteErfassenRequest,
     NachweisDetailResponse,
     NachweisErfassenRequest,
@@ -20,6 +22,7 @@ from api.schemas import (
 )
 from application.pruefausfuehrung.prueflauf_lesen import PrueflaufDetailAnsicht, PrueflaufLesen
 from application.protokoll.erzeugen import ProtokollErzeugen
+from application.pruefausfuehrung.externes_kommando_ausfuehren import ExternesKommandoAusfuehren
 from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
@@ -121,6 +124,33 @@ def komponente_erfassen(
         prueflauf_id, body.komponenten_typ, body.seriennummer
     )
     return NachweisResponse(nachweis_id=nachweis.nachweis_id, art=nachweis.art.value)
+
+
+@router.post(
+    "/{prueflauf_id}/schritte/{schritt_id}/kommandos/{kommando_id}/ausfuehren",
+    status_code=201,
+    response_model=ExternesKommandoAusfuehrenResponse,
+)
+def externes_kommando_ausfuehren(
+    prueflauf_id: str,
+    schritt_id: str,
+    kommando_id: str,
+    request: Request,
+    _body: ExternesKommandoAusfuehrenRequest = Body(
+        default_factory=ExternesKommandoAusfuehrenRequest
+    ),
+) -> ExternesKommandoAusfuehrenResponse:
+    deps = get_request_deps(request)
+    nachweise = ExternesKommandoAusfuehren(
+        deps.katalog,
+        deps.prueflauf_repo,
+        deps.kommando_port,
+    ).execute(prueflauf_id, schritt_id, kommando_id)
+    return ExternesKommandoAusfuehrenResponse(
+        nachweise=[
+            NachweisResponse(nachweis_id=n.nachweis_id, art=n.art.value) for n in nachweise
+        ]
+    )
 
 
 @router.post(

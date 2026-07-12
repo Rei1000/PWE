@@ -7,7 +7,7 @@ from typing import Any
 
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PrueflaufStartenRequest(BaseModel):
@@ -55,6 +55,16 @@ class NachweisErfassenRequest(BaseModel):
 class NachweisResponse(BaseModel):
     nachweis_id: str
     art: str
+
+
+class ExternesKommandoAusfuehrenRequest(BaseModel):
+    """Leerer Body — unbekannte Felder (z. B. kommandocode) werden abgelehnt."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class ExternesKommandoAusfuehrenResponse(BaseModel):
+    nachweise: list[NachweisResponse]
 
 
 class AbschlussResponse(BaseModel):

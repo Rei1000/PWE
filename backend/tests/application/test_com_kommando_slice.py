@@ -1,5 +1,6 @@
 """Vertical Slice — Externes Kommando via COM-Adapter."""
 
+from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from adapters.com.externes_kommando import ComExternesKommandoPort
 from adapters.com.in_memory_transport import InMemorySeriellerTransport
@@ -16,6 +17,10 @@ from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 from domain.pruefausfuehrung.prueflauf import NachweisArt
 
 
+KOMMANDO_ID = "cmd-com-voltage"
+KOMMANDOCODE = "READ_VOLTAGE"
+
+
 def test_com_adapter_slice_bis_gueltiger_lauf():
     katalog = InMemoryKatalogRepository()
     katalog.register_aktive_version(
@@ -30,13 +35,18 @@ def test_com_adapter_slice_bis_gueltiger_lauf():
                     ist_pflicht=True,
                     reihenfolge=1,
                     sollvorgaben={"spannung": {"min": 220, "max": 240}},
+                    externes_kommando=MaterialisiertesExternesKommando(
+                        kommando_id=KOMMANDO_ID,
+                        bezeichnung="Spannung messen",
+                        kommandocode=KOMMANDOCODE,
+                    ),
                 ),
             ),
         )
     )
     prueflauf_repo = InMemoryPrueflaufRepository()
     protokoll_repo = InMemoryProtokollRepository()
-    transport = InMemorySeriellerTransport({"READ_VOLTAGE": b"OK spannung=230"})
+    transport = InMemorySeriellerTransport({KOMMANDOCODE: b"OK spannung=230"})
     kommando_port = ComExternesKommandoPort(transport)
 
     prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
@@ -45,10 +55,10 @@ def test_com_adapter_slice_bis_gueltiger_lauf():
         pruefer_id="pruefer-1",
     )
 
-    nachweise = ExternesKommandoAusfuehren(prueflauf_repo, kommando_port).execute(
+    nachweise = ExternesKommandoAusfuehren(katalog, prueflauf_repo, kommando_port).execute(
         prueflauf.prueflauf_id,
         "schritt-a",
-        "READ_VOLTAGE",
+        KOMMANDO_ID,
     )
 
     assert nachweise[0].art == NachweisArt.ROHANTWORT

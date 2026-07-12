@@ -1,5 +1,6 @@
 """Vertical Slice — Externes Kommando via Simulation-Adapter."""
 
+from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
 from domain.pruefausfuehrung.prueflauf import NachweisArt
@@ -16,6 +17,10 @@ from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 
 
+KOMMANDO_ID = "cmd-sim-voltage"
+KOMMANDOCODE = "READ_VOLTAGE"
+
+
 def _setup_katalog() -> InMemoryKatalogRepository:
     katalog = InMemoryKatalogRepository()
     katalog.register_aktive_version(
@@ -30,6 +35,11 @@ def _setup_katalog() -> InMemoryKatalogRepository:
                     ist_pflicht=True,
                     reihenfolge=1,
                     sollvorgaben={"spannung": {"min": 220, "max": 240}},
+                    externes_kommando=MaterialisiertesExternesKommando(
+                        kommando_id=KOMMANDO_ID,
+                        bezeichnung="Spannung messen",
+                        kommandocode=KOMMANDOCODE,
+                    ),
                 ),
             ),
         )
@@ -43,7 +53,7 @@ def test_externes_kommando_simulation_bis_gueltiger_lauf():
     protokoll_repo = InMemoryProtokollRepository()
     kommando_port = SimuliertesExternesKommandoPort(
         {
-            "READ_VOLTAGE": ExternesKommandoAntwort(
+            KOMMANDOCODE: ExternesKommandoAntwort(
                 rohdaten="RAW:230",
                 extrahierte_werte={"spannung": 230},
             ),
@@ -56,10 +66,10 @@ def test_externes_kommando_simulation_bis_gueltiger_lauf():
         pruefer_id="pruefer-1",
     )
 
-    nachweise = ExternesKommandoAusfuehren(prueflauf_repo, kommando_port).execute(
+    nachweise = ExternesKommandoAusfuehren(katalog, prueflauf_repo, kommando_port).execute(
         prueflauf.prueflauf_id,
         "schritt-a",
-        "READ_VOLTAGE",
+        KOMMANDO_ID,
     )
 
     assert len(nachweise) == 2

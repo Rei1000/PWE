@@ -8,7 +8,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 |---------|------------|----------|----------------|
 | **Domain** | Aggregate-Invarianten, Wertobjekte | pytest, rein | keine |
 | **Application** | Use-Case-Orchestrierung | pytest + In-Memory-Repos | Domain, Ports |
-| **Adapter** | Mapping, SQL, COM-Simulation | pytest | extern |
+| **Adapter** | Mapping, SQL, COM-Simulation, PySerialTransport (Mock) | pytest | extern |
 | **API** | HTTP-Contract | pytest + httpx | Application |
 | **Frontend** | Transport-Schemas, API-Client | vitest | adapters/api |
 
@@ -29,4 +29,5 @@ cd backend && pip install -e ".[dev]" && pytest
 
 - E2E-Browser-Tests
 - Lasttests
-- Vollständige COM-Hardware-Tests
+- Vollständige COM-Hardware-Tests (Arbeitsplatz mit physischem Gerät)
+- Automatischer Retry im COM-Transport

@@ -31,6 +31,10 @@ Standardisierte Endprüfungen: Prüferführung, Nachweise, Beurteilungen, Protok
 cd backend && pip install ".[dev,persistence,pdf,api]"
 uvicorn api.app:create_app --factory --reload --port 8000
 
+# Optional: COM-Adapter (serieller Port, erfordert pyserial)
+# pip install ".[dev,persistence,pdf,api,com]"
+# EXTERNES_KOMMANDO_ADAPTER=com SERIELL_PORT=/dev/ttyUSB0 uvicorn api.app:create_app --factory --reload --port 8000
+
 # Frontend (separates Terminal)
 cd frontend/web && npm install && npm run dev
 ```

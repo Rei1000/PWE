@@ -49,7 +49,9 @@ Brücke Domain Model → Code. Fachliche Referenz: `docs/domain-model.md` §4.15
 
 Gate 7.3b: Ausführung bindet `kommando_id` an materialisierten Snapshot in der `ProduktdefinitionsVersion` — **kein** Zugriff auf `BibliothekRepository` zur Laufzeit. Fehler für fehlende materialisierte Schritte liegen in `domain/pruefausfuehrung/errors.py` (`MaterialisierterProzedurSchrittNichtGefunden`), nicht im Katalog-Context.
 
-COM-Adapter nutzt injizierbaren `SeriellerTransport` (`adapters/com/transport.py`); Hardware-Transport folgt über Konfiguration.
+Gate 7.3c: Adapterwahl ausschließlich in `api/kommando_wiring.py` (`create_kommando_port()`). Default: `SimuliertesExternesKommandoPort`. COM: `ComExternesKommandoPort` → `PySerialTransport` (optional Extra `[com]`). Transport-Lifecycle V1: **Port pro Kommando öffnen und schließen**. Technische Fehler → `ExternesKommandoAntwort(erfolgreich=False)`; Application → `ExternesKommandoAdapterFehler`. Kein automatischer Retry. Siehe [ADR-0013](../adr/0013-com-adapter-wiring-fehlerabbildung.md).
+
+COM-Adapter nutzt injizierbaren `SeriellerTransport` (`adapters/com/transport.py`); Tests: `InMemorySeriellerTransport`; Produktion: `PySerialTransport`.
 
 Laufzeit-VOs: `domain/pruefausfuehrung/kommando_ausfuehrung.py` (`ExternesKommandoAnfrage`, `ExternesKommandoAntwort`).
 
@@ -61,7 +63,7 @@ Keine.
 
 ## Nicht im Domain-Kern (noch offen)
 
-- PySerial-Hardware-Transport (`adapters/com/`), Fotospeicher
+- Fotospeicher
 - Vollständige Routine-Orchestrierung (folgt)
 
 **Istbestückung** ist im Domain-Kern implementiert: `Prueflauf.erfasse_komponente()` (ADR-0006, Slice minimal).

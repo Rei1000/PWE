@@ -14,7 +14,7 @@ from adapters.persistence.in_memory import (
 )
 from adapters.persistence.in_memory_abschluss import InMemoryPrueflaufAbschlussPersistenz
 from adapters.pdf.protokoll_erzeugung import PdfProtokollErzeugungAdapter
-from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
+from api.kommando_wiring import create_kommando_port
 from ports.bibliothek_repository import BibliothekRepository
 from ports.externes_kommando_port import ExternesKommandoPort
 from ports.katalog_repository import KatalogRepository
@@ -51,7 +51,7 @@ def in_memory_deps() -> ApiDeps:
             protokoll_repo=protokoll_repo,
         ),
         erzeugung_port=PdfProtokollErzeugungAdapter(),
-        kommando_port=SimuliertesExternesKommandoPort(),
+        kommando_port=create_kommando_port(),
     )
 
 

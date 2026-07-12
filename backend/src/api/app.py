@@ -10,6 +10,7 @@ from starlette.responses import Response
 
 from api.deps import ApiDeps, in_memory_deps
 from api.errors import register_exception_handlers
+from api.kommando_wiring import KommandoAdapterSettings, configure_kommando_adapter
 from api.persistence import (
     PersistenceSettings,
     PostgresDepsFactory,
@@ -31,6 +32,8 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        if deps is None:
+            configure_kommando_adapter(KommandoAdapterSettings.from_env())
         if deps is not None:
             app.state.persistence_mode = "in-memory"
             app.state.deps = deps

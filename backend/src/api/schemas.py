@@ -31,6 +31,8 @@ class KomponenteErfassenRequest(BaseModel):
 
 
 class NachweisArtEnum(str, Enum):
+    """Transport-Enum — Werte sind der öffentliche API-Contract (lowercase snake_case)."""
+
     MESSWERT = "messwert"
     FOTO = "foto"
     KOMMENTAR = "kommentar"
@@ -39,6 +41,9 @@ class NachweisArtEnum(str, Enum):
     EXTRAHIERTER_WERT = "extrahierter_wert"
     ERGAENZUNG = "ergaenzung"
     KOMPONENTENERFASSUNG = "komponentenerfassung"
+
+
+NACHWEIS_ART_API_WERTE: tuple[str, ...] = tuple(member.value for member in NachweisArtEnum)
 
 
 class NachweisErfassenRequest(BaseModel):

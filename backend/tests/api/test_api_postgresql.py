@@ -97,7 +97,7 @@ def test_prueflauf_happy_path_over_postgresql(pg_api_client: TestClient):
 
     nachweis = pg_api_client.post(
         f"/prueflaeufe/{prueflauf_id}/schritte/schritt-a/nachweise",
-        json={"art": "MESSWERT", "payload": {"spannung": 230}},
+        json={"art": "messwert", "payload": {"spannung": 230}},
     )
     assert nachweis.status_code == 201
 

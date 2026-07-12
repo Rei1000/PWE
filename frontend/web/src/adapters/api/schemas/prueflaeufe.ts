@@ -20,8 +20,19 @@ export const komponenteErfassenRequestSchema = z.object({
   seriennummer: z.string().min(1),
 });
 
+export const nachweisArtSchema = z.enum([
+  "messwert",
+  "foto",
+  "kommentar",
+  "manuelle_eingabe",
+  "rohantwort",
+  "extrahierter_wert",
+  "ergaenzung",
+  "komponentenerfassung",
+]);
+
 export const nachweisErfassenRequestSchema = z.object({
-  art: z.string().min(1),
+  art: nachweisArtSchema,
   payload: z.record(z.unknown()).default({}),
   ist_automatisch: z.boolean().default(false),
 });

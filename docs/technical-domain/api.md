@@ -43,6 +43,33 @@ Alle API-Fehler (Domain und Validierung) liefern ein einheitliches JSON-Objekt:
 
 Implementierung: `api/fehler.py`, Handler in `api/errors.py`.
 
+## NachweisArt — API-Contract
+
+`POST /prueflaeufe/{id}/schritte/{schritt_id}/nachweise` erwartet im Feld `art` einen **lowercase snake_case-String** — nicht den internen Python-Enum-Namen.
+
+| Transport (`art` im JSON) | Domain (`NachweisArt`) |
+|-----------------------------|-------------------------|
+| `messwert` | `NachweisArt.MESSWERT` |
+| `foto` | `NachweisArt.FOTO` |
+| `kommentar` | `NachweisArt.KOMMENTAR` |
+| `manuelle_eingabe` | `NachweisArt.MANUELLE_EINGABE` |
+| `rohantwort` | `NachweisArt.ROHANTWORT` |
+| `extrahierter_wert` | `NachweisArt.EXTRAHIERTER_WERT` |
+| `ergaenzung` | `NachweisArt.ERGAENZUNG` |
+| `komponentenerfassung` | `NachweisArt.KOMPONENTENERFASSUNG` |
+
+**Beispiel (gültig):**
+
+```json
+{"art": "messwert", "payload": {"spannung": 230}}
+```
+
+**Ungültig:** `"MESSWERT"`, `"Messwert"`, `"unbekannt"` → HTTP 422, `{"detail": "Validierungsfehler", "code": "validation"}`.
+
+Mapping: `NachweisArtEnum` (Pydantic, `api/schemas.py`) → `NachweisArt(body.art.value)` in der Route — Domain bleibt unabhängig von Pydantic.
+
+Antworten (`NachweisResponse`, Read Model) liefern `art` als denselben String-Wert (`messwert`, …).
+
 ## Read Model (Gate 6.0)
 
 `GET /prueflaeufe/{id}` liefert den UI-tauglichen Zustand:

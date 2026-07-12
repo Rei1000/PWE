@@ -21,15 +21,26 @@ Offene Modellierungsfragen:
 | Aspekt | Entscheidung |
 |--------|--------------|
 | Bounded Context | `ExternesKommando` lebt im **Katalog** (Design Time) |
+| Bibliotheks-Modul | Fachliches Modul **innerhalb** des Katalog-Bounded-Contexts — **kein** eigener Bounded Context, **kein** Bibliotheks-Mega-Aggregat |
 | Aggregate Root | `ExternesKommando` — eigenständig, stabile `kommando_id` |
-| Weitere Roots | `Routine`, `PrüfschrittVorlage` später im selben Modul — **kein** Mega-Aggregat |
-| Repository | `BibliothekRepository` als fachliche Facade — **kein** `ExternesKommandoRepository` |
+| Weitere Roots | `Routine`, `PrüfschrittVorlage` später im selben Modul |
+| Repository | `BibliothekRepository` — fachliche **Facade** des Bibliotheks-Moduls; **kein** `ExternesKommandoRepository` |
 | Entwurf | `ProzedurSchrittEntwurf.kommando_id` optional |
 | Materialisierung | `MaterialisiertesExternesKommando` in `MaterialisierterProzedurSchritt` (Snapshot: `kommando_id`, `bezeichnung`, `kommandocode`) |
 | Ausführung | `ExternesKommandoPort` bleibt ausschließlich in **Prüfausführung** (Run Time) |
 | Laufzeit | Veröffentlichte Versionen referenzieren **keine** mutable Bibliothek |
 
 Gate 7.3a implementiert nur das Katalog-Minimum — keine HTTP-Ausführung, keine Routine-Domain.
+
+### Repository-Semantik (fachlicher Contract)
+
+| Objekt | Port | Semantik |
+|--------|------|----------|
+| `Produktdefinition` (Entwurf) | `KatalogRepository.save_entwurf` | **Mutable save** — überschreibt den gespeicherten Zustand bei bekannter ID |
+| Bibliotheksobjekte (z. B. `ExternesKommando`) | `BibliothekRepository.save_*` | **Mutable save** — überschreibt den gespeicherten Zustand bei bekannter `kommando_id` |
+| `ProduktdefinitionsVersion` | `KatalogRepository.save_version` | **Insert-only** — `UnveraenderlichesObjektBereitsVorhanden` bei Duplikat |
+
+Der Port beschreibt **save** als fachliche Persistierung des Aggregate-Zustands. Ob der Adapter intern INSERT, UPDATE oder SQL-Upsert verwendet, ist **reine Implementierungsdetail** — nicht Teil des Domänen- oder Port-Contracts.
 
 ## Begründung
 
@@ -42,7 +53,7 @@ Gate 7.3a implementiert nur das Katalog-Minimum — keine HTTP-Ausführung, kein
 
 - `ProduktdefinitionVeroeffentlichen` benötigt `BibliothekRepository` zur Auflösung von `kommando_id`
 - PostgreSQL: Tabelle `externes_kommando`; JSON-Payload für Entwurf/Version enthält Referenz bzw. Snapshot
-- Bibliotheksobjekte sind **mutable** (Upsert nach `kommando_id`); Versionen **insert-only**
+- PostgreSQL-Adapter darf für mutable Bibliotheksobjekte SQL-Upsert nutzen — semantisch äquivalent zu mutable save
 - Gate 7.3b: API-Ausführung über materialisierten Snapshot / `kommando_id`, nicht freie Strings
 
 ## Bezug

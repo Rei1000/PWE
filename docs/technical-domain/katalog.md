@@ -40,7 +40,26 @@ Veröffentlichungsakt (Entwurf → Version): Katalog-Slice 2 + Gate 7.3a — `Pr
 | `KatalogRepository` | `get_aktive_version_fuer_kodierung`, `get_version`, `save_version`, `get_entwurf`, `save_entwurf` |
 | `BibliothekRepository` | `save_externes_kommando`, `get_externes_kommando` |
 
-`BibliothekRepository` ist fachliche Facade für Bibliotheksobjekte — kein separates Repository pro Typ (ADR-0012).
+`BibliothekRepository` ist fachliche Facade des **Bibliotheks-Moduls** innerhalb des Katalog-Bounded-Contexts — kein eigener Context, kein Mega-Aggregat, kein separates Repository pro Typ (ADR-0012).
+
+### Repository-Semantik
+
+| Objekt | Port / Methode | Semantik |
+|--------|----------------|----------|
+| Produktdefinition (Entwurf) | `KatalogRepository.save_entwurf` | Mutable save |
+| Bibliotheksobjekte | `BibliothekRepository.save_*` | Mutable save |
+| ProduktdefinitionsVersion | `KatalogRepository.save_version` | Insert-only |
+| Materialisierte Snapshots in Version | — | Unveränderlich nach Veröffentlichung |
+
+Adapter dürfen mutable save technisch per INSERT/UPDATE oder SQL-Upsert umsetzen — der Port-Contract spricht nur von **save**.
+
+### Kommando-Snapshot (`MaterialisiertesExternesKommando`)
+
+| Feld | Begründung |
+|------|------------|
+| `kommando_id` | Stabile Identität der Bibliotheksdefinition; Korrelation Entwurf→Version; Basis für API-Ausführung in Gate 7.3b |
+| `bezeichnung` | Menschlesbare Beschreibung für Prüferführung, Protokoll und Audit ohne Bibliotheks-Lookup |
+| `kommandocode` | Ausführungsinhalt für `ExternesKommandoPort` zum Veröffentlichungszeitpunkt |
 
 ## Application (Slice 2 + Gate 7.3a)
 

@@ -7,7 +7,11 @@ from application.katalog.entwurf_anlegen import EntwurfAnlegen
 from application.katalog.externes_kommando_anlegen import ExternesKommandoAnlegen
 from application.katalog.kommando_zuweisen import KommandoProzedurSchrittZuweisen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
-from domain.katalog.errors import ExternesKommandoNichtGefunden
+from domain.katalog.errors import (
+    EntwurfNichtGefunden,
+    ExternesKommandoNichtGefunden,
+    ProzedurSchrittNichtGefunden,
+)
 from domain.katalog.externes_kommando import ExternesKommando
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
 
@@ -60,6 +64,12 @@ def test_produktdefinition_mit_kommando_referenz_veroeffentlichen():
     assert schritt.externes_kommando.kommandocode == "RST"
 
 
+def test_veroeffentlichen_entwurf_nicht_gefunden():
+    katalog, bibliothek = _setup()
+    with pytest.raises(EntwurfNichtGefunden):
+        ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute("fehlende-id")
+
+
 def test_veroeffentlichen_mit_unbekannter_kommando_id():
     katalog, bibliothek = _setup()
     entwurf = EntwurfAnlegen(katalog).execute(
@@ -76,6 +86,58 @@ def test_veroeffentlichen_mit_unbekannter_kommando_id():
     )
     with pytest.raises(ExternesKommandoNichtGefunden):
         ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
+
+
+def test_kommando_zuweisen_entwurf_nicht_gefunden():
+    katalog, bibliothek = _setup()
+    with pytest.raises(EntwurfNichtGefunden):
+        KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+            "fehlende-id",
+            "schritt-a",
+            None,
+        )
+
+
+def test_kommando_zuweisen_prozedur_schritt_nicht_gefunden():
+    katalog, bibliothek = _setup()
+    entwurf = EntwurfAnlegen(katalog).execute(
+        produktkodierung="7777777777",
+        prozedur_schritte=(
+            ProzedurSchrittEntwurf(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+            ),
+        ),
+    )
+    with pytest.raises(ProzedurSchrittNichtGefunden):
+        KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+            entwurf.produktdefinition_id,
+            "fehlender-schritt",
+            None,
+        )
+
+
+def test_kommando_zuweisen_externes_kommando_nicht_gefunden():
+    katalog, bibliothek = _setup()
+    entwurf = EntwurfAnlegen(katalog).execute(
+        produktkodierung="8888888888",
+        prozedur_schritte=(
+            ProzedurSchrittEntwurf(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+            ),
+        ),
+    )
+    with pytest.raises(ExternesKommandoNichtGefunden):
+        KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+            entwurf.produktdefinition_id,
+            "schritt-a",
+            "fehlende-kommando-id",
+        )
 
 
 def test_bibliotheksaenderung_nach_veroeffentlichung():

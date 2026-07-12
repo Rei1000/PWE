@@ -4,17 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from domain.katalog.errors import ExternesKommandoNichtGefunden
+from domain.katalog.errors import EntwurfNichtGefunden, ExternesKommandoNichtGefunden
 from domain.katalog.externes_kommando import ExternesKommando
 from domain.katalog.produktdefinition import Produktdefinition
 from domain.katalog.version import ProduktdefinitionsVersion
-from domain.shared.errors import DomainError
 from ports.bibliothek_repository import BibliothekRepository
 from ports.katalog_repository import KatalogRepository
-
-
-class EntwurfNichtGefunden(DomainError):
-    pass
 
 
 @dataclass

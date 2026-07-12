@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal
 
@@ -21,6 +22,7 @@ from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPor
 from api.deps import ApiDeps
 
 PersistenceMode = Literal["in-memory", "postgresql"]
+PostgresDepsFactory = Callable[[Session], ApiDeps]
 
 
 class PersistenceConfigurationError(RuntimeError):

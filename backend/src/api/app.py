@@ -12,6 +12,7 @@ from api.deps import ApiDeps, in_memory_deps
 from api.errors import register_exception_handlers
 from api.persistence import (
     PersistenceSettings,
+    PostgresDepsFactory,
     create_session_factory,
     initialize_postgresql_engine,
     postgres_deps,
@@ -19,9 +20,14 @@ from api.persistence import (
 from api.routes import katalog, prueflaeufe
 
 
-def create_app(deps: ApiDeps | None = None) -> FastAPI:
+def create_app(
+    deps: ApiDeps | None = None,
+    *,
+    postgres_deps_factory: PostgresDepsFactory | None = None,
+) -> FastAPI:
     settings = PersistenceSettings.from_env()
     use_postgresql = deps is None and settings.database_url is not None
+    resolve_postgres_deps: PostgresDepsFactory = postgres_deps_factory or postgres_deps
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -48,7 +54,7 @@ def create_app(deps: ApiDeps | None = None) -> FastAPI:
         @app.middleware("http")
         async def postgres_unit_of_work(request: Request, call_next) -> Response:
             session: Session = app.state.session_factory()
-            request.state.deps = postgres_deps(session)
+            request.state.deps = resolve_postgres_deps(session)
             try:
                 response = await call_next(request)
                 session.commit()

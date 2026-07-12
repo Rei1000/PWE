@@ -168,11 +168,10 @@ def test_api_adapterfehler(client: TestClient):
 
 
 @pytest.mark.postgresql
-def test_api_kommando_ausfuehren_postgresql(monkeypatch):
+def test_api_kommando_ausfuehren_postgresql():
     import os
     import uuid
 
-    import api.persistence as persistence_module
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
 
@@ -189,6 +188,7 @@ def test_api_kommando_ausfuehren_postgresql(monkeypatch):
     from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
     from application.pruefausfuehrung.pruefung_starten import PruefungStarten
     from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
+    from domain.pruefausfuehrung.prueflauf import NachweisArt
 
     url = os.environ.get("DATABASE_URL")
     if not url:
@@ -234,19 +234,102 @@ def test_api_kommando_ausfuehren_postgresql(monkeypatch):
     kommando_id = kommando.kommando_id
     session.close()
 
-    def patched_postgres_deps(pg_session):
+    def simulation_postgres_deps(pg_session):
         deps = postgres_deps(pg_session)
-        if isinstance(deps.kommando_port, SimuliertesExternesKommandoPort):
-            deps.kommando_port.registriere_antwort(
-                KOMMANDOCODE,
-                ExternesKommandoAntwort(
-                    rohdaten="RAW:230",
-                    extrahierte_werte={"spannung": 230},
-                ),
-            )
+        assert isinstance(deps.kommando_port, SimuliertesExternesKommandoPort)
+        deps.kommando_port.registriere_antwort(
+            KOMMANDOCODE,
+            ExternesKommandoAntwort(
+                rohdaten="RAW:230",
+                extrahierte_werte={"spannung": 230},
+            ),
+        )
         return deps
 
-    monkeypatch.setattr(persistence_module, "postgres_deps", patched_postgres_deps)
+    with TestClient(create_app(postgres_deps_factory=simulation_postgres_deps)) as client:
+        response = client.post(
+            f"/prueflaeufe/{prueflauf_id}/schritte/schritt-a/kommandos/{kommando_id}/ausfuehren",
+            json={},
+        )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert len(body["nachweise"]) == 2
+
+    verify_session = sessionmaker(bind=engine, expire_on_commit=False)()
+    reloaded = PostgresPrueflaufRepository(verify_session).get(prueflauf_id)
+    verify_session.close()
+    assert reloaded is not None
+    nachweise = reloaded.durchfuehrungen["schritt-a"].nachweise
+    assert len(nachweise) == 2
+    assert nachweise[0].art == NachweisArt.ROHANTWORT
+    assert nachweise[0].payload["kommandocode"] == KOMMANDOCODE
+    assert nachweise[1].art == NachweisArt.EXTRAHIERTER_WERT
+
+
+@pytest.mark.postgresql
+def test_api_kommando_postgresql_ohne_simulation_liefert_adapterfehler():
+    import os
+    import uuid
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from adapters.persistence.postgresql.bibliothek_repository import PostgresBibliothekRepository
+    from adapters.persistence.postgresql.katalog_repository import PostgresKatalogRepository
+    from adapters.persistence.postgresql.prueflauf_repository import PostgresPrueflaufRepository
+    from adapters.persistence.postgresql.schema import init_schema
+    from api.app import create_app
+    from application.katalog.entwurf_anlegen import EntwurfAnlegen
+    from application.katalog.externes_kommando_anlegen import ExternesKommandoAnlegen
+    from application.katalog.kommando_zuweisen import KommandoProzedurSchrittZuweisen
+    from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
+    from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+    from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
+
+    url = os.environ.get("DATABASE_URL")
+    if not url:
+        pytest.skip("DATABASE_URL nicht gesetzt")
+
+    engine = create_engine(url, future=True)
+    init_schema(engine)
+    session = sessionmaker(bind=engine, expire_on_commit=False)()
+
+    katalog = PostgresKatalogRepository(session)
+    bibliothek = PostgresBibliothekRepository(session)
+    prueflauf_repo = PostgresPrueflaufRepository(session)
+
+    kodierung = str(10_000_000_000 + uuid.uuid4().int % 9_000_000_000)
+    kommando = ExternesKommandoAnlegen(bibliothek).execute(
+        bezeichnung="Spannung",
+        kommandocode=KOMMANDOCODE,
+    )
+    entwurf = EntwurfAnlegen(katalog).execute(
+        produktkodierung=kodierung,
+        prozedur_schritte=(
+            ProzedurSchrittEntwurf(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+            ),
+        ),
+    )
+    KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id,
+        "schritt-a",
+        kommando.kommando_id,
+    )
+    ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
+    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+        produktkodierung=kodierung,
+        pruefobjekt_kennung="GER-PG-API-2",
+        pruefer_id="pruefer-pg",
+    )
+    session.commit()
+    prueflauf_id = prueflauf.prueflauf_id
+    kommando_id = kommando.kommando_id
+    session.close()
 
     with TestClient(create_app()) as client:
         response = client.post(
@@ -254,5 +337,8 @@ def test_api_kommando_ausfuehren_postgresql(monkeypatch):
             json={},
         )
 
-    assert response.status_code == 201
-    assert len(response.json()["nachweise"]) == 2
+    assert response.status_code == 409
+    assert response.json() == {
+        "detail": "Die Anfrage konnte aus fachlichen Gründen nicht verarbeitet werden.",
+        "code": "externes_kommando_adapter_fehler",
+    }

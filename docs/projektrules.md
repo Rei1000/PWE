@@ -193,7 +193,61 @@ Gerätekommunikation ist **kein** Bounded Context — sie wird über `ExternesKo
 
 ---
 
-## 7. Verweise
+## 7. Entwicklungsprozess (Roadmap-Slices)
+
+Verbindlicher Ablauf für Implementierungsarbeit. Details zum Fortschritt: **`docs/roadmap.md`**.
+
+### Führende Arbeitsgrundlage
+
+- **`docs/roadmap.md`** bestimmt den **nächsten** Umsetzungsschritt.
+- Vor jedem Slice: Roadmap **kritisch prüfen** — ist der geplante Schritt noch der richtige?
+- Abweichungen nur **bewusst**, mit Begründung im Roadmap-Changelog.
+
+### Slice-Regeln
+
+| Regel | Bedeutung |
+|-------|-----------|
+| **Ein Slice pro Branch/PR** | Genau ein Roadmap-Punkt; kein Scope Creep |
+| **Feature-Branch** | Nie direkt auf `main`; Branch z. B. `feat/<slice-name>` |
+| **main lauffähig** | `main` bleibt nach jedem Merge merge-fähig und CI-grün |
+| **Kein Vorziehen** | Spätere Roadmap-Gates nicht vorzeitig umsetzen |
+
+### Ablauf pro Slice
+
+1. `main` aktualisieren, Feature-Branch anlegen
+2. Roadmap prüfen und ggf. begründet anpassen
+3. **Nur** den aktuellen Slice implementieren (TDD wo sinnvoll)
+4. Betroffene Dokumentation aktualisieren (Roadmap Pflicht)
+5. **Architektur-Review** vor PR (siehe unten)
+6. **Selbstkritik:** eigene Lösung bewusst widerlegen
+7. **Nur P0-Blocker** vor PR beheben; P1/P2 dokumentieren
+8. Commit → Push → Pull Request
+9. Merge **erst** nach Review-Freigabe und grünem CI
+
+### Architektur-Review vor Pull Request
+
+Pflicht vor jedem PR; baut auf „Architecture Reflection“ (oben) auf. Prüfen:
+
+- Domain Model, Architecture, Technical Domain, relevante ADRs
+- Bounded Contexts, Aggregate-Grenzen, hexagonale Schichten
+- Domain-Invarianten nicht in API/Frontend dupliziert
+- Scope Creep und Five-Year-Tragfähigkeit
+
+Ergebnis im PR oder Abschlussbericht festhalten.
+
+### Git und Merge
+
+- Commits fokussiert; keine Misch-Commits über Slice-Grenzen
+- Squash-Merge bevorzugt, wenn sinnvoll
+- Kein Merge bei rotem CI oder offenen P0-Punkten
+
+### Unveränderte Architekturprinzipien
+
+Domain First, Engine First, hexagonale Architektur und Frontend als Driving Adapter gelten in jedem Slice unverändert (siehe oben und `docs/architecture.md`).
+
+---
+
+## 8. Verweise
 
 - **Fachdomäne (Referenz):** `docs/domain-model.md`
 - Architekturentscheidungen: `docs/adr/`

@@ -39,7 +39,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 — Betriebsreife (⏸) / **Gate 6 abgeschlossen**
+**▶ Aktueller Stand:** Gate 6 — Schritt **6.2 Frontend Prüflauf UI** (🔄 in PR)
 
 ---
 
@@ -88,7 +88,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 |---|---------|--------|------|----------|--------------|
 | 6.0 | **API Read-Slice** — `GET /prueflaeufe/{id}` (Schritte, Status, Nachweise) | ✅ | **P0** | PR [#10](https://github.com/Rei1000/PWE/pull/10) | 5.6 |
 | 6.1 | Frontend Bootstrap (Vite, React, API-Client, Dev-Proxy) | ✅ | P1 | PR [#11](https://github.com/Rei1000/PWE/pull/11) — Merge `f94387b` | 6.0, ADR-0009 |
-| 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path | ✅ | P1 | PR #12 — `feat/frontend-prueflauf-ui` | 6.1 |
+| 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path | 🔄 | P1 | PR #12 — `feat/frontend-prueflauf-ui` | 6.1 |
 
 ### Roadmap-Anpassung (2026-06-27)
 
@@ -143,7 +143,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
-| 2026-07-12 | Gate 6.2 Frontend Prüflauf Happy Path abgeschlossen | End-to-end UI über API; P1 CI test+build, Router/Layout |
+| 2026-07-12 | Entwicklungsprozess in projektrules §7; Cursor-Rules entschlackt | Slice-Workflow verbindlich ohne Doppel-Doku |
+| 2026-07-12 | Gate 6.2 Frontend Prüflauf Happy Path (PR) | End-to-end UI über API; P1 CI test+build, Router/Layout |
 | 2026-06-28 | Gate 6.1 Frontend Bootstrap abgeschlossen | Vite/React/TS, shadcn, API-Client, Dev-Proxy, Health-Page |
 | 2026-06-27 | Gate 6.0 API Read-Slice abgeschlossen | `GET /prueflaeufe/{id}` + `PrueflaufLesen` für Frontend-Adapter |
 | 2026-06-27 | Roadmap initial erstellt; Gate 6 präzisiert (6.0 API Read vor Frontend) | API-Merge + Frontend-Stack-Entscheidung; Read-Endpoints fehlten für UI |
@@ -153,4 +154,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 7.1 — API ↔ PostgreSQL Wiring** (P2, deferred bis Bedarf): Session pro Request, `DATABASE_URL` in `create_app()`. Alternativ zuerst manueller Dev-Stack (7.2) wenn Frontend gegen persistente API getestet werden soll.
+**6.2 abschließen** (PR #12) — danach **Gate 7.1** API ↔ PostgreSQL Wiring (P2, deferred bis Bedarf).

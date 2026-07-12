@@ -11,6 +11,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
+
 
 @dataclass(frozen=True)
 class MaterialisierterProzedurSchritt:
@@ -21,6 +23,7 @@ class MaterialisierterProzedurSchritt:
     ist_pflicht: bool
     reihenfolge: int
     sollvorgaben: dict[str, Any] = field(default_factory=dict)
+    externes_kommando: MaterialisiertesExternesKommando | None = None
 
 
 @dataclass(frozen=True)

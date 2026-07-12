@@ -4,6 +4,7 @@ from domain.pruefausfuehrung.prueflauf import NachweisArt
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
 from helpers import in_memory_abschluss_persistenz
 from adapters.persistence.in_memory import (
+    InMemoryBibliothekRepository,
     InMemoryKatalogRepository,
     InMemoryProtokollRepository,
     InMemoryPrueflaufRepository,
@@ -20,13 +21,14 @@ from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 def _setup():
     return (
         InMemoryKatalogRepository(),
+        InMemoryBibliothekRepository(),
         InMemoryPrueflaufRepository(),
         InMemoryProtokollRepository(),
     )
 
 
 def test_katalog_slice_entwurf_veroeffentlichen_und_prueflauf():
-    katalog, prueflauf_repo, protokoll_repo = _setup()
+    katalog, bibliothek, prueflauf_repo, protokoll_repo = _setup()
 
     entwurf = EntwurfAnlegen(katalog).execute(
         produktkodierung="9876543210",
@@ -42,7 +44,9 @@ def test_katalog_slice_entwurf_veroeffentlichen_und_prueflauf():
         sollbestueckung=("mainboard",),
         basisprodukt_sollvorgaben={"spannung": {"min": 200, "max": 250}},
     )
-    version = ProduktdefinitionVeroeffentlichen(katalog).execute(entwurf.produktdefinition_id)
+    version = ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id
+    )
 
     assert katalog.get_aktive_version_fuer_kodierung("9876543210") is not None
     assert version.version_id == entwurf.aktive_version_id
@@ -69,7 +73,7 @@ def test_katalog_slice_entwurf_veroeffentlichen_und_prueflauf():
 
 
 def test_katalog_slice_neue_version_ueberschreibt_aktive():
-    katalog, _, _ = _setup()
+    katalog, bibliothek, _, _ = _setup()
 
     entwurf = EntwurfAnlegen(katalog).execute(
         produktkodierung="1111111111",
@@ -82,7 +86,7 @@ def test_katalog_slice_neue_version_ueberschreibt_aktive():
             ),
         ),
     )
-    v1 = ProduktdefinitionVeroeffentlichen(katalog).execute(entwurf.produktdefinition_id)
+    v1 = ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
     entwurf.prozedur_schritte.append(
         ProzedurSchrittEntwurf(
@@ -93,7 +97,7 @@ def test_katalog_slice_neue_version_ueberschreibt_aktive():
         )
     )
     katalog.save_entwurf(entwurf)
-    v2 = ProduktdefinitionVeroeffentlichen(katalog).execute(entwurf.produktdefinition_id)
+    v2 = ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
     aktiv = katalog.get_aktive_version_fuer_kodierung("1111111111")
     assert aktiv is not None
@@ -104,7 +108,7 @@ def test_katalog_slice_neue_version_ueberschreibt_aktive():
 
 
 def test_laufende_pruefung_bleibt_auf_alter_version_nach_neuer_veroeffentlichung():
-    katalog, prueflauf_repo, protokoll_repo = _setup()
+    katalog, bibliothek, prueflauf_repo, protokoll_repo = _setup()
 
     entwurf = EntwurfAnlegen(katalog).execute(
         produktkodierung="2222222222",
@@ -119,7 +123,7 @@ def test_laufende_pruefung_bleibt_auf_alter_version_nach_neuer_veroeffentlichung
         ),
         sollbestueckung=("mainboard",),
     )
-    v1 = ProduktdefinitionVeroeffentlichen(katalog).execute(entwurf.produktdefinition_id)
+    v1 = ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
     prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
         produktkodierung="2222222222",
@@ -130,7 +134,7 @@ def test_laufende_pruefung_bleibt_auf_alter_version_nach_neuer_veroeffentlichung
 
     entwurf.prozedur_schritte[0].sollvorgaben = {"spannung": {"min": 100, "max": 110}}
     katalog.save_entwurf(entwurf)
-    ProduktdefinitionVeroeffentlichen(katalog).execute(entwurf.produktdefinition_id)
+    ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
     KomponenteErfassen(prueflauf_repo).execute(prueflauf.prueflauf_id, "mainboard", "MB-3")
     NachweisErfassen(prueflauf_repo).execute(

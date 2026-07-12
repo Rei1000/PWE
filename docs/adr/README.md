@@ -15,3 +15,4 @@ Langfristig relevante Architekturentscheidungen. Fachdomäne: `docs/domain-model
 | [0009](0009-frontend-stack.md) | Frontend-Technologiestack (Driving Adapter) |
 | [0010](0010-prueflauf-abschluss-transaktion.md) | Atomische Persistierung beim Prüflauf-Abschluss |
 | [0011](0011-api-postgresql-unit-of-work.md) | Request-scoped Unit of Work für API ↔ PostgreSQL |
+| [0012](0012-katalog-bibliothek-externes-kommando.md) | Bibliotheks-Modul im Katalog (ExternesKommando, Facade) |

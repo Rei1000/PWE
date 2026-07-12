@@ -9,6 +9,7 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
+from adapters.persistence.postgresql.bibliothek_repository import PostgresBibliothekRepository
 from adapters.persistence.postgresql.katalog_repository import PostgresKatalogRepository
 from adapters.persistence.postgresql.protokoll_repository import PostgresProtokollRepository
 from adapters.persistence.postgresql.prueflauf_repository import PostgresPrueflaufRepository
@@ -53,6 +54,7 @@ def pg_session(pg_engine) -> Session:
 def pg_repos(pg_session):
     return (
         PostgresKatalogRepository(pg_session),
+        PostgresBibliothekRepository(pg_session),
         PostgresPrueflaufRepository(pg_session),
         PostgresProtokollRepository(pg_session),
     )

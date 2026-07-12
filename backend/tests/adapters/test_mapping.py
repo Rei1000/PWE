@@ -2,6 +2,7 @@
 
 from datetime import datetime, timezone
 
+from domain.katalog.externes_kommando import ExternesKommando, MaterialisiertesExternesKommando
 from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittEntwurf
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.protokoll.snapshot import ProtokollSnapshot
@@ -20,6 +21,45 @@ from adapters.persistence.postgresql.mapping import (
 )
 
 _NOW = datetime(2026, 6, 27, 12, 0, tzinfo=timezone.utc)
+
+
+def test_version_mapping_roundtrip_mit_kommando_snapshot():
+    kommando = ExternesKommando.anlegen(bezeichnung="Reset", kommandocode="RST")
+    snapshot = MaterialisiertesExternesKommando.aus(kommando)
+    original = ProduktdefinitionsVersion(
+        version_id="ver-kommando",
+        produktdefinition_id="pd-1",
+        produktkodierung="1234567890",
+        prozedur_schritte=(
+            MaterialisierterProzedurSchritt(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+                externes_kommando=snapshot,
+            ),
+        ),
+    )
+    restored = version_from_payload(version_to_payload(original))
+    assert restored == original
+
+
+def test_entwurf_mapping_roundtrip_mit_kommando_id():
+    original = Produktdefinition(
+        produktdefinition_id="pd-1",
+        produktkodierung="1234567890",
+        prozedur_schritte=[
+            ProzedurSchrittEntwurf(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+                kommando_id="kommando-1",
+            ),
+        ],
+    )
+    restored = entwurf_from_payload(entwurf_to_payload(original))
+    assert restored.prozedur_schritte[0].kommando_id == "kommando-1"
 
 
 def test_version_mapping_roundtrip():

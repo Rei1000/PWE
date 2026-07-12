@@ -102,9 +102,10 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 
 | Port | Verantwortung |
 |------|---------------|
-| `KatalogRepository` | Persistenz Katalog |
+| `KatalogRepository` | Persistenz Katalog (Entwurf, Version) |
+| `BibliothekRepository` | Facade für Bibliotheksobjekte im Katalog (Gate 7.3a: `ExternesKommando`; später Routine, PrüfschrittVorlage) |
 | `PrueflaufRepository` | Persistenz Prüfläufe |
-| `ExternesKommandoPort` | Externe Kommandos an Prüfobjekte |
+| `ExternesKommandoPort` | Ausführung externer Kommandos an Prüfobjekte (Run Time — nicht Katalog-Bibliothek) |
 | `ProtokollErzeugungPort` | PDF-Erzeugung aus ProtokollSnapshot |
 | `DruckPort` | Druck |
 | `DateiSpeicherPort` | Fotos, Dateien |

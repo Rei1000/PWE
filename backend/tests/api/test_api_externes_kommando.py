@@ -81,7 +81,22 @@ def test_api_kommando_happy_path(client: TestClient):
     assert body["nachweise"][1]["art"] == "extrahierter_wert"
 
 
-def test_api_kein_kommandocode_im_request(client: TestClient):
+def test_api_leerer_body(client: TestClient):
+    prueflauf_id = _start_prueflauf(client)
+
+    ohne_body = client.post(
+        f"/prueflaeufe/{prueflauf_id}/schritte/schritt-a/kommandos/{KOMMANDO_ID}/ausfuehren"
+    )
+    mit_leerem_json = client.post(
+        f"/prueflaeufe/{prueflauf_id}/schritte/schritt-a/kommandos/{KOMMANDO_ID}/ausfuehren",
+        json={},
+    )
+
+    assert ohne_body.status_code == 201
+    assert mit_leerem_json.status_code == 201
+
+
+def test_api_freier_kommandocode_wird_abgelehnt(client: TestClient):
     prueflauf_id = _start_prueflauf(client)
 
     response = client.post(
@@ -89,10 +104,8 @@ def test_api_kein_kommandocode_im_request(client: TestClient):
         json={"kommandocode": "HACK"},
     )
 
-    assert response.status_code == 201
-    detail = client.get(f"/prueflaeufe/{prueflauf_id}").json()
-    roh = next(n for n in detail["schritte"][0]["nachweise"] if n["art"] == "rohantwort")
-    assert roh["payload"]["kommandocode"] == KOMMANDOCODE
+    assert response.status_code == 422
+    assert response.json()["code"] == "validation"
 
 
 def test_api_prueflauf_nicht_gefunden(client: TestClient):
@@ -109,7 +122,7 @@ def test_api_falscher_schritt(client: TestClient):
         f"/prueflaeufe/{prueflauf_id}/schritte/fehlend/kommandos/{KOMMANDO_ID}/ausfuehren"
     )
     assert response.status_code == 404
-    assert response.json()["code"] == "prozedur_schritt_nicht_gefunden"
+    assert response.json()["code"] == "materialisierter_prozedur_schritt_nicht_gefunden"
 
 
 def test_api_unbekannte_kommando_id(client: TestClient):
@@ -152,3 +165,94 @@ def test_api_adapterfehler(client: TestClient):
     )
     assert response.status_code == 409
     assert response.json()["code"] == "externes_kommando_adapter_fehler"
+
+
+@pytest.mark.postgresql
+def test_api_kommando_ausfuehren_postgresql(monkeypatch):
+    import os
+    import uuid
+
+    import api.persistence as persistence_module
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from adapters.persistence.postgresql.bibliothek_repository import PostgresBibliothekRepository
+    from adapters.persistence.postgresql.katalog_repository import PostgresKatalogRepository
+    from adapters.persistence.postgresql.prueflauf_repository import PostgresPrueflaufRepository
+    from adapters.persistence.postgresql.schema import init_schema
+    from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
+    from api.app import create_app
+    from api.persistence import postgres_deps
+    from application.katalog.entwurf_anlegen import EntwurfAnlegen
+    from application.katalog.externes_kommando_anlegen import ExternesKommandoAnlegen
+    from application.katalog.kommando_zuweisen import KommandoProzedurSchrittZuweisen
+    from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
+    from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+    from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
+
+    url = os.environ.get("DATABASE_URL")
+    if not url:
+        pytest.skip("DATABASE_URL nicht gesetzt — PostgreSQL-API-Test übersprungen")
+
+    engine = create_engine(url, future=True)
+    init_schema(engine)
+    session = sessionmaker(bind=engine, expire_on_commit=False)()
+
+    katalog = PostgresKatalogRepository(session)
+    bibliothek = PostgresBibliothekRepository(session)
+    prueflauf_repo = PostgresPrueflaufRepository(session)
+
+    kodierung = str(10_000_000_000 + uuid.uuid4().int % 9_000_000_000)
+    kommando = ExternesKommandoAnlegen(bibliothek).execute(
+        bezeichnung="Spannung messen",
+        kommandocode=KOMMANDOCODE,
+    )
+    entwurf = EntwurfAnlegen(katalog).execute(
+        produktkodierung=kodierung,
+        prozedur_schritte=(
+            ProzedurSchrittEntwurf(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+            ),
+        ),
+    )
+    KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id,
+        "schritt-a",
+        kommando.kommando_id,
+    )
+    ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
+    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+        produktkodierung=kodierung,
+        pruefobjekt_kennung="GER-PG-API",
+        pruefer_id="pruefer-pg",
+    )
+    session.commit()
+    prueflauf_id = prueflauf.prueflauf_id
+    kommando_id = kommando.kommando_id
+    session.close()
+
+    def patched_postgres_deps(pg_session):
+        deps = postgres_deps(pg_session)
+        if isinstance(deps.kommando_port, SimuliertesExternesKommandoPort):
+            deps.kommando_port.registriere_antwort(
+                KOMMANDOCODE,
+                ExternesKommandoAntwort(
+                    rohdaten="RAW:230",
+                    extrahierte_werte={"spannung": 230},
+                ),
+            )
+        return deps
+
+    monkeypatch.setattr(persistence_module, "postgres_deps", patched_postgres_deps)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            f"/prueflaeufe/{prueflauf_id}/schritte/schritt-a/kommandos/{kommando_id}/ausfuehren",
+            json={},
+        )
+
+    assert response.status_code == 201
+    assert len(response.json()["nachweise"]) == 2

@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from domain.katalog.errors import ProzedurSchrittNichtGefunden
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAnfrage
 from domain.pruefausfuehrung.errors import (
     ExternesKommandoAdapterFehler,
     KommandoNichtFreigegeben,
+    MaterialisierterProzedurSchrittNichtGefunden,
     PrueflaufNichtGefunden,
     VersionNichtGefunden,
 )
@@ -42,8 +42,8 @@ class ExternesKommandoAusfuehren:
 
         schritt = version.schritt_by_id(prozedur_schritt_id)
         if schritt is None:
-            raise ProzedurSchrittNichtGefunden(
-                f"ProzedurSchritt {prozedur_schritt_id} nicht gefunden"
+            raise MaterialisierterProzedurSchrittNichtGefunden(
+                f"Materialisierter ProzedurSchritt {prozedur_schritt_id} nicht in Version"
             )
 
         snapshot = schritt.externes_kommando

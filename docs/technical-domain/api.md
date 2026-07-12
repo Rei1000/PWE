@@ -48,10 +48,11 @@ Implementierung: `api/fehler.py`, Handler in `api/errors.py`.
 
 `POST /prueflaeufe/{prueflauf_id}/schritte/{schritt_id}/kommandos/{kommando_id}/ausfuehren`
 
-Führt ein **bereits materialisiertes** Einzelkommando aus der referenzierten `ProduktdefinitionsVersion` aus. Kein Request-Body — insbesondere **kein** freier `kommandocode`.
+Führt ein **bereits materialisiertes** Einzelkommando aus der referenzierten `ProduktdefinitionsVersion` aus. Request-Body: leeres JSON `{}` oder kein Body. **`extra="forbid"`** — unbekannte Felder (z. B. `kommandocode`) → HTTP 422.
 
 | Aspekt | Regel |
 |--------|-------|
+| Request-Body | `{}` oder kein Body; unbekannte Felder abgelehnt |
 | Identifikation | `prueflauf_id`, `schritt_id`, `kommando_id` (Pfad) |
 | Kommandocode-Quelle | Ausschließlich `MaterialisiertesExternesKommando` in der Version |
 | Mutable Bibliothek | Wird zur Laufzeit **nicht** gelesen |
@@ -72,10 +73,11 @@ Führt ein **bereits materialisiertes** Einzelkommando aus der referenzierten `P
 | HTTP | `code` | Auslöser |
 |------|--------|----------|
 | 404 | `prueflauf_nicht_gefunden` | Unbekannter Prüflauf |
-| 404 | `prozedur_schritt_nicht_gefunden` | Schritt nicht in Version |
+| 404 | `materialisierter_prozedur_schritt_nicht_gefunden` | Schritt nicht in referenzierter Version |
 | 409 | `kommando_nicht_freigegeben` | `kommando_id` passt nicht zum materialisierten Schritt |
 | 409 | `invariant_verletzt` | Prüflauf bereits abgeschlossen |
 | 409 | `externes_kommando_adapter_fehler` | Adapter meldet fehlgeschlagene Ausführung |
+| 422 | `validation` | Unerlaubter Request-Body (z. B. `kommandocode`) |
 
 ## NachweisArt — API-Contract
 

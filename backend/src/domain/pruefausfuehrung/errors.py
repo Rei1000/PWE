@@ -13,6 +13,10 @@ class VersionNichtGefunden(DomainError):
     pass
 
 
+class MaterialisierterProzedurSchrittNichtGefunden(DomainError):
+    pass
+
+
 class KommandoNichtFreigegeben(DomainError):
     pass
 

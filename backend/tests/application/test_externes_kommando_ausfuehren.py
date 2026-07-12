@@ -15,7 +15,7 @@ from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlich
 from application.pruefausfuehrung.externes_kommando_ausfuehren import ExternesKommandoAusfuehren
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
-from domain.katalog.errors import ProzedurSchrittNichtGefunden
+from domain.pruefausfuehrung.errors import MaterialisierterProzedurSchrittNichtGefunden
 from domain.katalog.externes_kommando import ExternesKommando, MaterialisiertesExternesKommando
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
@@ -161,7 +161,7 @@ def test_schritt_nicht_gefunden():
         pruefer_id="pruefer-1",
     )
 
-    with pytest.raises(ProzedurSchrittNichtGefunden):
+    with pytest.raises(MaterialisierterProzedurSchrittNichtGefunden):
         ExternesKommandoAusfuehren(
             katalog, prueflauf_repo, _simulation_port()
         ).execute(prueflauf.prueflauf_id, "fehlend", KOMMANDO_ID)

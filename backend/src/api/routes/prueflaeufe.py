@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Body, Request
 from fastapi.responses import Response
 
 from api.deps import get_request_deps
 from api.schemas import (
     AbschlussResponse,
     BeurteilungResponse,
+    ExternesKommandoAusfuehrenRequest,
     ExternesKommandoAusfuehrenResponse,
     KomponenteErfassenRequest,
     NachweisDetailResponse,
@@ -135,6 +136,9 @@ def externes_kommando_ausfuehren(
     schritt_id: str,
     kommando_id: str,
     request: Request,
+    _body: ExternesKommandoAusfuehrenRequest = Body(
+        default_factory=ExternesKommandoAusfuehrenRequest
+    ),
 ) -> ExternesKommandoAusfuehrenResponse:
     deps = get_request_deps(request)
     nachweise = ExternesKommandoAusfuehren(

@@ -39,7 +39,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 6 — Schritt **6.1 Frontend Bootstrap** (⏳ nächster Slice)
+**▶ Aktueller Stand:** Gate 6 — Schritt **6.2 Frontend Prüflauf UI** (⏳ nächster Slice)
 
 ---
 
@@ -86,8 +86,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | # | Schritt | Status | Prio | Referenz | Abhängigkeit |
 |---|---------|--------|------|----------|--------------|
-| 6.0 | **API Read-Slice** — `GET /prueflaeufe/{id}` (Schritte, Status, Nachweise) | ✅ | **P0** | PR #10 — `feat/api-read-slice` | 5.6 |
-| 6.1 | Frontend Bootstrap (Vite, React, API-Client, Dev-Proxy) | ⏳ | P1 | — | 6.0, ADR-0009 |
+| 6.0 | **API Read-Slice** — `GET /prueflaeufe/{id}` (Schritte, Status, Nachweise) | ✅ | **P0** | PR [#10](https://github.com/Rei1000/PWE/pull/10) | 5.6 |
+| 6.1 | Frontend Bootstrap (Vite, React, API-Client, Dev-Proxy) | ✅ | P1 | PR #11 — `feat/frontend-bootstrap` | 6.0, ADR-0009 |
 | 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path | ⏳ | P1 | — | 6.1 |
 
 ### Roadmap-Anpassung (2026-06-27)
@@ -143,6 +143,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-06-28 | Gate 6.1 Frontend Bootstrap abgeschlossen | Vite/React/TS, shadcn, API-Client, Dev-Proxy, Health-Page |
 | 2026-06-27 | Gate 6.0 API Read-Slice abgeschlossen | `GET /prueflaeufe/{id}` + `PrueflaufLesen` für Frontend-Adapter |
 | 2026-06-27 | Roadmap initial erstellt; Gate 6 präzisiert (6.0 API Read vor Frontend) | API-Merge + Frontend-Stack-Entscheidung; Read-Endpoints fehlten für UI |
 | 2026-06-27 | ADR-0009 Frontend-Stack aufgenommen | Verbindliche Stack-Festlegung vor Bootstrap |
@@ -151,4 +152,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**6.1 Frontend Bootstrap** auf Branch `feat/frontend-bootstrap`: Vite + React + TS gemäß [ADR-0009](adr/0009-frontend-stack.md), API-Client-Schicht, TanStack Query, Dev-Proxy, Health-Check-Seite.
+**6.2 Frontend Prüflauf Happy Path** auf Branch `feat/frontend-prueflauf-ui`: Prüflauf starten → Schritte → Nachweise → Beurteilung → Abschluss → PDF — ausschließlich über API, keine Fachlogik in der UI.

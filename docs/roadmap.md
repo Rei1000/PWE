@@ -36,13 +36,14 @@ flowchart LR
 
   G7 --> G7d[7.0 Architecture Debt]
   G7d --> G7a[7.1 PostgreSQL Wiring]
+  G7a --> G7b[7.2 docker-compose Dev]
 
   G5 -.->|Adapter| G5a[Sim / COM / PDF]
   G5 -.->|Persistenz| G5b[PostgreSQL]
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 — Schritt **7.1 API ↔ PostgreSQL Wiring** (🔄 in Branch)
+**▶ Aktueller Stand:** Gate 7 — Schritt **7.2 docker-compose Dev-Stack** (🔄 in Branch)
 
 ---
 
@@ -106,8 +107,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | # | Schritt | Status | Prio | Referenz | Abhängigkeit |
 |---|---------|--------|------|----------|--------------|
 | 7.0 | **Architecture Debt** — Persistenz-Parität, Abschluss-Transaktion, API-Fehler, UI-Fortschritt | ✅ | **P1** | PR [#13](https://github.com/Rei1000/PWE/pull/13) — Merge `479ea9e` | 6.2, Architektur-Review |
-| 7.1 | API ↔ PostgreSQL Wiring (`DATABASE_URL`, Session pro Request) | 🔄 | P2 | Branch `feat/gate-7-1-postgresql-wiring` | 7.0 |
-| 7.2 | docker-compose Dev-Stack (API + Postgres) | ⏸ | P2 | 7.1 |
+| 7.1 | API ↔ PostgreSQL Wiring (`DATABASE_URL`, Session pro Request) | ✅ | P2 | PR [#14](https://github.com/Rei1000/PWE/pull/14) — Merge `48ab29e` | 7.0 |
+| 7.2 | docker-compose Dev-Stack (API + Postgres) | 🔄 | P2 | Branch `feat/gate-7-2-docker-compose-dev-stack` | 7.1 |
 | 7.3 | Routinen / Externes Kommando über API | ⏸ | P2 | 5.3–5.4, 6.2 |
 
 ---
@@ -136,7 +137,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | Thema | Gate | Begründung |
 |-------|------|------------|
 | Auth / Identity-Context | 8.1 | V1 PC-only, ein Prüfer; ADR-0001 |
-| API In-Memory-Default | 7.1 | Bleibt expliziter Dev-/Test-Modus ohne `DATABASE_URL`; PG über Konfiguration (Gate 7.1) |
+| API In-Memory-Default | 7.1 | Dev/Test ohne `DATABASE_URL`; docker-compose setzt PostgreSQL (Gate 7.2) |
 | Vollständige Katalogverwaltung | 8.2 | Minimal-API (Entwurf/Veröffentlichen) reicht für Frontend-Slice 1 |
 | OpenAPI-Codegen / erweiterte 422-Details | 6.1+ | Optional mit Frontend Bootstrap |
 | Aggregate Discovery als eigene Phase | — | In Technical Domain integriert (Gate 1) |
@@ -147,6 +148,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-07-12 | Gate 7.1 abgeschlossen (PR #14, Merge `48ab29e`) | PostgreSQL-Wiring, Request-UoW, ADR-0011, NachweisArt-Contract |
+| 2026-07-12 | Gate 7.2 docker-compose Dev-Stack gestartet | Branch `feat/gate-7-2-docker-compose-dev-stack` |
 | 2026-07-12 | Gate 7.0 abgeschlossen (PR #13, Merge `479ea9e`) | Persistenz-Parität, Abschluss-Port, API-Fehler, UI-Fortschritt |
 | 2026-07-12 | Gate 7.1 API ↔ PostgreSQL Wiring gestartet | Branch `feat/gate-7-1-postgresql-wiring` — konfigurierbare PG-Persistenz |
 | 2026-07-12 | Gate 7.0 Architecture Debt eingefügt vor 7.1 | Architektur-Review: PG-Parität, Transaktion, API, UI-Fortschritt |
@@ -161,4 +164,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**7.1 abschließen** auf Branch `feat/gate-7-1-postgresql-wiring` — danach **Gate 7.2** docker-compose Dev-Stack.
+**7.2 abschließen** auf Branch `feat/gate-7-2-docker-compose-dev-stack` — danach **Gate 7.3** (deferred) oder nächster priorisierter Slice.

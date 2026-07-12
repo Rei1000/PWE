@@ -95,6 +95,8 @@ Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruef
 
 **Startfehler:** Ungültige oder nicht erreichbare `DATABASE_URL` → Anwendung startet nicht (`PersistenceConfigurationError`).
 
+**Dev-Stack:** `docker compose up --build` startet API + PostgreSQL — siehe [`README-docker.md`](../../README-docker.md).
+
 ## Authentifizierung / Identity
 
 | Thema | Status | Begründung |

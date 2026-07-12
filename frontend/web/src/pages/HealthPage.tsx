@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import {
   refreshIntervalSchema,
   type RefreshIntervalForm,
-} from "@/adapters/api/schemas/health";
+} from "@/forms/schemas";
 import { getApiBaseUrl } from "@/adapters/api/client";
 import { Button } from "@/components/ui/button";
 import {

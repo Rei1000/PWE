@@ -169,6 +169,8 @@ in context.txt wiederholen.
 
   docs/projektrules.md      Entwicklungsregeln, Ubiquitous Language, Verbote
 
+  docs/roadmap.md           Geplanter Umsetzungsweg, Slice-Status, nächster Schritt
+
   docs/adr/                 Architekturentscheidungen (langfristig)
 
   README.md                 Einstieg für Menschen
@@ -178,6 +180,7 @@ FÜR NEUE AGENTEN — LESEPFAD
 ================================================================================
 
 1. Diese Datei (Project DNA — Denkweise verstehen)
-2. docs/domain-model.md (Fachdomäne — bei fachlichen Entscheidungen)
-3. docs/projektrules.md (Arbeitsregeln — vor Implementierung)
-4. Je nach Aufgabe: pflichtenheft · architecture · projectstructure
+2. docs/roadmap.md (nächster Umsetzungsschritt — vor Implementierung)
+3. docs/domain-model.md (Fachdomäne — bei fachlichen Entscheidungen)
+4. docs/projektrules.md (Arbeitsregeln — vor Implementierung)
+5. Je nach Aufgabe: pflichtenheft · architecture · projectstructure

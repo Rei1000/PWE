@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { healthResponseSchema, refreshIntervalSchema } from "@/adapters/api/schemas/health";
+import { healthResponseSchema } from "@/adapters/api/schemas/health";
+import { refreshIntervalSchema } from "@/forms/schemas";
 
 describe("healthResponseSchema", () => {
   it("parst gültige API-Antwort", () => {

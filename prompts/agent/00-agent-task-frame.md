@@ -30,10 +30,11 @@ Fehlt einer dieser Punkte, gilt die Aufgabe als NICHT korrekt ausgeführt.
 Vor jeder Aufgabe MUSS der Agent folgende Dokumente berücksichtigen:
 
 - `.goldstandard/context.txt` (Project DNA)
+- **`docs/roadmap.md`** (führende Arbeitsgrundlage — aktueller Slice)
 - `docs/domain-model.md` (fachliche Referenz)
-- `docs/projektrules.md`
-- cursor rules
-- vorhandene Architektur-Dokumentation
+- `docs/projektrules.md` (Entwicklungsprozess, Architektur)
+- `.cursor/cursor.rules` (Werkzeug — verweist auf Projektdocs)
+- vorhandene Architektur-Dokumentation / ADRs
 - Pflichtenheft (falls vorhanden)
 
 ---

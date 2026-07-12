@@ -2,7 +2,7 @@
 
 Verbindliche Übersicht über Projektfortschritt, Prioritäten und Abhängigkeiten.
 
-**Pflege-Regel:** Bei jedem abgeschlossenen Roadmap-Slice dieses Dokument aktualisieren (Status, PR/Commit, Changelog unten). Neue Erkenntnisse dürfen die Roadmap ändern — mit begründetem Changelog-Eintrag.
+**Pflege-Regel:** Bei jedem abgeschlossenen Roadmap-Slice dieses Dokument aktualisieren (Status, PR/Commit, Changelog unten). Prozess: `docs/projektrules.md` §7. Neue Erkenntnisse dürfen die Roadmap ändern — mit begründetem Changelog-Eintrag.
 
 Referenzen: `docs/architecture.md`, ADRs in `docs/adr/`, Fachdomäne `docs/domain-model.md`.
 
@@ -39,7 +39,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 6 — Schritt **6.2 Frontend Prüflauf UI** (⏳ nächster Slice)
+**▶ Aktueller Stand:** Gate 6 — Schritt **6.2 Frontend Prüflauf UI** (🔄 in PR)
 
 ---
 
@@ -87,8 +87,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | # | Schritt | Status | Prio | Referenz | Abhängigkeit |
 |---|---------|--------|------|----------|--------------|
 | 6.0 | **API Read-Slice** — `GET /prueflaeufe/{id}` (Schritte, Status, Nachweise) | ✅ | **P0** | PR [#10](https://github.com/Rei1000/PWE/pull/10) | 5.6 |
-| 6.1 | Frontend Bootstrap (Vite, React, API-Client, Dev-Proxy) | ✅ | P1 | PR #11 — `feat/frontend-bootstrap` | 6.0, ADR-0009 |
-| 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path | ⏳ | P1 | — | 6.1 |
+| 6.1 | Frontend Bootstrap (Vite, React, API-Client, Dev-Proxy) | ✅ | P1 | PR [#11](https://github.com/Rei1000/PWE/pull/11) — Merge `f94387b` | 6.0, ADR-0009 |
+| 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path | 🔄 | P1 | PR ausstehend — `feat/frontend-prueflauf-ui` | 6.1 |
 
 ### Roadmap-Anpassung (2026-06-27)
 
@@ -143,6 +143,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-07-12 | Entwicklungsprozess in projektrules §7; Cursor-Rules entschlackt | Slice-Workflow verbindlich ohne Doppel-Doku |
+| 2026-07-12 | Gate 6.2 Frontend Prüflauf Happy Path (PR) | End-to-end UI über API; P1 CI test+build, Router/Layout |
 | 2026-06-28 | Gate 6.1 Frontend Bootstrap abgeschlossen | Vite/React/TS, shadcn, API-Client, Dev-Proxy, Health-Page |
 | 2026-06-27 | Gate 6.0 API Read-Slice abgeschlossen | `GET /prueflaeufe/{id}` + `PrueflaufLesen` für Frontend-Adapter |
 | 2026-06-27 | Roadmap initial erstellt; Gate 6 präzisiert (6.0 API Read vor Frontend) | API-Merge + Frontend-Stack-Entscheidung; Read-Endpoints fehlten für UI |
@@ -152,4 +154,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**6.2 Frontend Prüflauf Happy Path** auf Branch `feat/frontend-prueflauf-ui`: Prüflauf starten → Schritte → Nachweise → Beurteilung → Abschluss → PDF — ausschließlich über API, keine Fachlogik in der UI.
+**6.2 abschließen** (PR ausstehend auf `feat/frontend-prueflauf-ui`) — danach **Gate 7.1** API ↔ PostgreSQL Wiring (P2, deferred bis Bedarf).

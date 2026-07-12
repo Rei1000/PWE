@@ -7,9 +7,3 @@ export const healthResponseSchema = z.object({
 });
 
 export type HealthResponse = z.infer<typeof healthResponseSchema>;
-
-export const refreshIntervalSchema = z.object({
-  intervalSeconds: z.coerce.number().int().min(5).max(120),
-});
-
-export type RefreshIntervalForm = z.infer<typeof refreshIntervalSchema>;

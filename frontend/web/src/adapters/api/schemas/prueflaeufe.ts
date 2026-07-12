@@ -60,6 +60,8 @@ export const schrittDurchfuehrungSchema = z.object({
   sollvorgaben: z.record(z.unknown()),
   nachweise: z.array(nachweisDetailSchema),
   beurteilung: beurteilungSchema.nullable().optional(),
+  kann_nachweis_erfassen: z.boolean().default(false),
+  kann_beurteilt_werden: z.boolean().default(false),
 });
 
 export const prueflaufDetailSchema = z.object({
@@ -74,6 +76,10 @@ export const prueflaufDetailSchema = z.object({
   schritte: z.array(schrittDurchfuehrungSchema),
   sollbestueckung: z.array(z.string()),
   erfasste_komponenten: z.array(z.string()),
+  ist_abgeschlossen: z.boolean().default(false),
+  fehlende_komponenten: z.array(z.string()).default([]),
+  kann_komponente_erfassen: z.boolean().default(false),
+  kann_abgeschlossen_werden: z.boolean().default(false),
 });
 
 export type PrueflaufStartenRequest = z.infer<typeof prueflaufStartenRequestSchema>;

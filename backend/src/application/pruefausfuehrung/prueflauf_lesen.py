@@ -44,6 +44,8 @@ class SchrittDurchfuehrungAnsicht:
     sollvorgaben: dict[str, Any]
     nachweise: tuple[NachweisAnsicht, ...]
     beurteilung: BeurteilungAnsicht | None
+    kann_nachweis_erfassen: bool
+    kann_beurteilt_werden: bool
 
 
 @dataclass(frozen=True)
@@ -59,6 +61,10 @@ class PrueflaufDetailAnsicht:
     schritte: tuple[SchrittDurchfuehrungAnsicht, ...]
     sollbestueckung: tuple[str, ...]
     erfasste_komponenten: tuple[str, ...]
+    ist_abgeschlossen: bool
+    fehlende_komponenten: tuple[str, ...]
+    kann_komponente_erfassen: bool
+    kann_abgeschlossen_werden: bool
 
 
 @dataclass
@@ -77,11 +83,22 @@ class PrueflaufLesen:
                 f"Keine Version {prueflauf.version_id} für Prüflauf {prueflauf_id}"
             )
 
+        ist_abgeschlossen = prueflauf.ist_abgeschlossen()
+        fehlende = prueflauf.fehlende_sollbestueckung(version.sollbestueckung)
+        kann_komponente = not ist_abgeschlossen and len(fehlende) > 0
+
         schritte: list[SchrittDurchfuehrungAnsicht] = []
+        alle_beurteilt = True
         for materialisiert in version.aktive_schritte():
             durchfuehrung = prueflauf.durchfuehrungen.get(materialisiert.schritt_id)
             nachweise = durchfuehrung.nachweise if durchfuehrung else []
             beurteilung = durchfuehrung.beurteilung if durchfuehrung else None
+            if beurteilung is None:
+                alle_beurteilt = False
+
+            schritte_offen = not ist_abgeschlossen and len(fehlende) == 0
+            kann_nachweis = schritte_offen and beurteilung is None and len(nachweise) == 0
+            kann_beurteilung = schritte_offen and beurteilung is None and len(nachweise) > 0
 
             schritte.append(
                 SchrittDurchfuehrungAnsicht(
@@ -109,8 +126,12 @@ class PrueflaufLesen:
                         if beurteilung
                         else None
                     ),
+                    kann_nachweis_erfassen=kann_nachweis,
+                    kann_beurteilt_werden=kann_beurteilung,
                 )
             )
+
+        kann_abgeschlossen = not ist_abgeschlossen and len(fehlende) == 0 and alle_beurteilt
 
         return PrueflaufDetailAnsicht(
             prueflauf_id=prueflauf.prueflauf_id,
@@ -124,4 +145,8 @@ class PrueflaufLesen:
             schritte=tuple(schritte),
             sollbestueckung=version.sollbestueckung,
             erfasste_komponenten=tuple(sorted(prueflauf.erfasste_komponenten)),
+            ist_abgeschlossen=ist_abgeschlossen,
+            fehlende_komponenten=fehlende,
+            kann_komponente_erfassen=kann_komponente,
+            kann_abgeschlossen_werden=kann_abgeschlossen,
         )

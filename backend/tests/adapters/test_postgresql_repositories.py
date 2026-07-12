@@ -4,6 +4,7 @@ import pytest
 
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
 from domain.pruefausfuehrung.prueflauf import NachweisArt
+from adapters.persistence.postgresql.abschluss_persistenz import PostgresPrueflaufAbschlussPersistenz
 from application.katalog.entwurf_anlegen import EntwurfAnlegen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
 from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
@@ -48,8 +49,9 @@ def test_postgresql_katalog_version_immutability(pg_repos):
     assert aktiv.version_id == v2.version_id
 
 
-def test_postgresql_end_to_end_prueflauf(pg_repos):
+def test_postgresql_end_to_end_prueflauf(pg_repos, pg_session):
     katalog, prueflauf_repo, protokoll_repo = pg_repos
+    abschluss_persistenz = PostgresPrueflaufAbschlussPersistenz(pg_session)
 
     entwurf = EntwurfAnlegen(katalog).execute(
         produktkodierung="6666666666",
@@ -80,7 +82,7 @@ def test_postgresql_end_to_end_prueflauf(pg_repos):
     SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
 
     abgeschlossen, snapshot = PruefungAbschliessen(
-        katalog, prueflauf_repo, protokoll_repo
+        katalog, prueflauf_repo, abschluss_persistenz
     ).execute(prueflauf.prueflauf_id)
 
     reloaded = prueflauf_repo.get(prueflauf.prueflauf_id)

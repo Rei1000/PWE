@@ -63,7 +63,7 @@ In der ersten Anwendung: Artikelnummer = **Produktkodierung**; Platine = **Kompo
 
 ## 5. Fachliche Konsistenzgrenzen (Orientierung)
 
-Aus **`docs/domain-model.md`** — technische Aggregate folgen in einer späteren Phase.
+Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-domain/` und im Code (`backend/src/domain/`) umgesetzt (Gate 1–6).
 
 | Context | Zentrale Objekte | Konsistenz |
 |---------|------------------|------------|

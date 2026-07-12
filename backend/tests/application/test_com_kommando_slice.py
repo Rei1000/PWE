@@ -3,6 +3,7 @@
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from adapters.com.externes_kommando import ComExternesKommandoPort
 from adapters.com.in_memory_transport import InMemorySeriellerTransport
+from helpers import in_memory_abschluss_persistenz
 from adapters.persistence.in_memory import (
     InMemoryKatalogRepository,
     InMemoryProtokollRepository,
@@ -55,7 +56,7 @@ def test_com_adapter_slice_bis_gueltiger_lauf():
 
     SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
     abgeschlossen, _ = PruefungAbschliessen(
-        katalog, prueflauf_repo, protokoll_repo
+        katalog, prueflauf_repo, in_memory_abschluss_persistenz(prueflauf_repo, protokoll_repo)
     ).execute(prueflauf.prueflauf_id)
 
     assert abgeschlossen.ist_gueltig()

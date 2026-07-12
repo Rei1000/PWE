@@ -17,6 +17,7 @@ from adapters.persistence.postgresql.schema import (
 )
 from domain.katalog.produktdefinition import Produktdefinition
 from domain.katalog.version import ProduktdefinitionsVersion
+from domain.shared.errors import UnveraenderlichesObjektBereitsVorhanden
 
 
 class PostgresKatalogRepository:
@@ -39,15 +40,18 @@ class PostgresKatalogRepository:
 
     def save_version(self, version: ProduktdefinitionsVersion) -> None:
         existing = self._session.get(ProduktdefinitionsVersionRow, version.version_id)
-        if existing is None:
-            self._session.add(
-                ProduktdefinitionsVersionRow(
-                    version_id=version.version_id,
-                    produktdefinition_id=version.produktdefinition_id,
-                    produktkodierung=version.produktkodierung,
-                    payload=version_to_payload(version),
-                )
+        if existing is not None:
+            raise UnveraenderlichesObjektBereitsVorhanden(
+                f"ProduktdefinitionsVersion {version.version_id} existiert bereits"
             )
+        self._session.add(
+            ProduktdefinitionsVersionRow(
+                version_id=version.version_id,
+                produktdefinition_id=version.produktdefinition_id,
+                produktkodierung=version.produktkodierung,
+                payload=version_to_payload(version),
+            )
+        )
 
         aktiv = self._session.get(AktiveVersionRow, version.produktkodierung)
         if aktiv is None:

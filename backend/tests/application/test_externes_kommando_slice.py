@@ -3,6 +3,7 @@
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
 from domain.pruefausfuehrung.prueflauf import NachweisArt
+from helpers import in_memory_abschluss_persistenz
 from adapters.persistence.in_memory import (
     InMemoryKatalogRepository,
     InMemoryProtokollRepository,
@@ -69,7 +70,7 @@ def test_externes_kommando_simulation_bis_gueltiger_lauf():
 
     SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
     abgeschlossen, snapshot = PruefungAbschliessen(
-        katalog, prueflauf_repo, protokoll_repo
+        katalog, prueflauf_repo, in_memory_abschluss_persistenz(prueflauf_repo, protokoll_repo)
     ).execute(prueflauf.prueflauf_id)
 
     assert abgeschlossen.ist_gueltig()

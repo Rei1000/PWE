@@ -34,12 +34,15 @@ flowchart LR
   G6a --> G6b[6.1 Frontend Bootstrap]
   G6b --> G6c[6.2 Frontend Prüflauf UI]
 
+  G7 --> G7d[7.0 Architecture Debt]
+  G7d --> G7a[7.1 PostgreSQL Wiring]
+
   G5 -.->|Adapter| G5a[Sim / COM / PDF]
   G5 -.->|Persistenz| G5b[PostgreSQL]
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 6 — Schritt **6.2 Frontend Prüflauf UI** (🔄 in PR)
+**▶ Aktueller Stand:** Gate 7 — Schritt **7.0 Architecture Debt** (🔄 in Branch)
 
 ---
 
@@ -80,7 +83,7 @@ flowchart LR
 
 ---
 
-## Gate 6 — Bedienbarkeit (PC)
+## Gate 6 — Bedienbarkeit (PC) ✅
 
 Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
@@ -88,7 +91,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 |---|---------|--------|------|----------|--------------|
 | 6.0 | **API Read-Slice** — `GET /prueflaeufe/{id}` (Schritte, Status, Nachweise) | ✅ | **P0** | PR [#10](https://github.com/Rei1000/PWE/pull/10) | 5.6 |
 | 6.1 | Frontend Bootstrap (Vite, React, API-Client, Dev-Proxy) | ✅ | P1 | PR [#11](https://github.com/Rei1000/PWE/pull/11) — Merge `f94387b` | 6.0, ADR-0009 |
-| 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path | 🔄 | P1 | PR ausstehend — `feat/frontend-prueflauf-ui` | 6.1 |
+| 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path | ✅ | P1 | PR [#12](https://github.com/Rei1000/PWE/pull/12) — Merge `e49fc99` | 6.1 |
 
 ### Roadmap-Anpassung (2026-06-27)
 
@@ -100,9 +103,10 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Gate 7 — Betriebsreife ⏳
 
-| # | Schritt | Status | Prio | Abhängigkeit |
-|---|---------|--------|------|--------------|
-| 7.1 | API ↔ PostgreSQL Wiring (`DATABASE_URL`, Session pro Request) | ⏸ | P2 | 6.2 |
+| # | Schritt | Status | Prio | Referenz | Abhängigkeit |
+|---|---------|--------|------|----------|--------------|
+| 7.0 | **Architecture Debt** — Persistenz-Parität, Abschluss-Transaktion, API-Fehler, UI-Fortschritt | 🔄 | **P1** | Branch `fix/gate-7-architecture-debt` | 6.2, Architektur-Review |
+| 7.1 | API ↔ PostgreSQL Wiring (`DATABASE_URL`, Session pro Request) | ⏳ | P2 | — | 7.0 |
 | 7.2 | docker-compose Dev-Stack (API + Postgres) | ⏸ | P2 | 7.1 |
 | 7.3 | Routinen / Externes Kommando über API | ⏸ | P2 | 5.3–5.4, 6.2 |
 
@@ -143,8 +147,9 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-07-12 | Gate 7.0 Architecture Debt eingefügt vor 7.1 | Architektur-Review: PG-Parität, Transaktion, API, UI-Fortschritt |
+| 2026-07-12 | Gate 6.2 abgeschlossen (PR #12) | Frontend Happy Path + Prozess-Doku |
 | 2026-07-12 | Entwicklungsprozess in projektrules §7; Cursor-Rules entschlackt | Slice-Workflow verbindlich ohne Doppel-Doku |
-| 2026-07-12 | Gate 6.2 Frontend Prüflauf Happy Path (PR) | End-to-end UI über API; P1 CI test+build, Router/Layout |
 | 2026-06-28 | Gate 6.1 Frontend Bootstrap abgeschlossen | Vite/React/TS, shadcn, API-Client, Dev-Proxy, Health-Page |
 | 2026-06-27 | Gate 6.0 API Read-Slice abgeschlossen | `GET /prueflaeufe/{id}` + `PrueflaufLesen` für Frontend-Adapter |
 | 2026-06-27 | Roadmap initial erstellt; Gate 6 präzisiert (6.0 API Read vor Frontend) | API-Merge + Frontend-Stack-Entscheidung; Read-Endpoints fehlten für UI |
@@ -154,4 +159,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**6.2 abschließen** (PR ausstehend auf `feat/frontend-prueflauf-ui`) — danach **Gate 7.1** API ↔ PostgreSQL Wiring (P2, deferred bis Bedarf).
+**7.0 abschließen** auf Branch `fix/gate-7-architecture-debt` — danach **Gate 7.1** API ↔ PostgreSQL Wiring.

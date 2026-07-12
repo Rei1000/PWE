@@ -2,6 +2,8 @@
 
 Fachliche Anforderungen. Verbindliche Domänensprache: **`docs/domain-model.md`**.
 
+**V1/V2-Abgrenzung:** Der V1-Umfang und bewusst zurückgestellte Features (Smartphone, Sync, Dashboard, Auth, …) sind in [ADR-0001](adr/0001-v1-scope-deferrals.md) dokumentiert. Nicht als V1 umgesetzte Anforderungen in diesem Dokument sind Zielbild, nicht aktueller Implementierungsstand.
+
 ---
 
 ## 0. Engine-Charakter

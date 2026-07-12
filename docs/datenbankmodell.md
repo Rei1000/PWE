@@ -94,8 +94,6 @@ Persistenz folgt der Fachdomäne — nicht umgekehrt. Das Domänenmodell beschre
 
 ## 8. Nächster Schritt
 
-Nach Modellierung von Aggregates, Entities und Value Objects:
+Persistenz-Adapter (PostgreSQL) und JSON-Mapping sind implementiert (Gate 5.2). Insert-only-Regeln für Versionen und ProtokollSnapshots: Gate 7.0 / [ADR-0010](adr/0010-prueflauf-abschluss-transaktion.md).
 
-- logisches Schema je Bounded Context,
-- physisches Schema,
-- Abstimmung mit `docs/architecture.md`.
+Offen für Gate 7.1: API-Wiring, Session pro Request, vollständige Unit-of-Work-Strategie.

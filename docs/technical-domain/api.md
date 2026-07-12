@@ -35,9 +35,11 @@ Alle API-Fehler (Domain und Validierung) liefern ein einheitliches JSON-Objekt:
 
 | HTTP | `code` (Beispiele) | Auslöser |
 |------|---------------------|----------|
-| 404 | `version_nicht_gefunden`, `entwurf_nicht_gefunden`, … | `DomainError` (Subklassen → snake_case) |
-| 409 | `invariant_verletzt` | `InvariantViolation` |
-| 422 | `validation` | Pydantic / Request-Validierung |
+| 404 | `version_nicht_gefunden`, `prueflauf_nicht_gefunden`, … | `DomainError`-Subklassen mit Suffix `NichtGefunden` |
+| 409 | `invariant_verletzt`, … | `InvariantViolation` und übrige fachliche Konflikte |
+| 422 | `validation`, `ungueltiger_wert` | Pydantic / ungültige Enum-Werte |
+
+Öffentliche `detail`-Texte sind generisch; technische Exception-Texte werden nicht ausgegeben.
 
 Implementierung: `api/fehler.py`, Handler in `api/errors.py`.
 
@@ -49,6 +51,7 @@ Implementierung: `api/fehler.py`, Handler in `api/errors.py`.
 - Materialisierte Schritte aus der referenzierten `ProduktdefinitionsVersion` (Reihenfolge, Sollvorgaben, Pflicht)
 - Pro Schritt: Nachweise und Beurteilung (falls vorhanden)
 - Sollbestückung und erfasste Komponenten
+- **UI-Fortschritt (Gate 7.0):** `ist_abgeschlossen`, `fehlende_komponenten`, `kann_komponente_erfassen`, `kann_abgeschlossen_werden`; pro Schritt `kann_nachweis_erfassen`, `kann_beurteilt_werden`
 
 Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruefausfuehrung/prueflauf_lesen.py`.
 

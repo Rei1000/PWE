@@ -10,8 +10,8 @@ from domain.protokoll.snapshot import ProtokollSnapshot
 from domain.pruefausfuehrung.prueflauf import Prueflauf
 from domain.shared.errors import DomainError
 from ports.katalog_repository import KatalogRepository
+from ports.prueflauf_abschluss_persistenz import PrueflaufAbschlussPersistenz
 from ports.prueflauf_repository import PrueflaufRepository
-from ports.protokoll_repository import ProtokollRepository
 
 
 class PrueflaufNichtGefunden(DomainError):
@@ -22,7 +22,7 @@ class PrueflaufNichtGefunden(DomainError):
 class PruefungAbschliessen:
     katalog: KatalogRepository
     prueflauf_repo: PrueflaufRepository
-    protokoll_repo: ProtokollRepository
+    abschluss_persistenz: PrueflaufAbschlussPersistenz
 
     def execute(self, prueflauf_id: str) -> tuple[Prueflauf, ProtokollSnapshot]:
         prueflauf = self.prueflauf_repo.get(prueflauf_id)
@@ -33,11 +33,10 @@ class PruefungAbschliessen:
         pflicht_map = {s.schritt_id: s.ist_pflicht for s in version.prozedur_schritte}
 
         prueflauf.abschliessen(version.pflicht_schritt_ids(), version.sollbestueckung)
-        self.prueflauf_repo.save(prueflauf)
 
         view = prueflauf.to_abschluss_view(pflicht_map)
         snapshot = ProtokollSnapshot.aus_abschluss(str(uuid4()), view)
-        self.protokoll_repo.save(snapshot)
+        self.abschluss_persistenz.speichern(prueflauf, snapshot)
         return prueflauf, snapshot
 
     def _version_fuer_prueflauf(self, prueflauf: Prueflauf) -> ProduktdefinitionsVersion:

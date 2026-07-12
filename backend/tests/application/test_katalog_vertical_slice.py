@@ -2,6 +2,7 @@
 
 from domain.pruefausfuehrung.prueflauf import NachweisArt
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
+from helpers import in_memory_abschluss_persistenz
 from adapters.persistence.in_memory import (
     InMemoryKatalogRepository,
     InMemoryProtokollRepository,
@@ -60,7 +61,7 @@ def test_katalog_slice_entwurf_veroeffentlichen_und_prueflauf():
     SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
 
     abgeschlossen, snapshot = PruefungAbschliessen(
-        katalog, prueflauf_repo, protokoll_repo
+        katalog, prueflauf_repo, in_memory_abschluss_persistenz(prueflauf_repo, protokoll_repo)
     ).execute(prueflauf.prueflauf_id)
 
     assert abgeschlossen.ist_gueltig()
@@ -138,7 +139,7 @@ def test_laufende_pruefung_bleibt_auf_alter_version_nach_neuer_veroeffentlichung
     SchrittBeurteilen(katalog, prueflauf_repo).execute(prueflauf.prueflauf_id, "schritt-a")
 
     abgeschlossen, _ = PruefungAbschliessen(
-        katalog, prueflauf_repo, protokoll_repo
+        katalog, prueflauf_repo, in_memory_abschluss_persistenz(prueflauf_repo, protokoll_repo)
     ).execute(prueflauf.prueflauf_id)
 
     assert abgeschlossen.ist_gueltig()

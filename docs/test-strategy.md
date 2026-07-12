@@ -10,6 +10,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 | **Application** | Use-Case-Orchestrierung | pytest + In-Memory-Repos | Domain, Ports |
 | **Adapter** | Mapping, SQL, COM-Simulation | pytest | extern |
 | **API** | HTTP-Contract | pytest + httpx | Application |
+| **Frontend** | Transport-Schemas, API-Client | vitest | adapters/api |
 
 ## Regeln
 

@@ -97,6 +97,24 @@ jobs:
             fi
           done
 
+      - name: Run frontend test
+        if: hashFiles('frontend/web/package.json') != '' || hashFiles('frontend/mobile/package.json') != '' || hashFiles('frontend/package.json') != ''
+        run: |
+          for dir in frontend/web frontend/mobile frontend; do
+            if [ -f "$dir/package.json" ]; then
+              (cd "$dir" && if npm run 2>/dev/null | grep -q "test"; then npm run test; else echo "No test script in $dir, skipping"; fi)
+            fi
+          done
+
+      - name: Run frontend build
+        if: hashFiles('frontend/web/package.json') != '' || hashFiles('frontend/mobile/package.json') != '' || hashFiles('frontend/package.json') != ''
+        run: |
+          for dir in frontend/web frontend/mobile frontend; do
+            if [ -f "$dir/package.json" ]; then
+              (cd "$dir" && if npm run 2>/dev/null | grep -q "build"; then npm run build; else echo "No build script in $dir, skipping"; fi)
+            fi
+          done
+
       # ---------- BACKEND (optional, when Python project setup exists) ----------
 
       - name: Set up Python

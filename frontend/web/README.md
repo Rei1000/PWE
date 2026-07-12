@@ -21,7 +21,13 @@ npm install
 npm run dev
 ```
 
-Öffnen: http://localhost:5173 — Health-Check gegen `GET /health`.
+Öffnen: http://localhost:5173
+
+### Happy Path (Gate 6.2)
+
+1. **Start** — Katalog seeden, Prüflauf starten
+2. **Prüflauf** — Komponente erfassen, Nachweis, Beurteilung, Abschluss
+3. **Abschluss** — PDF herunterladen
 
 ## Skripte
 
@@ -30,9 +36,11 @@ npm run dev
 | `npm run dev` | Vite Dev-Server mit API-Proxy |
 | `npm run build` | Produktions-Build |
 | `npm run lint` | ESLint |
-| `npm run test` | Vitest (Transport-Schemas) |
+| `npm run test` | Vitest (Transport-Schemas, API-Client) |
 
 ## Architektur
 
 - `src/adapters/api/` — einziger Backend-Zugang (fetch + Zod-Transportvalidierung)
+- `src/forms/` — UI-Formularschemas (keine Domain-Regeln)
+- `src/pages/` — Präsentation; delegiert an Adapter via TanStack Query
 - Keine Fachlogik, keine Domain-Regeln im Frontend

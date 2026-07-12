@@ -10,6 +10,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from adapters.persistence.postgresql.bibliothek_repository import PostgresBibliothekRepository
 from adapters.persistence.postgresql.abschluss_persistenz import PostgresPrueflaufAbschlussPersistenz
 from adapters.persistence.postgresql.katalog_repository import PostgresKatalogRepository
 from adapters.persistence.postgresql.protokoll_repository import PostgresProtokollRepository
@@ -67,6 +68,7 @@ def postgres_deps(session: Session) -> ApiDeps:
     protokoll_repo = PostgresProtokollRepository(session)
     return ApiDeps(
         katalog=PostgresKatalogRepository(session),
+        bibliothek=PostgresBibliothekRepository(session),
         prueflauf_repo=prueflauf_repo,
         protokoll_repo=protokoll_repo,
         abschluss_persistenz=PostgresPrueflaufAbschlussPersistenz(session),

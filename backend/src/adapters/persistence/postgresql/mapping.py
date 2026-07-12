@@ -6,6 +6,7 @@ import json
 from datetime import datetime, timezone
 from typing import Any
 
+from domain.katalog.externes_kommando import ExternesKommando, MaterialisiertesExternesKommando
 from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittEntwurf
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.protokoll.snapshot import ProtokollSnapshot
@@ -56,6 +57,7 @@ def entwurf_to_payload(entwurf: Produktdefinition) -> str:
                     "ist_pflicht": s.ist_pflicht,
                     "reihenfolge": s.reihenfolge,
                     "sollvorgaben": s.sollvorgaben,
+                    **({"kommando_id": s.kommando_id} if s.kommando_id is not None else {}),
                 }
                 for s in entwurf.prozedur_schritte
             ],
@@ -80,6 +82,7 @@ def entwurf_from_payload(raw: str) -> Produktdefinition:
                 ist_pflicht=s["ist_pflicht"],
                 reihenfolge=s["reihenfolge"],
                 sollvorgaben=s.get("sollvorgaben", {}),
+                kommando_id=s.get("kommando_id"),
             )
             for s in data.get("prozedur_schritte", [])
         ],
@@ -101,6 +104,17 @@ def version_to_payload(version: ProduktdefinitionsVersion) -> str:
                     "ist_pflicht": s.ist_pflicht,
                     "reihenfolge": s.reihenfolge,
                     "sollvorgaben": s.sollvorgaben,
+                    **(
+                        {
+                            "externes_kommando": {
+                                "kommando_id": s.externes_kommando.kommando_id,
+                                "bezeichnung": s.externes_kommando.bezeichnung,
+                                "kommandocode": s.externes_kommando.kommandocode,
+                            }
+                        }
+                        if s.externes_kommando is not None
+                        else {}
+                    ),
                 }
                 for s in version.prozedur_schritte
             ],
@@ -122,6 +136,15 @@ def version_from_payload(raw: str) -> ProduktdefinitionsVersion:
                 ist_pflicht=s["ist_pflicht"],
                 reihenfolge=s["reihenfolge"],
                 sollvorgaben=s.get("sollvorgaben", {}),
+                externes_kommando=(
+                    MaterialisiertesExternesKommando(
+                        kommando_id=ek["kommando_id"],
+                        bezeichnung=ek["bezeichnung"],
+                        kommandocode=ek["kommandocode"],
+                    )
+                    if (ek := s.get("externes_kommando"))
+                    else None
+                ),
             )
             for s in data.get("prozedur_schritte", [])
         ),

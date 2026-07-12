@@ -37,13 +37,17 @@ flowchart LR
   G7 --> G7d[7.0 Architecture Debt]
   G7d --> G7a[7.1 PostgreSQL Wiring]
   G7a --> G7b[7.2 docker-compose Dev]
+  G7b --> G73a[7.3a Katalog Kommando]
+  G73a --> G73b[7.3b API Einzelkommando]
+  G73b --> G73c[7.3c COM-Härtung]
+  G73c -.-> G73[7.3 Routinen deferred]
 
   G5 -.->|Adapter| G5a[Sim / COM / PDF]
   G5 -.->|Persistenz| G5b[PostgreSQL]
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 — Schritt **7.2 docker-compose Dev-Stack** (🔄 in Branch)
+**▶ Aktueller Stand:** Gate 7.3a implementiert (Branch `feat/gate-7-3a-katalog-externes-kommando`) — **Nächster geplanter Slice: Gate 7.3b** (⏳, Freigabe ausstehend)
 
 ---
 
@@ -102,14 +106,28 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ---
 
-## Gate 7 — Betriebsreife ⏳
+## Gate 7 — Betriebsreife ✅
 
 | # | Schritt | Status | Prio | Referenz | Abhängigkeit |
 |---|---------|--------|------|----------|--------------|
 | 7.0 | **Architecture Debt** — Persistenz-Parität, Abschluss-Transaktion, API-Fehler, UI-Fortschritt | ✅ | **P1** | PR [#13](https://github.com/Rei1000/PWE/pull/13) — Merge `479ea9e` | 6.2, Architektur-Review |
 | 7.1 | API ↔ PostgreSQL Wiring (`DATABASE_URL`, Session pro Request) | ✅ | P2 | PR [#14](https://github.com/Rei1000/PWE/pull/14) — Merge `48ab29e` | 7.0 |
-| 7.2 | docker-compose Dev-Stack (API + Postgres) | 🔄 | P2 | Branch `feat/gate-7-2-docker-compose-dev-stack` | 7.1 |
-| 7.3 | Routinen / Externes Kommando über API | ⏸ | P2 | 5.3–5.4, 6.2 |
+| 7.2 | docker-compose Dev-Stack (API + Postgres) | ✅ | P2 | PR [#15](https://github.com/Rei1000/PWE/pull/15) — Merge `f526767` | 7.1 |
+| 7.3 | **Routinen / Externes Kommando über API** (Gesamtfeature) | ⏸ | P2 | Aufgeteilt in 7.3a → 7.3b → 7.3c → vollständig 7.3 | 5.3–5.4, 6.2 |
+| 7.3a | Katalog: Externes Kommando minimal | ✅ | P2 | Branch `feat/gate-7-3a-katalog-externes-kommando`, [ADR-0012](adr/0012-katalog-bibliothek-externes-kommando.md) | 7.2, Domain Model §4.11 |
+| 7.3b | API: Einzelkommando ausführen (`kommando_id`) | ⏳ | P2 | — | 7.3a |
+| 7.3c | COM-Härtung (Timeout, Transport, Fehler) | ⏳ | P2 | — | 7.3b |
+
+### Roadmap-Anpassung (2026-07-12) — Gate 7.3 Zerlegung
+
+**Entscheidung:** Vollständiges Gate 7.3 ist zu groß für einen Slice. Zerlegung in Teilschritte; **minimales Katalogmodell vor API**, damit keine freien technischen Kommandostrings Teil des öffentlichen HTTP-Contracts werden (Domain Model §4.11, Pflichtenheft zentrale Kommandoverwaltung).
+
+| Slice | Inhalt | Bewusst nicht |
+|-------|--------|---------------|
+| **7.3a** | `ExternesKommando` in Bibliothek, `kommando_id`, Materialisierung in Version/Schritt | API-Ausführung, Routine, Frontend |
+| **7.3b** | HTTP-Ausführung nur über `kommando_id`, Simulation-Default | Freie Kommandostrings, COM-Härtung |
+| **7.3c** | Timeout, Transport-Config, Fehlerklassifikation | Routine-Orchestrierung |
+| **7.3 (später)** | Routine-Domain, Orchestrierung, Wiederholung, Frontend | — |
 
 ---
 
@@ -138,7 +156,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 |-------|------|------------|
 | Auth / Identity-Context | 8.1 | V1 PC-only, ein Prüfer; ADR-0001 |
 | API In-Memory-Default | 7.1 | Dev/Test ohne `DATABASE_URL`; docker-compose setzt PostgreSQL (Gate 7.2) |
-| Vollständige Katalogverwaltung | 8.2 | Minimal-API (Entwurf/Veröffentlichen) reicht für Frontend-Slice 1 |
+| Vollständige Katalogverwaltung | 8.2 | Minimal-API (Entwurf/Veröffentlichen) reicht für Frontend-Slice 1; Kommando-Bibliothek schrittweise (7.3a) |
+| Gate 7.3 Gesamtfeature | 7.3 | Zerlegt in 7.3a/7.3b/7.3c — siehe Gate-7-Tabelle |
 | OpenAPI-Codegen / erweiterte 422-Details | 6.1+ | Optional mit Frontend Bootstrap |
 | Aggregate Discovery als eigene Phase | — | In Technical Domain integriert (Gate 1) |
 
@@ -148,8 +167,11 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-07-12 | Gate 7.3a abgeschlossen (Branch `feat/gate-7-3a-katalog-externes-kommando`) | ExternesKommando, BibliothekRepository, Materialisierung, ADR-0012 |
+| 2026-07-12 | Gate 7.3 in 7.3a/7.3b/7.3c zerlegt; Katalog vor API | Keine freien Kommandostrings im HTTP-Contract; minimales Katalogmodell zuerst |
+| 2026-07-12 | Gate 7.2 abgeschlossen (PR #15, Merge `f526767`) | docker-compose Dev-Stack API + PostgreSQL |
+| 2026-07-12 | Gate 7.0–7.2 abgeschlossen (Betriebsreife-Basis) | Architecture Debt, PG-Wiring, Dev-Stack |
 | 2026-07-12 | Gate 7.1 abgeschlossen (PR #14, Merge `48ab29e`) | PostgreSQL-Wiring, Request-UoW, ADR-0011, NachweisArt-Contract |
-| 2026-07-12 | Gate 7.2 docker-compose Dev-Stack gestartet | Branch `feat/gate-7-2-docker-compose-dev-stack` |
 | 2026-07-12 | Gate 7.0 abgeschlossen (PR #13, Merge `479ea9e`) | Persistenz-Parität, Abschluss-Port, API-Fehler, UI-Fortschritt |
 | 2026-07-12 | Gate 7.1 API ↔ PostgreSQL Wiring gestartet | Branch `feat/gate-7-1-postgresql-wiring` — konfigurierbare PG-Persistenz |
 | 2026-07-12 | Gate 7.0 Architecture Debt eingefügt vor 7.1 | Architektur-Review: PG-Parität, Transaktion, API, UI-Fortschritt |
@@ -164,4 +186,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**7.2 abschließen** auf Branch `feat/gate-7-2-docker-compose-dev-stack` — danach **Gate 7.3** (deferred) oder nächster priorisierter Slice.
+**Gate 7.3b — API: Einzelkommando ausführen (`kommando_id`)** (⏳) — Freigabe durch Nutzer erforderlich.

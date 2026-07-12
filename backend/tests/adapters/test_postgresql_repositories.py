@@ -17,7 +17,7 @@ pytestmark = pytest.mark.postgresql
 
 
 def test_postgresql_katalog_version_immutability(pg_repos):
-    katalog, _, _ = pg_repos
+    katalog, bibliothek, _, _ = pg_repos
 
     entwurf = EntwurfAnlegen(katalog).execute(
         produktkodierung="5555555555",
@@ -31,11 +31,11 @@ def test_postgresql_katalog_version_immutability(pg_repos):
             ),
         ),
     )
-    v1 = ProduktdefinitionVeroeffentlichen(katalog).execute(entwurf.produktdefinition_id)
+    v1 = ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
     entwurf.prozedur_schritte[0].sollvorgaben = {"spannung": {"min": 100, "max": 110}}
     katalog.save_entwurf(entwurf)
-    v2 = ProduktdefinitionVeroeffentlichen(katalog).execute(entwurf.produktdefinition_id)
+    v2 = ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
     stored_v1 = katalog.get_version(v1.version_id)
     assert stored_v1 is not None
@@ -50,7 +50,7 @@ def test_postgresql_katalog_version_immutability(pg_repos):
 
 
 def test_postgresql_end_to_end_prueflauf(pg_repos, pg_session):
-    katalog, prueflauf_repo, protokoll_repo = pg_repos
+    katalog, bibliothek, prueflauf_repo, protokoll_repo = pg_repos
     abschluss_persistenz = PostgresPrueflaufAbschlussPersistenz(pg_session)
 
     entwurf = EntwurfAnlegen(katalog).execute(
@@ -66,7 +66,7 @@ def test_postgresql_end_to_end_prueflauf(pg_repos, pg_session):
         ),
         sollbestueckung=("mainboard",),
     )
-    ProduktdefinitionVeroeffentlichen(katalog).execute(entwurf.produktdefinition_id)
+    ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
     prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
         produktkodierung="6666666666",

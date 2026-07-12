@@ -49,7 +49,9 @@ def entwurf_veroeffentlichen(
     produktdefinition_id: str, request: Request
 ) -> VersionResponse:
     deps = get_request_deps(request)
-    version = ProduktdefinitionVeroeffentlichen(deps.katalog).execute(produktdefinition_id)
+    version = ProduktdefinitionVeroeffentlichen(deps.katalog, deps.bibliothek).execute(
+        produktdefinition_id
+    )
     return VersionResponse(
         version_id=version.version_id,
         produktdefinition_id=version.produktdefinition_id,

@@ -1,6 +1,6 @@
 """Application-Tests — PrueflaufLesen."""
 
-from adapters.persistence.in_memory import InMemoryKatalogRepository, InMemoryPrueflaufRepository
+from adapters.persistence.in_memory import InMemoryBibliothekRepository, InMemoryKatalogRepository, InMemoryPrueflaufRepository
 from application.katalog.entwurf_anlegen import EntwurfAnlegen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
 from application.pruefausfuehrung.prueflauf_lesen import PrueflaufLesen
@@ -10,6 +10,7 @@ from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
 
 def test_prueflauf_lesen_liefert_materialisierte_schritte():
     katalog = InMemoryKatalogRepository()
+    bibliothek = InMemoryBibliothekRepository()
     prueflauf_repo = InMemoryPrueflaufRepository()
 
     entwurf = EntwurfAnlegen(katalog).execute(
@@ -25,7 +26,7 @@ def test_prueflauf_lesen_liefert_materialisierte_schritte():
         ),
         sollbestueckung=("platine",),
     )
-    ProduktdefinitionVeroeffentlichen(katalog).execute(entwurf.produktdefinition_id)
+    ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
     prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
         produktkodierung="1111111111",

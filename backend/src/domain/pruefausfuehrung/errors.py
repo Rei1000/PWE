@@ -23,3 +23,7 @@ class KommandoNichtFreigegeben(DomainError):
 
 class ExternesKommandoAdapterFehler(DomainError):
     pass
+
+
+class KeineAutomatisierungAmSchritt(DomainError):
+    pass

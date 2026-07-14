@@ -138,6 +138,21 @@ def test_abgeschlossener_prueflauf_unveraenderlich():
         p.add_nachweis("s1", NachweisArt.KOMMENTAR, {"text": "zu spät"})
 
 
+def test_stelle_offen_sicher_bei_abgeschlossenem_lauf():
+    p = Prueflauf.starten(
+        version_id="v1",
+        pruefobjekt_kennung="SN-001",
+        produktkodierung="ART-001",
+        pruefer_id="user-1",
+        prozedur_schritt_ids=["s1"],
+    )
+    p.add_nachweis("s1", NachweisArt.KOMMENTAR, {"text": "ok"})
+    p.beurteilen_schritt("s1", {})
+    p.abschliessen(frozenset())
+    with pytest.raises(InvariantViolation):
+        p.stelle_offen_sicher()
+
+
 def test_protokollsnapshot_aus_abschluss_view():
     p = Prueflauf.starten(
         version_id="v1",

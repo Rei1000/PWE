@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from uuid import uuid4
 
-from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAnfrage
+from application.pruefausfuehrung.automatisierung_audit import AutomatisierungAuditKontext
+from application.pruefausfuehrung.kommando_ausfuehrung_kern import kommandoausfuehrung_kern
+from domain.katalog.routine import MaterialisierteRoutineHerkunft
 from domain.pruefausfuehrung.errors import (
     ExternesKommandoAdapterFehler,
     KommandoNichtFreigegeben,
@@ -12,7 +15,7 @@ from domain.pruefausfuehrung.errors import (
     PrueflaufNichtGefunden,
     VersionNichtGefunden,
 )
-from domain.pruefausfuehrung.prueflauf import Nachweis, NachweisArt
+from domain.pruefausfuehrung.prueflauf import Nachweis
 from ports.externes_kommando_port import ExternesKommandoPort
 from ports.katalog_repository import KatalogRepository
 from ports.prueflauf_repository import PrueflaufRepository
@@ -60,52 +63,29 @@ class ExternesKommandoAusfuehren:
                 f"Kommando {kommando_id} ist für ProzedurSchritt {prozedur_schritt_id} nicht freigegeben"
             )
 
-        kommandocode = snapshot.kommandocode
-        antwort = self.kommando_port.ausfuehren(
-            ExternesKommandoAnfrage(kommandocode=kommandocode)
+        prueflauf.stelle_offen_sicher()
+
+        audit = AutomatisierungAuditKontext(
+            ausfuehrung_id=str(uuid4()),
+            herkunft=MaterialisierteRoutineHerkunft.EINZELKOMMANDO,
+            aktion_position=1,
+            kommando_id=kommando_id,
+        )
+        kern = kommandoausfuehrung_kern(
+            prueflauf,
+            prozedur_schritt_id,
+            snapshot,
+            self.kommando_port,
+            audit,
         )
 
-        if not _hat_audit_relevante_rohantwort(antwort):
+        if kern.fehlgeschlagen and not kern.nachweise:
             raise ExternesKommandoAdapterFehler(
                 f"Ausführung des Kommandos {kommando_id} fehlgeschlagen"
             )
 
-        roh_nachweis = prueflauf.add_nachweis(
-            prozedur_schritt_id,
-            NachweisArt.ROHANTWORT,
-            {
-                "kommando_id": kommando_id,
-                "kommandocode": kommandocode,
-                "rohdaten": antwort.rohdaten,
-                "erfolgreich": antwort.erfolgreich,
-            },
-            ist_automatisch=True,
-        )
-        nachweise: list[Nachweis] = [roh_nachweis]
-
-        if antwort.erfolgreich:
-            for feld, wert in antwort.extrahierte_werte.items():
-                nachweise.append(
-                    prueflauf.add_nachweis(
-                        prozedur_schritt_id,
-                        NachweisArt.EXTRAHIERTER_WERT,
-                        {
-                            "kommando_id": kommando_id,
-                            "feld": feld,
-                            "wert": wert,
-                        },
-                        ist_automatisch=True,
-                        bezug_nachweis_id=roh_nachweis.nachweis_id,
-                    )
-                )
-
         self.prueflauf_repo.save(prueflauf)
         return ExternesKommandoAusfuehrungErgebnis(
-            nachweise=nachweise,
-            fehlgeschlagen=not antwort.erfolgreich,
+            nachweise=kern.nachweise,
+            fehlgeschlagen=kern.fehlgeschlagen,
         )
-
-
-def _hat_audit_relevante_rohantwort(antwort) -> bool:
-    """True, wenn eine Geräte-Rohantwort für Audit vorliegt (Domain §4.11, Invariante 16)."""
-    return bool(antwort.rohdaten.strip())

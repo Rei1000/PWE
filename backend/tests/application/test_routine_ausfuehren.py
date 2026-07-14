@@ -35,22 +35,8 @@ from domain.pruefausfuehrung.errors import KeineAutomatisierungAmSchritt
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
 from domain.pruefausfuehrung.prueflauf import NachweisArt, Prueflauf
 from domain.shared.errors import InvariantViolation
-from helpers import in_memory_abschluss_persistenz
+from helpers import CountingPrueflaufRepository, in_memory_abschluss_persistenz
 from adapters.persistence.in_memory import InMemoryProtokollRepository
-from ports.prueflauf_repository import PrueflaufRepository
-
-
-class CountingPrueflaufRepository(PrueflaufRepository):
-    def __init__(self, inner: InMemoryPrueflaufRepository) -> None:
-        self._inner = inner
-        self.save_count = 0
-
-    def save(self, prueflauf: Prueflauf) -> None:
-        self.save_count += 1
-        self._inner.save(prueflauf)
-
-    def get(self, prueflauf_id: str) -> Prueflauf | None:
-        return self._inner.get(prueflauf_id)
 
 
 def _katalog_mit_legacy_kommando(

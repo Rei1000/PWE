@@ -74,6 +74,8 @@ Technische Details nur ins Log — nicht in Nachweise oder öffentliche API-Antw
 
 Application liefert `ExternesKommandoAusfuehrungErgebnis(nachweise, fehlgeschlagen)`. Die API mappt `fehlgeschlagen=True` auf HTTP 409 **mit** `nachweise` im Body — kein Domain-Exception-Wurf, damit die Request-Transaktion committed.
 
+**Vorbedingungen (ADR-0015):** Use Cases validieren Domain-Invarianten (insbesondere `Prueflauf.stelle_offen_sicher()`) **vor** jedem Port-Aufruf — ein Rollback kann physische Geräteaktionen nicht rückgängig machen.
+
 `ExternesKommandoAntwort.erfolgreich` plus `rohdaten` reicht — keine zusätzliche Fehlerklassifikation in der Domain.
 
 ### Kein automatischer Retry

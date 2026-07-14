@@ -38,6 +38,7 @@ def kommandoausfuehrung_kern(
     port: ExternesKommandoPort,
     audit: AutomatisierungAuditKontext,
 ) -> KommandoAusfuehrungKernErgebnis:
+    prueflauf.stelle_offen_sicher()
     antwort = port.ausfuehren(
         ExternesKommandoAnfrage(kommandocode=snapshot.kommandocode)
     )

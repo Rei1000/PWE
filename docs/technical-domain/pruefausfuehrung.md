@@ -20,6 +20,7 @@ Brücke Domain Model → Code. Fachliche Referenz: `docs/domain-model.md` §4.15
 | Methode | Regel |
 |---------|-------|
 | `starten()` | Legt Durchführungen für alle aktiven ProzedurSchritte an |
+| `stelle_offen_sicher()` | Vor externen Seiteneffekten — wirft bei abgeschlossenem Lauf |
 | `add_nachweis()` | Nur bei offenem Lauf; Wellen via append |
 | `beurteilen_schritt(schritt_id, sollvorgaben)` | ADR-0007 — Beurteilung via `BeurteilungService` |
 | `erfasse_komponente(typ, seriennummer)` | ADR-0006 — Istbestückung |
@@ -73,6 +74,14 @@ Invariante §4.11: Rohantwort → `NachweisArt.ROHANTWORT` (automatisch); extrah
 | API | Nicht in 7.3e — Gate 7.3f |
 
 Ergebnis-Contract: `RoutineAusfuehrungErgebnis` — `ausfuehrung_id`, `nachweise`, `fehlgeschlagen`, `abgebrochen_bei_aktion_position`, `ausgefuehrte_aktionen`, optionale fachliche `fehlerart` (`keine_geraeteantwort`, `geraetefehlschlag`, `ungueltige_antwort`).
+
+### Vorbedingungen vor externen Seiteneffekten (ADR-0015)
+
+Alle lokal prüfbaren Domain-Invarianten werden **vor** dem ersten `ExternesKommandoPort`-Aufruf validiert. Ein Datenbank-Rollback kann irreversible Geräteaktionen nicht kompensieren.
+
+Domain-API: `Prueflauf.stelle_offen_sicher()` — öffentliche Vorbedingungsprüfung, identisch zu `_ensure_offen()` bei Mutationen.
+
+Use Cases validieren in fester Reihenfolge: laden → Katalog/Snapshot → Offenheit → erst dann Port (siehe ADR-0015). Die Kommando-Kernlogik wiederholt `stelle_offen_sicher()` unmittelbar vor dem Port-Aufruf.
 
 ## Domain Events (V1)
 

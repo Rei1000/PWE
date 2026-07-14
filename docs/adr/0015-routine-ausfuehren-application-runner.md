@@ -146,6 +146,36 @@ Zulässige `fehlerart`-Werte: `keine_geraeteantwort`, `geraetefehlschlag`, `ungu
 
 HTTP-Endpunkt für schrittzentrierte Routine-Ausführung mappt `RoutineAusfuehrungErgebnis` auf Statuscodes — nicht Teil von 7.3e.
 
+### Vorbedingungen vor externen Seiteneffekten
+
+Alle lokal prüfbaren Domain-Invarianten werden **vor** dem ersten Aufruf von `ExternesKommandoPort` validiert. Ein Datenbank-Rollback kann externe Geräteaktionen nicht kompensieren.
+
+Domain-API: `Prueflauf.stelle_offen_sicher()` — dieselbe Invariante wie bei späteren Mutationen (`_ensure_offen`).
+
+Reihenfolge `ExternesKommandoAusfuehren`:
+
+1. Prüflauf laden
+2. Version und Schritt laden
+3. Kommandozuordnung validieren
+4. `stelle_offen_sicher()`
+5. `ausfuehrung_id` erzeugen
+6. Port aufrufen (via Kernlogik)
+7. Nachweise erzeugen
+8. einmal speichern
+9. Ergebnis beziehungsweise fachlichen Fehler
+
+Reihenfolge `RoutineAusfuehren`:
+
+1. Prüflauf, Version und Schritt laden
+2. Routine zentral auflösen und vollständig vorvalidieren (inkl. nicht leer)
+3. `stelle_offen_sicher()`
+4. `ausfuehrung_id` erzeugen
+5. Aktionen sequenziell — erst dann erster Port-Aufruf
+6. Teilfehler als Ergebnis (ADR-0015)
+7. einmal speichern
+
+Die Kommando-Kernlogik ruft `stelle_offen_sicher()` unmittelbar vor dem Port-Aufruf erneut auf (Defense in Depth).
+
 ## Konsequenzen
 
 - Ein einheitlicher Ergebnis-Contract für alle **begonnenen** Routineausführungen

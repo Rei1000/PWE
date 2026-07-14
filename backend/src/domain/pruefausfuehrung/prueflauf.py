@@ -69,12 +69,16 @@ class Prueflauf:
             )
         return prueflauf
 
-    def _ensure_offen(self) -> None:
+    def stelle_offen_sicher(self) -> None:
+        """Prüft vor externen Seiteneffekten, dass der Lauf noch bearbeitbar ist."""
         if self.status in (
             PrueflaufStatus.ABGESCHLOSSEN_GUELTIG,
             PrueflaufStatus.ABGESCHLOSSEN_UNGUELTIG,
         ):
             raise InvariantViolation("Abgeschlossener Prüflauf ist unveränderlich")
+
+    def _ensure_offen(self) -> None:
+        self.stelle_offen_sicher()
 
     def _touch_bearbeitung(self) -> None:
         if self.status == PrueflaufStatus.GESTARTET:

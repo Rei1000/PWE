@@ -63,6 +63,8 @@ class ExternesKommandoAusfuehren:
                 f"Kommando {kommando_id} ist für ProzedurSchritt {prozedur_schritt_id} nicht freigegeben"
             )
 
+        prueflauf.stelle_offen_sicher()
+
         audit = AutomatisierungAuditKontext(
             ausfuehrung_id=str(uuid4()),
             herkunft=MaterialisierteRoutineHerkunft.EINZELKOMMANDO,

@@ -18,8 +18,7 @@ from domain.pruefausfuehrung.errors import (
     PrueflaufNichtGefunden,
     VersionNichtGefunden,
 )
-from domain.pruefausfuehrung.prueflauf import Nachweis, Prueflauf
-from domain.shared.errors import InvariantViolation
+from domain.pruefausfuehrung.prueflauf import Nachweis
 from ports.externes_kommando_port import ExternesKommandoPort
 from ports.katalog_repository import KatalogRepository
 from ports.prueflauf_repository import PrueflaufRepository
@@ -62,13 +61,13 @@ class RoutineAusfuehren:
                 f"Materialisierter ProzedurSchritt {prozedur_schritt_id} nicht in Version"
             )
 
-        _validiere_prueflauf_offen(prueflauf)
-
         routine = aufgeloeste_materialisierte_routine(schritt)
         if not routine.aktionen:
             raise LeereRoutine(
                 f"ProzedurSchritt {prozedur_schritt_id}: materialisierte Routine ohne Aktionen"
             )
+
+        prueflauf.stelle_offen_sicher()
 
         ausfuehrung_id = str(uuid4())
         neue_nachweise: list[Nachweis] = []
@@ -119,6 +118,3 @@ class RoutineAusfuehren:
         )
 
 
-def _validiere_prueflauf_offen(prueflauf: Prueflauf) -> None:
-    if prueflauf.ist_abgeschlossen():
-        raise InvariantViolation("Abgeschlossener Prüflauf ist unveränderlich")

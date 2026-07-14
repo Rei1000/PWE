@@ -78,7 +78,7 @@ def test_routine_einem_schritt_zuweisen():
     assert schritt.kommando_id is None
 
 
-def test_routine_zuweisen_ersetzt_kommando_id():
+def test_routine_zuweisen_bei_vorhandenem_kommando_schlaegt_fehl():
     katalog, bibliothek = _setup()
     kommando = ExternesKommandoAnlegen(bibliothek).execute(
         bezeichnung="Reset",
@@ -104,6 +104,45 @@ def test_routine_zuweisen_ersetzt_kommando_id():
         "schritt-a",
         kommando.kommando_id,
     )
+    with pytest.raises(AutomatisierungDoppeltZugewiesen):
+        RoutineProzedurSchrittZuweisen(katalog, bibliothek).execute(
+            entwurf.produktdefinition_id,
+            "schritt-a",
+            routine.routine_id,
+        )
+
+
+def test_wechsel_kommando_zu_routine_erfordert_zwei_schritte():
+    katalog, bibliothek = _setup()
+    kommando = ExternesKommandoAnlegen(bibliothek).execute(
+        bezeichnung="Reset",
+        kommandocode="RST",
+    )
+    routine = RoutineAnlegen(bibliothek).execute(
+        bezeichnung="Reset-Routine",
+        kommando_ids=(kommando.kommando_id,),
+    )
+    entwurf = EntwurfAnlegen(katalog).execute(
+        produktkodierung="2222222222",
+        prozedur_schritte=(
+            ProzedurSchrittEntwurf(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+            ),
+        ),
+    )
+    KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id,
+        "schritt-a",
+        kommando.kommando_id,
+    )
+    KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id,
+        "schritt-a",
+        None,
+    )
     RoutineProzedurSchrittZuweisen(katalog, bibliothek).execute(
         entwurf.produktdefinition_id,
         "schritt-a",
@@ -116,7 +155,7 @@ def test_routine_zuweisen_ersetzt_kommando_id():
     assert schritt.kommando_id is None
 
 
-def test_kommando_zuweisen_ersetzt_routine_id():
+def test_kommando_zuweisen_bei_vorhandener_routine_schlaegt_fehl():
     katalog, bibliothek = _setup()
     kommando = ExternesKommandoAnlegen(bibliothek).execute(
         bezeichnung="Reset",
@@ -141,6 +180,45 @@ def test_kommando_zuweisen_ersetzt_routine_id():
         entwurf.produktdefinition_id,
         "schritt-a",
         routine.routine_id,
+    )
+    with pytest.raises(AutomatisierungDoppeltZugewiesen):
+        KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+            entwurf.produktdefinition_id,
+            "schritt-a",
+            kommando.kommando_id,
+        )
+
+
+def test_wechsel_routine_zu_kommando_erfordert_zwei_schritte():
+    katalog, bibliothek = _setup()
+    kommando = ExternesKommandoAnlegen(bibliothek).execute(
+        bezeichnung="Reset",
+        kommandocode="RST",
+    )
+    routine = RoutineAnlegen(bibliothek).execute(
+        bezeichnung="Reset-Routine",
+        kommando_ids=(kommando.kommando_id,),
+    )
+    entwurf = EntwurfAnlegen(katalog).execute(
+        produktkodierung="3333333333",
+        prozedur_schritte=(
+            ProzedurSchrittEntwurf(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+            ),
+        ),
+    )
+    RoutineProzedurSchrittZuweisen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id,
+        "schritt-a",
+        routine.routine_id,
+    )
+    RoutineProzedurSchrittZuweisen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id,
+        "schritt-a",
+        None,
     )
     KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
         entwurf.produktdefinition_id,

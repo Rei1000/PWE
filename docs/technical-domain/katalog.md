@@ -27,7 +27,7 @@ Veröffentlichungsakt (Entwurf → Version): Katalog-Slice 2 + Gate 7.3a/d — `
 | Typ | Name | Anmerkung |
 |-----|------|-----------|
 | Entity | `Produktdefinition` | Root im Slice 2; mutable Entwurf |
-| VO | `ProzedurSchrittEntwurf` | Schritt im Entwurf; optional `kommando_id` **oder** `routine_id` (XOR) |
+| VO | `ProzedurSchrittEntwurf` | Schritt im Entwurf; optional `kommando_id` **oder** `routine_id` (XOR); Wechsel nur explizit (entfernen → neu zuweisen) |
 | VO | `MaterialisierterProzedurSchritt` | Aufgelöste Sollvorgaben; `MaterialisierteRoutine` (führend); `MaterialisiertesExternesKommando` (deprecated, Gate 7.3b) |
 | VO | `MaterialisierteRoutine` | Einheitlicher Automatisierungs-Snapshot; Herkunft `bibliothek` \| `einzelkommando` |
 | VO | `MaterialisierteKommandoAktion` | Materialisierte Kommando-Aktion innerhalb einer Routine |
@@ -47,6 +47,23 @@ Veröffentlichungsakt (Entwurf → Version): Katalog-Slice 2 + Gate 7.3a/d — `
 | keine Automatisierung | `materialisierte_routine=None` |
 
 **Führendes Feld:** `materialisierte_routine`. `externes_kommando` bleibt für Gate 7.3b-Kompatibilität beim Einzelkommando-Pfad.
+
+### Kompatibilitätsinvariante
+
+| Situation | Regel |
+|-----------|-------|
+| Einzelkommando (neu) | `materialisierte_routine` führend; `externes_kommando` abgeleitet, muss identisch sein |
+| Bibliotheksroutine | nur `materialisierte_routine`; `externes_kommando=None` |
+| Legacy (pre-7.3d) | nur `externes_kommando` — lesbar; Runner 7.3e normalisiert intern |
+| Abweichung beider Felder | `MaterialisierteAutomatisierungInkonsistent` bei Materialisierung/Deserialisierung |
+
+Validierung: `domain/katalog/materialisierung.py` → `validiere_materialisierter_schritt_automatisierung()`.
+
+**Exit:** Gate 7.3e Runner liest `materialisierte_routine`; Gate 7.3f legt fest, wann `externes_kommando` nicht mehr geschrieben wird.
+
+### Entwurfs-Wechsel (Kommando ↔ Routine)
+
+Keine stille Ersetzung (projektrules §6). Bei gesetzter Gegenreferenz schlägt Zuweisung mit `AutomatisierungDoppeltZugewiesen` fehl. Wechsel: zuerst `None`, dann neue Referenz.
 
 ## Repository
 

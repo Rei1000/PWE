@@ -6,7 +6,8 @@ import json
 from datetime import datetime, timezone
 from typing import Any
 
-from domain.katalog.externes_kommando import ExternesKommando, MaterialisiertesExternesKommando
+from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
+from domain.katalog.materialisierung import validiere_materialisierter_schritt_automatisierung
 from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittEntwurf
 from domain.katalog.routine import (
     MaterialisierteKommandoAktion,
@@ -174,6 +175,32 @@ def version_to_payload(version: ProduktdefinitionsVersion) -> str:
     )
 
 
+def _materialisierter_schritt_from_dict(data: dict[str, Any]) -> MaterialisierterProzedurSchritt:
+    schritt = MaterialisierterProzedurSchritt(
+        schritt_id=data["schritt_id"],
+        vorlage_id=data["vorlage_id"],
+        ist_pflicht=data["ist_pflicht"],
+        reihenfolge=data["reihenfolge"],
+        sollvorgaben=data.get("sollvorgaben", {}),
+        materialisierte_routine=(
+            _materialisierte_routine_from_dict(mr)
+            if (mr := data.get("materialisierte_routine"))
+            else None
+        ),
+        externes_kommando=(
+            MaterialisiertesExternesKommando(
+                kommando_id=ek["kommando_id"],
+                bezeichnung=ek["bezeichnung"],
+                kommandocode=ek["kommandocode"],
+            )
+            if (ek := data.get("externes_kommando"))
+            else None
+        ),
+    )
+    validiere_materialisierter_schritt_automatisierung(schritt)
+    return schritt
+
+
 def version_from_payload(raw: str) -> ProduktdefinitionsVersion:
     data = _load(raw)
     return ProduktdefinitionsVersion(
@@ -181,28 +208,7 @@ def version_from_payload(raw: str) -> ProduktdefinitionsVersion:
         produktdefinition_id=data["produktdefinition_id"],
         produktkodierung=data["produktkodierung"],
         prozedur_schritte=tuple(
-            MaterialisierterProzedurSchritt(
-                schritt_id=s["schritt_id"],
-                vorlage_id=s["vorlage_id"],
-                ist_pflicht=s["ist_pflicht"],
-                reihenfolge=s["reihenfolge"],
-                sollvorgaben=s.get("sollvorgaben", {}),
-                materialisierte_routine=(
-                    _materialisierte_routine_from_dict(mr)
-                    if (mr := s.get("materialisierte_routine"))
-                    else None
-                ),
-                externes_kommando=(
-                    MaterialisiertesExternesKommando(
-                        kommando_id=ek["kommando_id"],
-                        bezeichnung=ek["bezeichnung"],
-                        kommandocode=ek["kommandocode"],
-                    )
-                    if (ek := s.get("externes_kommando"))
-                    else None
-                ),
-            )
-            for s in data.get("prozedur_schritte", [])
+            _materialisierter_schritt_from_dict(s) for s in data.get("prozedur_schritte", [])
         ),
         sollbestueckung=tuple(data.get("sollbestueckung", [])),
     )

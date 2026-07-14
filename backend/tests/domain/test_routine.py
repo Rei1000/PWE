@@ -7,6 +7,7 @@ from domain.katalog.errors import (
     ExternesKommandoNichtGefunden,
     KommandoInRoutineNichtGefunden,
     LeereRoutine,
+    MaterialisierteAutomatisierungInkonsistent,
     RoutineNichtGefunden,
     UngueltigeAktionsreihenfolge,
 )
@@ -293,3 +294,44 @@ def test_materialisierte_routine_aus_einzelkommando_hat_keine_routine_id():
     mr = MaterialisierteRoutine.aus_einzelkommando(kommando=kommando)
     assert mr.routine_id is None
     assert mr.herkunft == MaterialisierteRoutineHerkunft.EINZELKOMMANDO
+
+
+def test_inkonsistente_doppelte_automatisierung_wird_abgelehnt():
+    from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
+    from domain.katalog.materialisierung import validiere_materialisierter_schritt_automatisierung
+    from domain.katalog.version import MaterialisierterProzedurSchritt
+
+    mr = MaterialisierteRoutine.aus_einzelkommando(kommando=_kommando(bezeichnung="A", code="A"))
+    schritt = MaterialisierterProzedurSchritt(
+        schritt_id="s1",
+        vorlage_id="v1",
+        ist_pflicht=True,
+        reihenfolge=1,
+        materialisierte_routine=mr,
+        externes_kommando=MaterialisiertesExternesKommando(
+            kommando_id=mr.aktionen[0].kommando_id,
+            bezeichnung="Abweichend",
+            kommandocode="DIFF",
+        ),
+    )
+    with pytest.raises(MaterialisierteAutomatisierungInkonsistent):
+        validiere_materialisierter_schritt_automatisierung(schritt)
+
+
+def test_legacy_nur_externes_kommando_bleibt_gueltig():
+    from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
+    from domain.katalog.materialisierung import validiere_materialisierter_schritt_automatisierung
+    from domain.katalog.version import MaterialisierterProzedurSchritt
+
+    schritt = MaterialisierterProzedurSchritt(
+        schritt_id="s1",
+        vorlage_id="v1",
+        ist_pflicht=True,
+        reihenfolge=1,
+        externes_kommando=MaterialisiertesExternesKommando(
+            kommando_id="k1",
+            bezeichnung="Alt",
+            kommandocode="OLD",
+        ),
+    )
+    validiere_materialisierter_schritt_automatisierung(schritt)

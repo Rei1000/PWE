@@ -36,9 +36,8 @@ class KommandoProzedurSchrittZuweisen:
         if schritt is None:
             raise ProzedurSchrittNichtGefunden(f"ProzedurSchritt {schritt_id} nicht gefunden")
 
+        schritt.pruefe_kommando_zuweisung(kommando_id)
         schritt.kommando_id = kommando_id
-        if kommando_id is not None:
-            schritt.routine_id = None
         schritt.validiere_automatisierung()
         self.katalog.save_entwurf(entwurf)
         return entwurf

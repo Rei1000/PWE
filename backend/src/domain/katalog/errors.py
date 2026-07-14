@@ -29,6 +29,10 @@ class AutomatisierungDoppeltZugewiesen(DomainError):
     pass
 
 
+class MaterialisierteAutomatisierungInkonsistent(DomainError):
+    pass
+
+
 class LeereRoutine(DomainError):
     pass
 

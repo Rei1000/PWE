@@ -16,7 +16,10 @@ from domain.katalog.errors import (
     RoutineNichtGefunden,
 )
 from domain.katalog.externes_kommando import ExternesKommando, MaterialisiertesExternesKommando
-from domain.katalog.materialisierung import materialisiere_sollvorgaben
+from domain.katalog.materialisierung import (
+    materialisiere_sollvorgaben,
+    validiere_materialisierter_schritt_automatisierung,
+)
 from domain.katalog.routine import MaterialisierteRoutine, Routine
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.shared.errors import InvariantViolation
@@ -38,6 +41,20 @@ class ProzedurSchrittEntwurf:
         if self.kommando_id is not None and self.routine_id is not None:
             raise AutomatisierungDoppeltZugewiesen(
                 f"ProzedurSchritt {self.schritt_id}: kommando_id und routine_id sind gegenseitig exklusiv"
+            )
+
+    def pruefe_kommando_zuweisung(self, kommando_id: str | None) -> None:
+        if kommando_id is not None and self.routine_id is not None:
+            raise AutomatisierungDoppeltZugewiesen(
+                f"ProzedurSchritt {self.schritt_id}: Routine ist gesetzt — "
+                "Kommando-Zuweisung erfordert vorheriges Entfernen der Routine"
+            )
+
+    def pruefe_routine_zuweisung(self, routine_id: str | None) -> None:
+        if routine_id is not None and self.kommando_id is not None:
+            raise AutomatisierungDoppeltZugewiesen(
+                f"ProzedurSchritt {self.schritt_id}: Kommando ist gesetzt — "
+                "Routine-Zuweisung erfordert vorheriges Entfernen des Kommandos"
             )
 
 
@@ -122,7 +139,7 @@ def _materialisiere_schritt(
             kommandos=kommandos,
         )
 
-    return MaterialisierterProzedurSchritt(
+    return _schritt_aus_automatisierung(
         schritt_id=schritt.schritt_id,
         vorlage_id=schritt.vorlage_id,
         ist_pflicht=schritt.ist_pflicht,
@@ -136,3 +153,26 @@ def _materialisiere_schritt(
         materialisierte_routine=materialisierte_routine,
         externes_kommando=externes_kommando,
     )
+
+
+def _schritt_aus_automatisierung(
+    *,
+    schritt_id: str,
+    vorlage_id: str,
+    ist_pflicht: bool,
+    reihenfolge: int,
+    sollvorgaben: dict[str, Any],
+    materialisierte_routine: MaterialisierteRoutine | None,
+    externes_kommando: MaterialisiertesExternesKommando | None,
+) -> MaterialisierterProzedurSchritt:
+    schritt = MaterialisierterProzedurSchritt(
+        schritt_id=schritt_id,
+        vorlage_id=vorlage_id,
+        ist_pflicht=ist_pflicht,
+        reihenfolge=reihenfolge,
+        sollvorgaben=sollvorgaben,
+        materialisierte_routine=materialisierte_routine,
+        externes_kommando=externes_kommando,
+    )
+    validiere_materialisierter_schritt_automatisierung(schritt)
+    return schritt

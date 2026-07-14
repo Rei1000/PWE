@@ -36,9 +36,8 @@ class RoutineProzedurSchrittZuweisen:
         if schritt is None:
             raise ProzedurSchrittNichtGefunden(f"ProzedurSchritt {schritt_id} nicht gefunden")
 
+        schritt.pruefe_routine_zuweisung(routine_id)
         schritt.routine_id = routine_id
-        if routine_id is not None:
-            schritt.kommando_id = None
         schritt.validiere_automatisierung()
         self.katalog.save_entwurf(entwurf)
         return entwurf

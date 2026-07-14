@@ -23,7 +23,7 @@ Offene Modellierungsfragen:
 | Bounded Context | `ExternesKommando` lebt im **Katalog** (Design Time) |
 | Bibliotheks-Modul | Fachliches Modul **innerhalb** des Katalog-Bounded-Contexts — **kein** eigener Bounded Context, **kein** Bibliotheks-Mega-Aggregat |
 | Aggregate Root | `ExternesKommando` — eigenständig, stabile `kommando_id` |
-| Weitere Roots | `Routine`, `PrüfschrittVorlage` später im selben Modul |
+| Weitere Roots | `Routine` (Gate 7.3d), `PrüfschrittVorlage` später im selben Modul |
 | Repository | `BibliothekRepository` — fachliche **Facade** des Bibliotheks-Moduls; **kein** `ExternesKommandoRepository` |
 | Entwurf | `ProzedurSchrittEntwurf.kommando_id` optional |
 | Materialisierung | `MaterialisiertesExternesKommando` in `MaterialisierterProzedurSchritt` (Snapshot: `kommando_id`, `bezeichnung`, `kommandocode`) |
@@ -55,6 +55,7 @@ Der Port beschreibt **save** als fachliche Persistierung des Aggregate-Zustands.
 - PostgreSQL: Tabelle `externes_kommando`; JSON-Payload für Entwurf/Version enthält Referenz bzw. Snapshot
 - PostgreSQL-Adapter darf für mutable Bibliotheksobjekte SQL-Upsert nutzen — semantisch äquivalent zu mutable save
 - Gate 7.3b: API-Ausführung über materialisierten Snapshot / `kommando_id`, nicht freie Strings; Laufzeit liest **keine** mutable Bibliothek
+- Gate 7.3d: `Routine` als weiteres Aggregate Root — siehe [ADR-0014](0014-routine-katalog-materialisierung.md)
 
 ## Bezug
 

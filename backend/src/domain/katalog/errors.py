@@ -15,3 +15,27 @@ class ProzedurSchrittNichtGefunden(DomainError):
 
 class ExternesKommandoNichtGefunden(DomainError):
     pass
+
+
+class RoutineNichtGefunden(DomainError):
+    pass
+
+
+class KommandoInRoutineNichtGefunden(DomainError):
+    pass
+
+
+class AutomatisierungDoppeltZugewiesen(DomainError):
+    pass
+
+
+class MaterialisierteAutomatisierungInkonsistent(DomainError):
+    pass
+
+
+class LeereRoutine(DomainError):
+    pass
+
+
+class UngueltigeAktionsreihenfolge(DomainError):
+    pass

@@ -184,7 +184,7 @@ PWE beginnt fachlich beim **Qualitätsprozess**. Produktionsprozesse (Kundenauft
 | **Zweck** | Konkrete Verwendung einer PrüfschrittVorlage innerhalb einer Prozedur. |
 | **Verantwortung** | Reihenfolge, Pflichtstatus, Aktivierungsregel, optionale Routine, schrittspezifische Konfiguration. |
 | **Lebenszyklus** | Teil der Prozedur im Entwurf; materialisiert in der Version. |
-| **Beziehungen** | Referenziert PrüfschrittVorlage; kann Routine referenzieren; wird zur Laufzeit als PrüfschrittDurchführung instanziiert. |
+| **Beziehungen** | Referenziert PrüfschrittVorlage; kann **optional** `kommando_id` **oder** `routine_id` referenzieren (gegenseitig exklusiv); wird zur Laufzeit als PrüfschrittDurchführung instanziiert. |
 | **Invarianten** | Dieselbe Vorlage kann in einer Prozedur mehrfach vorkommen — ProzedurSchritte sind eigenständig identifizierbar. |
 
 ---
@@ -506,6 +506,7 @@ Beim Veröffentlichen wird die effektive Prüfvorgabe **materialisiert**:
 - Sollvorgaben, Sollbestückung, Firmwarevorgaben
 - Prüfprozedur inkl. ProzedurSchritte, Aktivierungsregeln
 - Routinen und Externe Kommandos (Inhalt, nicht nur lose IDs)
+- Automatisierung materialisiert als **`MaterialisierteRoutine`** (Variante D, ADR-0014); direktes Einzelkommando wird als synthetische Ein-Aktions-Routine materialisiert
 
 Referenzen auf Bibliotheksobjekte dürfen **zusätzlich** dokumentiert werden.
 

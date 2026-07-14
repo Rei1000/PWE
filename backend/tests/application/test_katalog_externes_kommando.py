@@ -12,6 +12,7 @@ from domain.katalog.errors import (
     ExternesKommandoNichtGefunden,
     ProzedurSchrittNichtGefunden,
 )
+from domain.katalog.routine import MaterialisierteRoutineHerkunft
 from domain.katalog.externes_kommando import ExternesKommando
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
 
@@ -62,6 +63,8 @@ def test_produktdefinition_mit_kommando_referenz_veroeffentlichen():
     assert schritt.externes_kommando.kommando_id == kommando.kommando_id
     assert schritt.externes_kommando.bezeichnung == "Reset"
     assert schritt.externes_kommando.kommandocode == "RST"
+    assert schritt.materialisierte_routine is not None
+    assert schritt.materialisierte_routine.herkunft == MaterialisierteRoutineHerkunft.EINZELKOMMANDO
 
 
 def test_veroeffentlichen_entwurf_nicht_gefunden():
@@ -177,3 +180,5 @@ def test_bibliotheksaenderung_nach_veroeffentlichung():
     assert schritt.externes_kommando is not None
     assert schritt.externes_kommando.bezeichnung == "Alt"
     assert schritt.externes_kommando.kommandocode == "OLD"
+    assert schritt.materialisierte_routine is not None
+    assert schritt.materialisierte_routine.aktionen[0].kommandocode == "OLD"

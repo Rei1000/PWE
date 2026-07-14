@@ -55,6 +55,14 @@ class ExternesKommandoRow(Base):
     kommandocode: Mapped[str] = mapped_column(String(256), nullable=False)
 
 
+class RoutineRow(Base):
+    __tablename__ = "routine"
+
+    routine_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    bezeichnung: Mapped[str] = mapped_column(String(128), nullable=False)
+    payload: Mapped[str] = mapped_column(Text, nullable=False)
+
+
 class ProtokollSnapshotRow(Base):
     __tablename__ = "protokoll_snapshot"
 

@@ -64,6 +64,7 @@ Keine.
 ## Nicht im Domain-Kern (noch offen)
 
 - Fotospeicher
-- Vollständige Routine-Orchestrierung (folgt)
+- Routine-Orchestrierung (Gate 7.3e — Application Runner liest `MaterialisierteRoutine` aus materialisiertem Schritt; kein Run-Time-Aggregate; siehe ADR-0014)
+- Schrittzentrierte Routine-API (Gate 7.3f)
 
 **Istbestückung** ist im Domain-Kern implementiert: `Prueflauf.erfasse_komponente()` (ADR-0006, Slice minimal).

@@ -3,7 +3,7 @@
 Entsteht durch Veröffentlichen einer Produktdefinition (Katalog-Slice 2).
 
 Fachliche Referenz: docs/domain-model.md §4.7, §10
-Materialisierung: docs/adr/0005-sollvorgaben-materialisierung.md
+Materialisierung: docs/adr/0005-sollvorgaben-materialisierung.md, ADR-0014
 """
 
 from __future__ import annotations
@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
+from domain.katalog.routine import MaterialisierteRoutine
 
 
 @dataclass(frozen=True)
@@ -23,6 +24,7 @@ class MaterialisierterProzedurSchritt:
     ist_pflicht: bool
     reihenfolge: int
     sollvorgaben: dict[str, Any] = field(default_factory=dict)
+    materialisierte_routine: MaterialisierteRoutine | None = None
     externes_kommando: MaterialisiertesExternesKommando | None = None
 
 

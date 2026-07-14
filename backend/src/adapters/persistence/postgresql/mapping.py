@@ -8,6 +8,14 @@ from typing import Any
 
 from domain.katalog.externes_kommando import ExternesKommando, MaterialisiertesExternesKommando
 from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittEntwurf
+from domain.katalog.routine import (
+    MaterialisierteKommandoAktion,
+    MaterialisierteRoutine,
+    MaterialisierteRoutineHerkunft,
+    Routine,
+    RoutineAktion,
+    RoutineAktionsart,
+)
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.protokoll.snapshot import ProtokollSnapshot
 from domain.pruefausfuehrung.abschluss_view import PrueflaufAbschlussView, SchrittAbschlussView
@@ -42,6 +50,21 @@ def _load(raw: str) -> dict[str, Any]:
     return json.loads(raw)
 
 
+def _schritt_entwurf_to_dict(s: ProzedurSchrittEntwurf) -> dict[str, Any]:
+    data: dict[str, Any] = {
+        "schritt_id": s.schritt_id,
+        "vorlage_id": s.vorlage_id,
+        "ist_pflicht": s.ist_pflicht,
+        "reihenfolge": s.reihenfolge,
+        "sollvorgaben": s.sollvorgaben,
+    }
+    if s.kommando_id is not None:
+        data["kommando_id"] = s.kommando_id
+    if s.routine_id is not None:
+        data["routine_id"] = s.routine_id
+    return data
+
+
 def entwurf_to_payload(entwurf: Produktdefinition) -> str:
     return _dump(
         {
@@ -50,17 +73,7 @@ def entwurf_to_payload(entwurf: Produktdefinition) -> str:
             "basisprodukt_sollvorgaben": entwurf.basisprodukt_sollvorgaben,
             "kundenprofil_sollvorgaben": entwurf.kundenprofil_sollvorgaben,
             "definition_sollvorgaben": entwurf.definition_sollvorgaben,
-            "prozedur_schritte": [
-                {
-                    "schritt_id": s.schritt_id,
-                    "vorlage_id": s.vorlage_id,
-                    "ist_pflicht": s.ist_pflicht,
-                    "reihenfolge": s.reihenfolge,
-                    "sollvorgaben": s.sollvorgaben,
-                    **({"kommando_id": s.kommando_id} if s.kommando_id is not None else {}),
-                }
-                for s in entwurf.prozedur_schritte
-            ],
+            "prozedur_schritte": [_schritt_entwurf_to_dict(s) for s in entwurf.prozedur_schritte],
             "sollbestueckung": list(entwurf.sollbestueckung),
             "aktive_version_id": entwurf.aktive_version_id,
         }
@@ -83,12 +96,68 @@ def entwurf_from_payload(raw: str) -> Produktdefinition:
                 reihenfolge=s["reihenfolge"],
                 sollvorgaben=s.get("sollvorgaben", {}),
                 kommando_id=s.get("kommando_id"),
+                routine_id=s.get("routine_id"),
             )
             for s in data.get("prozedur_schritte", [])
         ],
         sollbestueckung=tuple(data.get("sollbestueckung", [])),
         aktive_version_id=data.get("aktive_version_id"),
     )
+
+
+def _materialisierte_routine_to_dict(r: MaterialisierteRoutine) -> dict[str, Any]:
+    data: dict[str, Any] = {
+        "herkunft": r.herkunft.value,
+        "bezeichnung": r.bezeichnung,
+        "aktionen": [
+            {
+                "position": a.position,
+                "kommando_id": a.kommando_id,
+                "bezeichnung": a.bezeichnung,
+                "kommandocode": a.kommandocode,
+            }
+            for a in r.aktionen
+        ],
+    }
+    if r.routine_id is not None:
+        data["routine_id"] = r.routine_id
+    return data
+
+
+def _materialisierte_routine_from_dict(data: dict[str, Any]) -> MaterialisierteRoutine:
+    return MaterialisierteRoutine(
+        herkunft=MaterialisierteRoutineHerkunft(data["herkunft"]),
+        routine_id=data.get("routine_id"),
+        bezeichnung=data["bezeichnung"],
+        aktionen=tuple(
+            MaterialisierteKommandoAktion(
+                position=a["position"],
+                kommando_id=a["kommando_id"],
+                bezeichnung=a["bezeichnung"],
+                kommandocode=a["kommandocode"],
+            )
+            for a in data.get("aktionen", [])
+        ),
+    )
+
+
+def _materialisierter_schritt_to_dict(s: MaterialisierterProzedurSchritt) -> dict[str, Any]:
+    data: dict[str, Any] = {
+        "schritt_id": s.schritt_id,
+        "vorlage_id": s.vorlage_id,
+        "ist_pflicht": s.ist_pflicht,
+        "reihenfolge": s.reihenfolge,
+        "sollvorgaben": s.sollvorgaben,
+    }
+    if s.materialisierte_routine is not None:
+        data["materialisierte_routine"] = _materialisierte_routine_to_dict(s.materialisierte_routine)
+    if s.externes_kommando is not None:
+        data["externes_kommando"] = {
+            "kommando_id": s.externes_kommando.kommando_id,
+            "bezeichnung": s.externes_kommando.bezeichnung,
+            "kommandocode": s.externes_kommando.kommandocode,
+        }
+    return data
 
 
 def version_to_payload(version: ProduktdefinitionsVersion) -> str:
@@ -98,25 +167,7 @@ def version_to_payload(version: ProduktdefinitionsVersion) -> str:
             "produktdefinition_id": version.produktdefinition_id,
             "produktkodierung": version.produktkodierung,
             "prozedur_schritte": [
-                {
-                    "schritt_id": s.schritt_id,
-                    "vorlage_id": s.vorlage_id,
-                    "ist_pflicht": s.ist_pflicht,
-                    "reihenfolge": s.reihenfolge,
-                    "sollvorgaben": s.sollvorgaben,
-                    **(
-                        {
-                            "externes_kommando": {
-                                "kommando_id": s.externes_kommando.kommando_id,
-                                "bezeichnung": s.externes_kommando.bezeichnung,
-                                "kommandocode": s.externes_kommando.kommandocode,
-                            }
-                        }
-                        if s.externes_kommando is not None
-                        else {}
-                    ),
-                }
-                for s in version.prozedur_schritte
+                _materialisierter_schritt_to_dict(s) for s in version.prozedur_schritte
             ],
             "sollbestueckung": list(version.sollbestueckung),
         }
@@ -136,6 +187,11 @@ def version_from_payload(raw: str) -> ProduktdefinitionsVersion:
                 ist_pflicht=s["ist_pflicht"],
                 reihenfolge=s["reihenfolge"],
                 sollvorgaben=s.get("sollvorgaben", {}),
+                materialisierte_routine=(
+                    _materialisierte_routine_from_dict(mr)
+                    if (mr := s.get("materialisierte_routine"))
+                    else None
+                ),
                 externes_kommando=(
                     MaterialisiertesExternesKommando(
                         kommando_id=ek["kommando_id"],
@@ -295,3 +351,59 @@ def snapshot_from_payload(raw: str) -> ProtokollSnapshot:
         schritte=schritte,
         fehlende_sollbestueckung=tuple(data.get("fehlende_sollbestueckung", [])),
     )
+
+
+def routine_to_payload(routine: Routine) -> str:
+    return _dump(
+        {
+            "aktionen": [
+                {
+                    "aktionsart": a.aktionsart.value,
+                    "kommando_id": a.kommando_id,
+                    "position": a.position,
+                }
+                for a in routine.aktionen
+            ],
+        }
+    )
+
+
+def routine_from_payload(routine_id: str, bezeichnung: str, raw: str) -> Routine:
+    data = _load(raw)
+    aktionen = tuple(
+        RoutineAktion(
+            aktionsart=RoutineAktionsart(a["aktionsart"]),
+            kommando_id=a["kommando_id"],
+            position=a["position"],
+        )
+        for a in data.get("aktionen", [])
+    )
+    return Routine(routine_id=routine_id, bezeichnung=bezeichnung, aktionen=aktionen)
+
+
+def routine_to_payload(routine: Routine) -> str:
+    return _dump(
+        {
+            "aktionen": [
+                {
+                    "aktionsart": a.aktionsart.value,
+                    "kommando_id": a.kommando_id,
+                    "position": a.position,
+                }
+                for a in routine.aktionen
+            ],
+        }
+    )
+
+
+def routine_from_payload(routine_id: str, bezeichnung: str, raw: str) -> Routine:
+    data = _load(raw)
+    aktionen = tuple(
+        RoutineAktion(
+            aktionsart=RoutineAktionsart(a["aktionsart"]),
+            kommando_id=a["kommando_id"],
+            position=a["position"],
+        )
+        for a in data.get("aktionen", [])
+    )
+    return Routine(routine_id=routine_id, bezeichnung=bezeichnung, aktionen=aktionen)

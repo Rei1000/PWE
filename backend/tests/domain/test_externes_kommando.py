@@ -3,6 +3,7 @@
 import pytest
 
 from domain.katalog.errors import ExternesKommandoNichtGefunden
+from domain.katalog.routine import MaterialisierteRoutineHerkunft
 from domain.katalog.externes_kommando import ExternesKommando, MaterialisiertesExternesKommando
 from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittEntwurf
 from domain.shared.errors import InvariantViolation
@@ -81,3 +82,5 @@ def test_bibliotheksaenderung_aendert_veroeffentlichte_version_nicht():
     assert geaendert.kommando_id == kommando.kommando_id
     assert schritt.externes_kommando.bezeichnung == "Alt"
     assert schritt.externes_kommando.kommandocode == "OLD"
+    assert schritt.materialisierte_routine is not None
+    assert schritt.materialisierte_routine.herkunft == MaterialisierteRoutineHerkunft.EINZELKOMMANDO

@@ -17,3 +17,4 @@ Langfristig relevante Architekturentscheidungen. Fachdomäne: `docs/domain-model
 | [0011](0011-api-postgresql-unit-of-work.md) | Request-scoped Unit of Work für API ↔ PostgreSQL |
 | [0012](0012-katalog-bibliothek-externes-kommando.md) | Bibliotheks-Modul im Katalog (ExternesKommando, Facade) |
 | [0013](0013-com-adapter-wiring-fehlerabbildung.md) | COM-Adapter-Wiring, PySerialTransport, Fehlerabbildung |
+| [0014](0014-routine-katalog-materialisierung.md) | Routine — Katalogmodell und einheitliche Materialisierung (Variante D) |

@@ -9,16 +9,24 @@ from domain.protokoll.snapshot import ProtokollSnapshot
 from domain.pruefausfuehrung.abschluss_view import PrueflaufAbschlussView, SchrittAbschlussView
 from domain.pruefausfuehrung.prueflauf import NachweisArt, Prueflauf
 from domain.pruefausfuehrung.typen import BeurteilungErgebnis
+from domain.katalog.routine import (
+    MaterialisierteKommandoAktion,
+    MaterialisierteRoutine,
+    MaterialisierteRoutineHerkunft,
+)
 from adapters.persistence.postgresql.mapping import (
     entwurf_from_payload,
     entwurf_to_payload,
     prueflauf_from_payload,
     prueflauf_to_payload,
+    routine_from_payload,
+    routine_to_payload,
     snapshot_from_payload,
     snapshot_to_payload,
     version_from_payload,
     version_to_payload,
 )
+from domain.katalog.routine import Routine, RoutineAktion, RoutineAktionsart
 
 _NOW = datetime(2026, 6, 27, 12, 0, tzinfo=timezone.utc)
 
@@ -141,3 +149,70 @@ def test_snapshot_mapping_roundtrip():
     restored = snapshot_from_payload(snapshot_to_payload(original))
     assert restored.snapshot_id == original.snapshot_id
     assert restored.schritte[0].beurteilung == BeurteilungErgebnis.BESTANDEN
+
+
+def test_entwurf_mapping_roundtrip_mit_routine_id():
+    original = Produktdefinition(
+        produktdefinition_id="pd-1",
+        produktkodierung="1234567890",
+        prozedur_schritte=[
+            ProzedurSchrittEntwurf(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+                routine_id="routine-1",
+            ),
+        ],
+    )
+    restored = entwurf_from_payload(entwurf_to_payload(original))
+    assert restored.prozedur_schritte[0].routine_id == "routine-1"
+
+
+def test_version_mapping_roundtrip_mit_materialisierter_routine():
+    mr = MaterialisierteRoutine(
+        herkunft=MaterialisierteRoutineHerkunft.BIBLIOTHEK,
+        routine_id="routine-1",
+        bezeichnung="Test-Routine",
+        aktionen=(
+            MaterialisierteKommandoAktion(
+                position=1,
+                kommando_id="k1",
+                bezeichnung="Reset",
+                kommandocode="RST",
+            ),
+        ),
+    )
+    original = ProduktdefinitionsVersion(
+        version_id="ver-routine",
+        produktdefinition_id="pd-1",
+        produktkodierung="1234567890",
+        prozedur_schritte=(
+            MaterialisierterProzedurSchritt(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+                materialisierte_routine=mr,
+            ),
+        ),
+    )
+    restored = version_from_payload(version_to_payload(original))
+    assert restored == original
+
+
+def test_routine_mapping_roundtrip():
+    routine = Routine.anlegen(
+        bezeichnung="Test",
+        aktionen=(
+            RoutineAktion(
+                aktionsart=RoutineAktionsart.EXTERNES_KOMMANDO_AUSFUEHREN,
+                kommando_id="k1",
+                position=1,
+            ),
+        ),
+    )
+    payload = routine_to_payload(routine)
+    restored = routine_from_payload(routine.routine_id, routine.bezeichnung, payload)
+    assert restored == routine
+

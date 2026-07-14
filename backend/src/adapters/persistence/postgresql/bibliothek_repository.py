@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from adapters.persistence.postgresql.schema import ExternesKommandoRow
+from adapters.persistence.postgresql.mapping import routine_from_payload, routine_to_payload
+from adapters.persistence.postgresql.schema import ExternesKommandoRow, RoutineRow
 from domain.katalog.externes_kommando import ExternesKommando
+from domain.katalog.routine import Routine
 
 
 class PostgresBibliothekRepository:
@@ -37,3 +39,26 @@ class PostgresBibliothekRepository:
             bezeichnung=row.bezeichnung,
             kommandocode=row.kommandocode,
         )
+
+    def save_routine(self, routine: Routine, *, commit: bool = False) -> None:
+        payload = routine_to_payload(routine)
+        row = self._session.get(RoutineRow, routine.routine_id)
+        if row is None:
+            self._session.add(
+                RoutineRow(
+                    routine_id=routine.routine_id,
+                    bezeichnung=routine.bezeichnung,
+                    payload=payload,
+                )
+            )
+        else:
+            row.bezeichnung = routine.bezeichnung
+            row.payload = payload
+        if commit:
+            self._session.commit()
+
+    def get_routine(self, routine_id: str) -> Routine | None:
+        row = self._session.get(RoutineRow, routine_id)
+        if row is None:
+            return None
+        return routine_from_payload(row.routine_id, row.bezeichnung, row.payload)

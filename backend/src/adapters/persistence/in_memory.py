@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from domain.katalog.externes_kommando import ExternesKommando
+from domain.katalog.routine import Routine
 from domain.katalog.produktdefinition import Produktdefinition
 from domain.katalog.version import ProduktdefinitionsVersion
 from domain.pruefausfuehrung.prueflauf import Prueflauf
@@ -45,12 +46,19 @@ class InMemoryKatalogRepository:
 class InMemoryBibliothekRepository:
     def __init__(self) -> None:
         self._kommandos: dict[str, ExternesKommando] = {}
+        self._routinen: dict[str, Routine] = {}
 
     def save_externes_kommando(self, kommando: ExternesKommando) -> None:
         self._kommandos[kommando.kommando_id] = kommando
 
     def get_externes_kommando(self, kommando_id: str) -> ExternesKommando | None:
         return self._kommandos.get(kommando_id)
+
+    def save_routine(self, routine: Routine) -> None:
+        self._routinen[routine.routine_id] = routine
+
+    def get_routine(self, routine_id: str) -> Routine | None:
+        return self._routinen.get(routine_id)
 
 
 class InMemoryPrueflaufRepository:

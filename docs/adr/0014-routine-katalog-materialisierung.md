@@ -74,7 +74,7 @@ Keine dauerhafte doppelte Wahrheit: `externes_kommando` ist abgeleiteter Kompati
 Validierung: `validiere_materialisierter_schritt_automatisierung()` bei Materialisierung und Deserialisierung.
 
 **Exit-Strategie:**
-- Gate 7.3e: Runner normalisiert Legacy (`externes_kommando` only) intern zu Ein-Aktions-Routine
+- Gate 7.3e: Runner normalisiert Legacy über `aufgeloeste_materialisierte_routine()` — siehe [ADR-0015](0015-routine-ausfuehren-application-runner.md)
 - Gate 7.3f: Entscheidung, wann `externes_kommando` nicht mehr geschrieben wird
 - Gate 7.3b-Endpunkt: deprecated, Entfernung nach schrittzentrierter API
 

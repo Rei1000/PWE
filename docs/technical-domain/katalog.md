@@ -59,7 +59,18 @@ Veröffentlichungsakt (Entwurf → Version): Katalog-Slice 2 + Gate 7.3a/d — `
 
 Validierung: `domain/katalog/materialisierung.py` → `validiere_materialisierter_schritt_automatisierung()`.
 
-**Exit:** Gate 7.3e Runner liest `materialisierte_routine`; Gate 7.3f legt fest, wann `externes_kommando` nicht mehr geschrieben wird.
+**Laufzeit-Auflösung (Gate 7.3e, ADR-0015):** `aufgeloeste_materialisierte_routine(schritt)` — einzige zentrale Normalisierung:
+
+| Situation | Ergebnis |
+|-----------|----------|
+| `materialisierte_routine` gesetzt | Invariante prüfen, Routine zurückgeben |
+| nur `externes_kommando` (Legacy) | synthetische Ein-Aktions-Routine, `herkunft=einzelkommando`, Position 1 |
+| beide inkonsistent | `MaterialisierteAutomatisierungInkonsistent` |
+| keine Automatisierung | `KeineAutomatisierungAmSchritt` |
+
+Keine zweite Normalisierung in Application Layer oder Mapper.
+
+**Exit:** Gate 7.3f legt fest, wann `externes_kommando` nicht mehr geschrieben wird.
 
 ### Entwurfs-Wechsel (Kommando ↔ Routine)
 

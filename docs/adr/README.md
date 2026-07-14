@@ -18,3 +18,4 @@ Langfristig relevante Architekturentscheidungen. Fachdomäne: `docs/domain-model
 | [0012](0012-katalog-bibliothek-externes-kommando.md) | Bibliotheks-Modul im Katalog (ExternesKommando, Facade) |
 | [0013](0013-com-adapter-wiring-fehlerabbildung.md) | COM-Adapter-Wiring, PySerialTransport, Fehlerabbildung |
 | [0014](0014-routine-katalog-materialisierung.md) | Routine — Katalogmodell und einheitliche Materialisierung (Variante D) |
+| [0015](0015-routine-ausfuehren-application-runner.md) | RoutineAusfuehren — Application Runner (Gate 7.3e) |

@@ -39,23 +39,40 @@ Brücke Domain Model → Code. Fachliche Referenz: `docs/domain-model.md` §4.15
 
 `PrueflaufRepository` — `save`, `get`
 
-## Ports (Slice — Externes Kommando)
+## Ports (Slice — Externes Kommando / Routine)
 
 | Port | Adapter (V1) | Use Case |
 |------|--------------|----------|
-| `ExternesKommandoPort` | `adapters/simulation/externes_kommando.py` | `ExternesKommandoAusfuehren` |
-| `ExternesKommandoPort` | `adapters/com/externes_kommando.py` | `ExternesKommandoAusfuehren` |
-| `KatalogRepository` | — | `ExternesKommandoAusfuehren` (nur Version/Snapshot lesen) |
+| `ExternesKommandoPort` | `adapters/simulation/externes_kommando.py` | `ExternesKommandoAusfuehren`, `RoutineAusfuehren` |
+| `ExternesKommandoPort` | `adapters/com/externes_kommando.py` | `ExternesKommandoAusfuehren`, `RoutineAusfuehren` |
+| `KatalogRepository` | — | Version/Snapshot lesen |
 
 Gate 7.3b: Ausführung bindet `kommando_id` an materialisierten Snapshot in der `ProduktdefinitionsVersion` — **kein** Zugriff auf `BibliothekRepository` zur Laufzeit. Fehler für fehlende materialisierte Schritte liegen in `domain/pruefausfuehrung/errors.py` (`MaterialisierterProzedurSchrittNichtGefunden`), nicht im Katalog-Context.
 
-Gate 7.3c: Adapterwahl ausschließlich in `api/kommando_wiring.py` (`create_kommando_port()`). Default: `SimuliertesExternesKommandoPort`. COM: `ComExternesKommandoPort` → `PySerialTransport` (optional Extra `[com]`). Transport-Lifecycle V1: **Port pro Kommando öffnen und schließen**. Technische Fehler ohne Geräte-Rohdaten → `ExternesKommandoAntwort(erfolgreich=False, rohdaten="")`; Application wirft `ExternesKommandoAdapterFehler`. **Empfangene Geräte-Rohantwort** wird immer als ROHANTWORT-Nachweis persistiert (Domain Invariante 16), auch bei `erfolgreich=False`; Application liefert `ExternesKommandoAusfuehrungErgebnis`, API 409 mit `nachweise` ohne Exception-Rollback. Siehe [ADR-0013](../adr/0013-com-adapter-wiring-fehlerabbildung.md).
+Gate 7.3c: Adapterwahl ausschließlich in `api/kommando_wiring.py` (`create_kommando_port()`). Default: `SimuliertesExternesKommandoPort`. COM: `ComExternesKommandoPort` → `PySerialTransport` (optional Extra `[com]`). Transport-Lifecycle V1: **Port pro Kommando öffnen und schließen**. Technische Fehler ohne Geräte-Rohdaten → `ExternesKommandoAntwort(erfolgreich=False, rohdaten="")`; Application Einzelkommando wirft `ExternesKommandoAdapterFehler`. **Empfangene Geräte-Rohantwort** wird immer als ROHANTWORT-Nachweis persistiert (Domain Invariante 16), auch bei `erfolgreich=False`; Application liefert `ExternesKommandoAusfuehrungErgebnis`, API 409 mit `nachweise` ohne Exception-Rollback. Siehe [ADR-0013](../adr/0013-com-adapter-wiring-fehlerabbildung.md).
 
 COM-Adapter nutzt injizierbaren `SeriellerTransport` (`adapters/com/transport.py`); Tests: `InMemorySeriellerTransport`; Produktion: `PySerialTransport`.
 
 Laufzeit-VOs: `domain/pruefausfuehrung/kommando_ausfuehrung.py` (`ExternesKommandoAnfrage`, `ExternesKommandoAntwort`).
 
 Invariante §4.11: Rohantwort → `NachweisArt.ROHANTWORT` (automatisch); extrahierte Werte → `EXTRAHIERTER_WERT` mit Bezug.
+
+## Gate 7.3e — RoutineAusfuehren (ADR-0015)
+
+| Aspekt | Entscheidung |
+|--------|--------------|
+| Use Case | `application/pruefausfuehrung/routine_ausfuehren.py` |
+| Run-Time-Aggregate | **Keins** — `Prueflauf` bleibt einziger Root |
+| Ausführungsvorgabe | `aufgeloeste_materialisierte_routine(schritt)` — zentrale Domain-Normalisierung |
+| Kernlogik | `kommandoausfuehrung_kern` — intern, kein save/load |
+| Speicherung | Genau ein `save(prueflauf)` pro Aufruf |
+| Dispatch | Explizite Schleife über Kommando-Aktionen — keine Handler-Registry |
+| Fehler vor Beginn | Exception (Rollback) |
+| Fehler nach Beginn | `RoutineAusfuehrungErgebnis` — auch Transport ohne Rohantwort bei erster Aktion |
+| Audit | Payload-Abschnitt `automatisierung` mit `ausfuehrung_id`, `herkunft`, `aktion_position`, `kommando_id`, optional `routine_id` |
+| API | Nicht in 7.3e — Gate 7.3f |
+
+Ergebnis-Contract: `RoutineAusfuehrungErgebnis` — `ausfuehrung_id`, `nachweise`, `fehlgeschlagen`, `abgebrochen_bei_aktion_position`, `ausgefuehrte_aktionen`, optionale fachliche `fehlerart` (`keine_geraeteantwort`, `geraetefehlschlag`, `ungueltige_antwort`).
 
 ## Domain Events (V1)
 
@@ -64,7 +81,6 @@ Keine.
 ## Nicht im Domain-Kern (noch offen)
 
 - Fotospeicher
-- Routine-Orchestrierung (Gate 7.3e — Application Runner liest `MaterialisierteRoutine` aus materialisiertem Schritt; kein Run-Time-Aggregate; siehe ADR-0014)
 - Schrittzentrierte Routine-API (Gate 7.3f)
 
 **Istbestückung** ist im Domain-Kern implementiert: `Prueflauf.erfasse_komponente()` (ADR-0006, Slice minimal).

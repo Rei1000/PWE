@@ -5,8 +5,13 @@ from __future__ import annotations
 from typing import Any
 
 from domain.katalog.errors import MaterialisierteAutomatisierungInkonsistent
-from domain.katalog.routine import MaterialisierteRoutineHerkunft
+from domain.katalog.routine import (
+    MaterialisierteKommandoAktion,
+    MaterialisierteRoutine,
+    MaterialisierteRoutineHerkunft,
+)
 from domain.katalog.version import MaterialisierterProzedurSchritt
+from domain.pruefausfuehrung.errors import KeineAutomatisierungAmSchritt
 
 
 def materialisiere_sollvorgaben(
@@ -61,3 +66,41 @@ def validiere_materialisierter_schritt_automatisierung(
             f"ProzedurSchritt {schritt.schritt_id}: externes_kommando weicht von "
             "materialisierte_routine ab"
         )
+
+
+def aufgeloeste_materialisierte_routine(
+    schritt: MaterialisierterProzedurSchritt,
+) -> MaterialisierteRoutine:
+    """Zentrale Auflösung der materialisierten Automatisierung (ADR-0015).
+
+    Neues Modell: materialisierte_routine nach Invariantenprüfung.
+    Legacy: nur externes_kommando → synthetische Ein-Aktions-Routine.
+    """
+    mr = schritt.materialisierte_routine
+    ek = schritt.externes_kommando
+
+    if mr is not None:
+        validiere_materialisierter_schritt_automatisierung(schritt)
+        return mr
+
+    if ek is not None:
+        return _synthetische_routine_aus_legacy(ek)
+
+    raise KeineAutomatisierungAmSchritt(
+        f"ProzedurSchritt {schritt.schritt_id} hat keine Automatisierung"
+    )
+
+
+def _synthetische_routine_aus_legacy(ek) -> MaterialisierteRoutine:
+    aktion = MaterialisierteKommandoAktion(
+        position=1,
+        kommando_id=ek.kommando_id,
+        bezeichnung=ek.bezeichnung,
+        kommandocode=ek.kommandocode,
+    )
+    return MaterialisierteRoutine(
+        herkunft=MaterialisierteRoutineHerkunft.EINZELKOMMANDO,
+        routine_id=None,
+        bezeichnung=ek.bezeichnung,
+        aktionen=(aktion,),
+    )

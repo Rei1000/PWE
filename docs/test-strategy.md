@@ -18,6 +18,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 - Ein **Vertical-Slice-Test** pro Kern-Use-Case in `tests/application/`.
 - In-Memory-Repos in `adapters/persistence/in_memory.py` — nicht in Tests duplizieren.
 - PostgreSQL-Adapter in `adapters/persistence/postgresql/` — Mapping-Tests ohne DB; Repository-Tests mit `DATABASE_URL` (CI: Postgres-Service).
+- **OpenAPI-Contract-Tests** (Gate 7.3f): maschinenlesbare Prüfung von Response-Schemas, `deprecated`-Markierung Legacy-Endpunkte, `additionalProperties: false` am Request — `tests/api/test_api_openapi_automatisierung.py`.
 
 ## V1-Pflicht vor Merge
 

@@ -71,7 +71,7 @@ Invariante §4.11: Rohantwort → `NachweisArt.ROHANTWORT` (automatisch); extrah
 | Fehler vor Beginn | Exception (Rollback) |
 | Fehler nach Beginn | `RoutineAusfuehrungErgebnis` — auch Transport ohne Rohantwort bei erster Aktion |
 | Audit | Payload-Abschnitt `automatisierung` mit `ausfuehrung_id`, `herkunft`, `aktion_position`, `kommando_id`, optional `routine_id` |
-| API | Nicht in 7.3e — Gate 7.3f |
+| API | Gate 7.3f — [ADR-0016](../adr/0016-automatisierung-http-api.md), `POST .../automatisierung/ausfuehren` |
 
 Ergebnis-Contract: `RoutineAusfuehrungErgebnis` — `ausfuehrung_id`, `nachweise`, `fehlgeschlagen`, `abgebrochen_bei_aktion_position`, `ausgefuehrte_aktionen`, optionale fachliche `fehlerart` (`keine_geraeteantwort`, `geraetefehlschlag`, `ungueltige_antwort`).
 
@@ -90,6 +90,7 @@ Keine.
 ## Nicht im Domain-Kern (noch offen)
 
 - Fotospeicher
-- Schrittzentrierte Routine-API (Gate 7.3f)
+
+**Schrittzentrierte Automatisierungs-API** ist implementiert (Gate 7.3f, ADR-0016). Legacy-Einzelkommando-Endpunkt (7.3b) bleibt deprecated.
 
 **Istbestückung** ist im Domain-Kern implementiert: `Prueflauf.erfasse_komponente()` (ADR-0006, Slice minimal).

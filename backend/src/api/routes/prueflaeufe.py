@@ -5,11 +5,15 @@ from __future__ import annotations
 from fastapi import APIRouter, Body, Request
 from fastapi.responses import JSONResponse, Response
 
+from api.automatisierung_response import automatisierung_ausfuehren_response
 from api.deps import get_request_deps
 from api.fehler import fehler_response, oeffentliche_fehlermeldung
 from api.schemas import (
     AbschlussResponse,
+    AutomatisierungAusfuehrenRequest,
+    AutomatisierungAusfuehrenResponse,
     BeurteilungResponse,
+    ErrorResponse,
     ExternesKommandoAusfuehrenRequest,
     ExternesKommandoAusfuehrenResponse,
     KomponenteErfassenRequest,
@@ -23,6 +27,7 @@ from api.schemas import (
 )
 from application.pruefausfuehrung.prueflauf_lesen import PrueflaufDetailAnsicht, PrueflaufLesen
 from application.protokoll.erzeugen import ProtokollErzeugen
+from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
 from application.pruefausfuehrung.externes_kommando_ausfuehren import ExternesKommandoAusfuehren
 from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
@@ -129,9 +134,42 @@ def komponente_erfassen(
 
 
 @router.post(
+    "/{prueflauf_id}/schritte/{schritt_id}/automatisierung/ausfuehren",
+    status_code=200,
+    response_model=AutomatisierungAusfuehrenResponse,
+    responses={
+        404: {"model": ErrorResponse},
+        409: {"model": ErrorResponse},
+        422: {"model": ErrorResponse},
+    },
+)
+def automatisierung_ausfuehren(
+    prueflauf_id: str,
+    schritt_id: str,
+    request: Request,
+    _body: AutomatisierungAusfuehrenRequest = Body(
+        default_factory=AutomatisierungAusfuehrenRequest
+    ),
+) -> AutomatisierungAusfuehrenResponse:
+    deps = get_request_deps(request)
+    ergebnis = RoutineAusfuehren(
+        deps.katalog,
+        deps.prueflauf_repo,
+        deps.kommando_port,
+    ).execute(prueflauf_id, schritt_id)
+    return automatisierung_ausfuehren_response(ergebnis)
+
+
+@router.post(
     "/{prueflauf_id}/schritte/{schritt_id}/kommandos/{kommando_id}/ausfuehren",
     status_code=201,
     response_model=ExternesKommandoAusfuehrenResponse,
+    deprecated=True,
+    description=(
+        "Legacy (Gate 7.3b) — Einzelkommando über kommando_id. "
+        "Verwenden Sie POST .../schritte/{schritt_id}/automatisierung/ausfuehren (ADR-0016). "
+        "Verhalten unverändert; kein Redirect auf RoutineAusfuehren."
+    ),
 )
 def externes_kommando_ausfuehren(
     prueflauf_id: str,

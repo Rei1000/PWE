@@ -19,3 +19,4 @@ Langfristig relevante Architekturentscheidungen. Fachdomäne: `docs/domain-model
 | [0013](0013-com-adapter-wiring-fehlerabbildung.md) | COM-Adapter-Wiring, PySerialTransport, Fehlerabbildung |
 | [0014](0014-routine-katalog-materialisierung.md) | Routine — Katalogmodell und einheitliche Materialisierung (Variante D) |
 | [0015](0015-routine-ausfuehren-application-runner.md) | RoutineAusfuehren — Application Runner (Gate 7.3e) |
+| [0016](0016-automatisierung-http-api.md) | Automatisierung am ProzedurSchritt — HTTP-API (Gate 7.3f) |

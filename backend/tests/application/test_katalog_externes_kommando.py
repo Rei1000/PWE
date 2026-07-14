@@ -182,3 +182,62 @@ def test_bibliotheksaenderung_nach_veroeffentlichung():
     assert schritt.externes_kommando.kommandocode == "OLD"
     assert schritt.materialisierte_routine is not None
     assert schritt.materialisierte_routine.aktionen[0].kommandocode == "OLD"
+
+
+def test_kommando_zuweisen_wechsel_ohne_entfernen_schlaegt_fehl():
+    from domain.katalog.errors import AutomatisierungDoppeltZugewiesen
+
+    katalog, bibliothek = _setup()
+    k1 = ExternesKommandoAnlegen(bibliothek).execute(bezeichnung="K1", kommandocode="K1")
+    k2 = ExternesKommandoAnlegen(bibliothek).execute(bezeichnung="K2", kommandocode="K2")
+    entwurf = EntwurfAnlegen(katalog).execute(
+        produktkodierung="9999999991",
+        prozedur_schritte=(
+            ProzedurSchrittEntwurf(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+            ),
+        ),
+    )
+    KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id,
+        "schritt-a",
+        k1.kommando_id,
+    )
+    with pytest.raises(AutomatisierungDoppeltZugewiesen):
+        KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+            entwurf.produktdefinition_id,
+            "schritt-a",
+            k2.kommando_id,
+        )
+
+
+def test_kommando_zuweisen_gleiche_id_idempotent():
+    katalog, bibliothek = _setup()
+    k1 = ExternesKommandoAnlegen(bibliothek).execute(bezeichnung="K1", kommandocode="K1")
+    entwurf = EntwurfAnlegen(katalog).execute(
+        produktkodierung="9999999992",
+        prozedur_schritte=(
+            ProzedurSchrittEntwurf(
+                schritt_id="schritt-a",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+            ),
+        ),
+    )
+    KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id,
+        "schritt-a",
+        k1.kommando_id,
+    )
+    KommandoProzedurSchrittZuweisen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id,
+        "schritt-a",
+        k1.kommando_id,
+    )
+    reloaded = katalog.get_entwurf(entwurf.produktdefinition_id)
+    assert reloaded is not None
+    assert reloaded.prozedur_schritte[0].kommando_id == k1.kommando_id

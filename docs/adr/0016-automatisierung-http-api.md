@@ -119,3 +119,4 @@ Frontend, Legacy-Entfernung, Idempotency-Key, Retry, Pause/Resume, weitere Aktio
 - [ADR-0013](0013-com-adapter-wiring-fehlerabbildung.md)
 - [ADR-0014](0014-routine-katalog-materialisierung.md)
 - [ADR-0015](0015-routine-ausfuehren-application-runner.md)
+- [ADR-0017](0017-katalog-setup-http-automatisierung.md) — Katalog-Setup vor Ausführung (Gate 6.3a)

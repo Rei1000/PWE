@@ -107,15 +107,25 @@ Adapter dürfen mutable save technisch per INSERT/UPDATE oder SQL-Upsert umsetze
 | Routine anlegen | `application/katalog/routine_anlegen.py` |
 | Routine an ProzedurSchritt zuweisen | `application/katalog/routine_zuweisen.py` |
 
+## HTTP (Gate 6.3a, ADR-0017)
+
+| Endpunkt | Use Case |
+|----------|----------|
+| `POST /katalog/bibliothek/kommandos` | `ExternesKommandoAnlegen` |
+| `PUT /katalog/entwuerfe/{id}/schritte/{schritt_id}/automatisierung` | `KommandoProzedurSchrittZuweisen` |
+
+Nur Einzelkommando-Zuweisung — **kein** `routine_id` im Request (Gate 8.2a). Keine Ausführung, keine Adapterfelder. Laborbetrieb ohne Auth ([ADR-0001](../adr/0001-v1-scope-deferrals.md)).
+
+Entwurfs-Wechsel: andere `kommando_id` bei gesetztem Kommando → `AutomatisierungDoppeltZugewiesen` (409) — kein stiller Ersatz (projektrules §6).
+
 ## Domain Events (V1)
 
 Keine — erst bei Persistenz/Event-Integration.
 
-## Offen (nach Gate 7.3d)
+## Offen (nach Gate 6.3a)
 
-- Routine-Ausführung / Runner (Gate 7.3e)
-- API schrittzentriert (Gate 7.3f)
-- Weitere Aktionsarten (Warten, Bestätigung, …)
+- Frontend Automatisierung (Gate 6.3b), Demo-Seed (6.3c)
+- Vollständige Bibliothek-HTTP-CRUD (Gate 8.2a)
 - `PrüfschrittVorlage` in Bibliothek (Gate 8.2)
 - Aktivierungsregeln-Auswertung zur Laufzeit
 - Version deaktivieren (V1: neue Version ersetzt aktive)

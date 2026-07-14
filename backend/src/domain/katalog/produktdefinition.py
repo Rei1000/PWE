@@ -49,6 +49,15 @@ class ProzedurSchrittEntwurf:
                 f"ProzedurSchritt {self.schritt_id}: Routine ist gesetzt — "
                 "Kommando-Zuweisung erfordert vorheriges Entfernen der Routine"
             )
+        if (
+            kommando_id is not None
+            and self.kommando_id is not None
+            and self.kommando_id != kommando_id
+        ):
+            raise AutomatisierungDoppeltZugewiesen(
+                f"ProzedurSchritt {self.schritt_id}: Kommando ist gesetzt — "
+                "Wechsel erfordert vorheriges Entfernen der Automatisierung"
+            )
 
     def pruefe_routine_zuweisung(self, routine_id: str | None) -> None:
         if routine_id is not None and self.kommando_id is not None:

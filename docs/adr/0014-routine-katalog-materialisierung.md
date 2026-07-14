@@ -75,6 +75,7 @@ Validierung: `validiere_materialisierter_schritt_automatisierung()` bei Material
 
 **Exit-Strategie:**
 - Gate 7.3e: Runner normalisiert Legacy über `aufgeloeste_materialisierte_routine()` — siehe [ADR-0015](0015-routine-ausfuehren-application-runner.md)
+- Gate 6.3a: Minimaler Katalog-Setup-HTTP ([ADR-0017](0017-katalog-setup-http-automatisierung.md)) — Einzelkommando-Zuweisung vor Ausführung
 - Gate 7.3f: Schrittzentrierte HTTP-API ([ADR-0016](0016-automatisierung-http-api.md)); Entscheidung wann `externes_kommando` nicht mehr geschrieben wird — weiterhin offen
 - Gate 7.3b-Endpunkt: deprecated, Entfernung nach schrittzentrierter API
 

@@ -130,6 +130,37 @@ class VersionResponse(BaseModel):
     produktkodierung: str
 
 
+class ExternesKommandoAnlegenRequest(BaseModel):
+    """Bibliothek — Externes Kommando anlegen (Gate 6.3a)."""
+
+    bezeichnung: str
+    kommandocode: str
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class ExternesKommandoAnlegenResponse(BaseModel):
+    """Schmaler Setup-Response — ohne kommandocode (Ausführung aus Materialisierung)."""
+
+    kommando_id: str
+    bezeichnung: str
+
+
+class AutomatisierungZuweisenRequest(BaseModel):
+    """Einzelkommando an Entwurfsschritt — Gate 6.3a (kein routine_id)."""
+
+    kommando_id: str
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class AutomatisierungZuweisenResponse(BaseModel):
+    produktdefinition_id: str
+    schritt_id: str
+    kommando_id: str | None
+    routine_id: str | None
+
+
 class NachweisDetailResponse(BaseModel):
     nachweis_id: str
     art: str

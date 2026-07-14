@@ -19,6 +19,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 - In-Memory-Repos in `adapters/persistence/in_memory.py` — nicht in Tests duplizieren.
 - PostgreSQL-Adapter in `adapters/persistence/postgresql/` — Mapping-Tests ohne DB; Repository-Tests mit `DATABASE_URL` (CI: Postgres-Service).
 - **OpenAPI-Contract-Tests** (Gate 7.3f): maschinenlesbare Prüfung von Response-Schemas, `deprecated`-Markierung Legacy-Endpunkte, `additionalProperties: false` am Request — `tests/api/test_api_openapi_automatisierung.py`.
+- **Katalog-Setup-API-Tests** (Gate 6.3a): HTTP-E2E Setup + Automatisierung, OpenAPI — `tests/api/test_api_katalog_automatisierung_setup.py`, `test_api_openapi_katalog_automatisierung_setup.py`, PostgreSQL in `test_api_postgresql_katalog_automatisierung_setup.py`.
 
 ## V1-Pflicht vor Merge
 

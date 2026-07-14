@@ -142,9 +142,15 @@ Zulässige `fehlerart`-Werte: `keine_geraeteantwort`, `geraetefehlschlag`, `ungu
 - `kommando_id` weiter gegen materialisierten Snapshot validiert
 - Pro Aufruf neue `ausfuehrung_id`, `herkunft=einzelkommando`, `aktion_position=1`
 
-### Gate 7.3f (Ausblick)
+### Gate 7.3f — HTTP (ADR-0016)
 
-HTTP-Endpunkt für schrittzentrierte Routine-Ausführung mappt `RoutineAusfuehrungErgebnis` auf Statuscodes — nicht Teil von 7.3e.
+Schrittzentrierter Endpunkt `POST .../automatisierung/ausfuehren` mappt `RoutineAusfuehrungErgebnis` auf HTTP:
+
+- Vor Ausführungsbeginn: 404/409/422 + `{detail, code}`
+- Nach Beginn: immer 200 + `AutomatisierungAusfuehrenResponse`
+- Legacy 7.3b deprecated, Verhalten unverändert
+
+Siehe [ADR-0016](0016-automatisierung-http-api.md).
 
 ### Vorbedingungen vor externen Seiteneffekten
 

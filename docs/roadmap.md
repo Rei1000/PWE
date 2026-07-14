@@ -48,7 +48,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7.3e ✅ (RoutineAusfuehren Application Runner) — **Nächster Schritt: Gate 7.3f** (API-Ausführung)
+**▶ Aktueller Stand:** Gate 7.3e ✅ — **Gate 7.3f 🔄** (HTTP-API Automatisierung, Branch `feat/gate-7-3f-automatisierung-api`)
 
 ---
 
@@ -119,8 +119,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 7.3b | API: Einzelkommando ausführen (`kommando_id`) | ✅ | P2 | PR [#17](https://github.com/Rei1000/PWE/pull/17) — Merge `b3d3761` | 7.3a |
 | 7.3c | COM-Härtung (Wiring, Transport, PySerialTransport) | ✅ | P2 | PR [#18](https://github.com/Rei1000/PWE/pull/18) — Merge `d9b3bf0`, [ADR-0013](adr/0013-com-adapter-wiring-fehlerabbildung.md) | 7.3b |
 | 7.3d | Routine: Katalogmodell + Materialisierung | ✅ | P2 | PR [#19](https://github.com/Rei1000/PWE/pull/19) — Merge `914b23e`, [ADR-0014](adr/0014-routine-katalog-materialisierung.md) | 7.3c |
-| 7.3e | Routine: minimaler Runner (nur Kommando-Aktion) | ✅ | P2 | Branch `feat/gate-7-3e-routine-runner`, [ADR-0015](adr/0015-routine-ausfuehren-application-runner.md) | 7.3d |
-| 7.3f | Routine: API-Ausführung | ⏳ | P2 | — (nächster Slice) | 7.3e |
+| 7.3e | Routine: minimaler Runner (nur Kommando-Aktion) | ✅ | P2 | PR [#20](https://github.com/Rei1000/PWE/pull/20) — Merge `bb436a5`, [ADR-0015](adr/0015-routine-ausfuehren-application-runner.md) | 7.3d |
+| 7.3f | Routine: API-Ausführung | 🔄 | P2 | ADR-0016, Branch `feat/gate-7-3f-automatisierung-api` | 7.3e |
 
 ### Roadmap-Anpassung (2026-07-12) — Gate 7.3 Zerlegung
 
@@ -162,7 +162,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | Auth / Identity-Context | 8.1 | V1 PC-only, ein Prüfer; ADR-0001 |
 | API In-Memory-Default | 7.1 | Dev/Test ohne `DATABASE_URL`; docker-compose setzt PostgreSQL (Gate 7.2) |
 | Vollständige Katalogverwaltung | 8.2 | Minimal-API (Entwurf/Veröffentlichen) reicht für Frontend-Slice 1; Kommando-Bibliothek schrittweise (7.3a) |
-| Gate 7.3 Gesamtfeature | 7.3 | Zerlegt in 7.3a–7.3f; 7.3a–7.3e ✅, API 7.3f ⏳ |
+| Gate 7.3 Gesamtfeature | 7.3 | Zerlegt in 7.3a–7.3f; 7.3a–7.3e ✅, API 7.3f 🔄 |
 | OpenAPI-Codegen / erweiterte 422-Details | 6.1+ | Optional mit Frontend Bootstrap |
 | Aggregate Discovery als eigene Phase | — | In Technical Domain integriert (Gate 1) |
 
@@ -172,6 +172,9 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-07-14 | Gate 7.3f Implementierung — ADR-0016, schrittzentrierter Endpunkt, Legacy deprecated | Variante D: HTTP 200 nach Ausführungsbeginn, 4xx nur vorher |
+| 2026-07-14 | Gate 7.3e abgeschlossen (PR #20, Merge `bb436a5`) | RoutineAusfuehren, ADR-0015, Kommando-Kernlogik, Audit, Vorbedingungen vor Port |
+| 2026-07-14 | Gate 7.3f gestartet — Architekturreview API-Ausführung | Adversarial Review vor Implementierung; Voraussetzung 7.3e ✅ |
 | 2026-07-14 | Gate 7.3e abgeschlossen — RoutineAusfuehren, ADR-0015 | Zentrale Normalisierung, Kommando-Kernlogik, Audit-Korrelation, Ergebnis-Contract |
 | 2026-07-14 | Gate 7.3e gestartet — RoutineAusfuehren Application Runner, ADR-0015 | Zentrale Normalisierung, gemeinsame Kommando-Kernlogik, Ergebnis-Contract nach Ausführungsbeginn |
 | 2026-07-14 | Gate 7.3d abgeschlossen (PR #19, Merge `914b23e`) | Routine Katalog + Materialisierung, ADR-0014, XOR ohne stille Ersetzung, Kompatibilitätsinvariante |
@@ -200,4 +203,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 7.3f — Routine: API-Ausführung** (⏳, nächster Slice) — mappt `RoutineAusfuehrungErgebnis` auf HTTP; Voraussetzung 7.3e ✅.
+**Gate 7.3f — Routine: API-Ausführung** (🔄) — schrittzentrierter Endpunkt, ADR-0016; Voraussetzung 7.3e ✅ (PR #20, Merge `bb436a5`).

@@ -57,6 +57,34 @@ class NachweisResponse(BaseModel):
     art: str
 
 
+class ErrorResponse(BaseModel):
+    """Einheitliches API-Fehlerformat — vor Ausführungsbeginn."""
+
+    detail: str
+    code: str
+
+
+class AutomatisierungFehlerartEnum(str, Enum):
+    KEINE_GERAETEANTWORT = "keine_geraeteantwort"
+    GERAETEFEHLSCHLAG = "geraetefehlschlag"
+    UNGUELTIGE_ANTWORT = "ungueltige_antwort"
+
+
+class AutomatisierungAusfuehrenRequest(BaseModel):
+    """Leerer Body — unbekannte Felder werden abgelehnt (Gate 7.3f)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class AutomatisierungAusfuehrenResponse(BaseModel):
+    ausfuehrung_id: str
+    fehlgeschlagen: bool
+    ausgefuehrte_aktionen: int
+    abgebrochen_bei_aktion_position: int | None
+    fehlerart: AutomatisierungFehlerartEnum | None
+    nachweise: list[NachweisResponse]
+
+
 class ExternesKommandoAusfuehrenRequest(BaseModel):
     """Leerer Body — unbekannte Felder (z. B. kommandocode) werden abgelehnt."""
 

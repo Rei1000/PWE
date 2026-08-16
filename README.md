@@ -47,3 +47,25 @@ docker compose up --build
 ```
 
 Details: [`README-docker.md`](README-docker.md)
+
+### Demo-/Labor-Automatisierung (Gate 6.3c)
+
+Reproduzierbarer Setup **nur über öffentliche HTTP-API** — kein `/dev`-Endpoint, kein Ersatz für Katalog-Admin (Gate 8.2).
+
+```bash
+# 1) API mit explizitem Demo-Simulationsmodus
+cd backend && pip install ".[dev,persistence,pdf,api]"
+PWE_DEMO_MODE=true EXTERNES_KOMMANDO_ADAPTER=simulation \
+  uvicorn api.app:create_app --factory --reload --port 8000
+
+# 2) Demo-Seed (nicht idempotent — jeder Lauf erzeugt neue Katalogobjekte)
+python3 scripts/seed_demo_automatisierung.py --api-base http://127.0.0.1:8000
+
+# 3) Frontend
+cd frontend/web && npm run dev
+# ausgegebene URL öffnen, z. B. http://localhost:5173/prueflaeufe/<id>
+
+# 4) Komponente „komponente-a“ erfassen → Automatisierung ausführen
+```
+
+Ohne `PWE_DEMO_MODE=true` bleibt die Simulation leer (kein verstecktes Demo-Verhalten).

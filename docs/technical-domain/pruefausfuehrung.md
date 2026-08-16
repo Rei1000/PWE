@@ -95,7 +95,7 @@ Keine.
 
 **Istbestückung** ist im Domain-Kern implementiert: `Prueflauf.erfasse_komponente()` (ADR-0006, Slice minimal).
 
-## Gate 6.3b — Frontend-Ausführung / Read-Model-Flags
+Gate 6.3b — Frontend-Ausführung / Read-Model-Flags
 
 | Feld | Bedeutung |
 |------|-----------|
@@ -112,4 +112,17 @@ Keine.
 - Mutation: `retry: false`; Doppelklick gesperrt während Pending
 - Nicht-Idempotenz: Hinweis auf neue Nachweis-Welle; bei Netzwerkfehler Read-Model invalidieren, **nicht** automatisch erneut ausführen
 - Prüfer-UI nutzt **keinen** Katalog-Setup-Endpunkt (Gate 6.3a) und **keinen** Legacy-Kommando-Endpunkt
-- Demo-/Seed-Orchestrierung mit Automatisierung: Gate 6.3c
+- Demo-/Seed-Orchestrierung: Gate 6.3c
+
+## Gate 6.3c — Demo-/Labor-Seed
+
+| Aspekt | Regel |
+|--------|-------|
+| Einstieg | `scripts/seed_demo_automatisierung.py` — externer HTTP-Client |
+| Contracts | ausschließlich öffentliche Katalog-/Prüflauf-HTTP (ADR-0017, ADR-0016) |
+| Simulation | nur mit `PWE_DEMO_MODE=true` und Adapter `simulation`: feste Antwort für `DEMO_MESSWERT` |
+| Default | `PWE_DEMO_MODE` fehlt/false → **keine** Demo-Antworten |
+| Idempotenz | **nicht** idempotent; erneutes Seeden erzeugt neue Objekte; aktive Version der Demo-Kodierung wird ersetzt |
+| Fehler | Schritt stoppt; keine Multi-Request-Kompensation |
+| Abgrenzung | Labor/Demo/Schulung — **kein** Ersatz für Gate 8.2 Katalog-Admin |
+| StartPage | bewusst nicht erweitert (P1) |

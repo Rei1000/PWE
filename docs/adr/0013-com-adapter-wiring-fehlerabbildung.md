@@ -103,3 +103,4 @@ Application liefert `ExternesKommandoAusfuehrungErgebnis(nachweise, fehlgeschlag
 - `docs/domain-model.md` §4.11
 - Gate 7.3c in `docs/roadmap.md`
 - `docs/technical-domain/pruefausfuehrung.md`
+- Gate 6.3c: optionale Demo-Simulationsantworten nur bei `PWE_DEMO_MODE=true` (Composition Root `api/kommando_wiring.py`) — keine öffentliche Sim-Config-API

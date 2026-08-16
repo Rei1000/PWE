@@ -205,6 +205,7 @@ Antworten (`NachweisResponse`, Read Model) liefern `art` als denselben String-We
 - Sollbestückung und erfasste Komponenten
 - **UI-Fortschritt (Gate 7.0):** `ist_abgeschlossen`, `fehlende_komponenten`, `kann_komponente_erfassen`, `kann_abgeschlossen_werden`; pro Schritt `kann_nachweis_erfassen`, `kann_beurteilt_werden`
 - **Automatisierung (Gate 6.3b):** pro Schritt `hat_automatisierung`, `kann_automatisierung_ausfuehren`, optional `automatisierung_bezeichnung` — siehe `docs/technical-domain/pruefausfuehrung.md`
+- **Demo-Labor (Gate 6.3c):** `PWE_DEMO_MODE=true` aktiviert feste Simulationsantwort für `DEMO_MESSWERT` (nur Adapter `simulation`); Seed: `scripts/seed_demo_automatisierung.py`. Default `false` — kein verstecktes Demo-Verhalten.
 
 Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruefausfuehrung/prueflauf_lesen.py`.
 

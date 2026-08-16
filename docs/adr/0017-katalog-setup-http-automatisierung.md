@@ -64,8 +64,8 @@ Gate 6.3a schließt diese Lücke mit einem **minimalen Katalog-Setup-Contract**,
 ## Konsequenzen
 
 - Erstmals vollständig HTTP-basierter Setup- und Ausführungsflow für Einzelkommando-Automatisierung
-- Gate 6.3b/c bauen auf diesen Endpunkten auf (Frontend, Demo-Seed-Orchestrierung)
-- Gate 8.2a erweitert Bibliothek-HTTP (Listen, Routinen, CRUD) — kein Ersatz für 6.3a
+- Gate 6.3b/c bauen auf diesen Endpunkten auf (Frontend-Ausführung; Demo-Seed als externer HTTP-Client `scripts/seed_demo_automatisierung.py`, kein `/dev`-Endpoint)
+- Gate 8.2a erweitert Bibliothek-HTTP (Listen, Routinen, CRUD) — kein Ersatz für 6.3a / 6.3c
 
 ## Nicht-Ziele (Gate 6.3a)
 

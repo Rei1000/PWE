@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3b 🔄** (Frontend-Ausführung der Automatisierung, ADR-0016)
+**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3b ✅** — **Nächster Slice: Gate 6.3c** (Demo-/Seed-Konfiguration)
 
 ---
 
@@ -102,8 +102,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path (manuell) | ✅ | P1 | PR [#12](https://github.com/Rei1000/PWE/pull/12) — Merge `e49fc99` | 6.1 |
 | 6.3 | **End-to-End Automatisierung** (Gesamtfeature) | ⏳ | **P0** | Schließt Wertlücke nach Gate 7.3f | 7.3f, 6.2 |
 | 6.3a | Minimaler Katalog-HTTP-Contract für Automatisierung | ✅ | **P0** | PR [#22](https://github.com/Rei1000/PWE/pull/22) — Merge `2bba9eb`, [ADR-0017](adr/0017-katalog-setup-http-automatisierung.md) | 7.3a, 5.6 |
-| 6.3b | Frontend-Ausführung der Automatisierung (ADR-0016) | 🔄 | **P0** | Nächster geplanter Slice | 6.3a |
-| 6.3c | Demo-/Seed-Konfiguration mit automatisierbarem Schritt | ⏳ | P0 | — | 6.3a, 6.3b |
+| 6.3b | Frontend-Ausführung der Automatisierung (ADR-0016) | ✅ | **P0** | PR [#23](https://github.com/Rei1000/PWE/pull/23) — Merge `e851f44` | 6.3a |
+| 6.3c | Demo-/Seed-Konfiguration mit automatisierbarem Schritt | 🔄 | **P0** | Nächster geplanter Slice | 6.3a, 6.3b |
 
 ### Roadmap-Anpassung (2026-06-27)
 
@@ -121,7 +121,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 |-------|--------|---------------|
 | **6.3a** | HTTP: Bibliothek-Kommando anlegen + Automatisierung an Entwurfsschritt zuweisen | Vollständige Admin-API, Routine-Anlage, Auth, Ausführung |
 | **6.3b** | Frontend: `automatisierung/ausfuehren`, Ergebnisdarstellung (`fehlgeschlagen`, Nachweise) | Katalog-Admin-UI, Legacy-Endpunkt |
-| **6.3c** | Demo-Seed über öffentliche 6.3a-Endpunkte (Frontend-Orchestrierung) | Dedizierter `/dev`-Wegwerf-Endpunkt, App-Start-Fixture als Produktionspfad |
+| **6.3c** | Demo-Seed über öffentliche HTTP-Contracts (CLI-Script; Demo-Simulation nur mit `PWE_DEMO_MODE`) | Dedizierter `/dev`-Endpunkt, StartPage-Admin, App-Startup-Fixture |
 
 ---
 
@@ -215,6 +215,9 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-16 | Gate 6.3c in Umsetzung — Demo-Seed-Script + `PWE_DEMO_MODE` | CLI-Orchestrierung öffentlicher HTTP; Demo-Sim nur explizit aktiviert |
+| 2026-08-16 | Gate 6.3b abgeschlossen — PR #23, Merge `e851f44` (Feature `21d0b4e`) | Frontend-Ausführung ADR-0016; Read-Model-Flags; CI grün |
+| 2026-08-16 | Gate 6.3c als nächster Slice markiert (🔄) | Demo-/Seed für automatisierbaren Prüflauf; Orchestrierung öffentlicher 6.3a-HTTP |
 | 2026-08-16 | Gate 6.3b in Umsetzung — Frontend-Ausführung + Read-Model-Flags | `hat_automatisierung` / `kann_automatisierung_ausfuehren` (UX-Führung Variante B); ADR-0016-Mutation |
 | 2026-07-14 | Gate 6.3a abgeschlossen — PR #22, Merge `2bba9eb` (Feature `52dd051`) | ADR-0017: POST `/katalog/bibliothek/kommandos`, PUT Automatisierung-Zuweisung; E2E-Tests grün |
 | 2026-07-14 | Gate 6.3b als nächster Slice markiert (🔄) | Frontend-Ausführung schrittzentriert (ADR-0016); Read-Model-Erweiterung erwartet |
@@ -242,4 +245,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 6.3b — Frontend-Ausführung der Automatisierung** (🔄, P0) — ADR-0016; Voraussetzung Gate 6.3a ✅ (PR #22, Merge `2bba9eb`).
+**Gate 6.3c — Demo-/Seed-Konfiguration mit automatisierbarem Schritt** (🔄, P0) — Voraussetzung Gate 6.3a/6.3b ✅ (PR #22/`2bba9eb`, PR #23/`e851f44`).

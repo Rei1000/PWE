@@ -32,6 +32,16 @@ Die API startet erst, wenn PostgreSQL healthy ist (`depends_on` + Healthcheck).
 | `DATABASE_URL` | `postgresql+psycopg://postgres:postgres@db:5432/app` |
 | `ENV` | `development` |
 
+Optional für Demo-/Labor-Automatisierung (Gate 6.3c):
+
+```yaml
+# in docker-compose.yml unter backend.environment ergänzen:
+PWE_DEMO_MODE: "true"
+EXTERNES_KOMMANDO_ADAPTER: simulation
+```
+
+Default bleibt **ohne** Demo-Antworten (`PWE_DEMO_MODE=false`). Siehe Root-README Demo-Ablauf und `scripts/seed_demo_automatisierung.py`.
+
 Schema wird beim API-Start via `init_schema` angelegt (kein Alembic in diesem Slice).
 
 ## Frontend anbinden

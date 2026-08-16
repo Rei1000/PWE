@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3 ✅** — **Gate 7.4a ✅** — **Nächster Slice: Gate 7.4b** (Write Exit)
+**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3 ✅** — **Gate 7.4a/b ✅** — **Nächster Slice: Gate 7.4c** (Monitoring-Baseline)
 
 ---
 
@@ -139,10 +139,10 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 7.3d | Routine: Katalogmodell + Materialisierung | ✅ | P2 | PR [#19](https://github.com/Rei1000/PWE/pull/19) — Merge `914b23e`, [ADR-0014](adr/0014-routine-katalog-materialisierung.md) | 7.3c |
 | 7.3e | Routine: minimaler Runner (nur Kommando-Aktion) | ✅ | P2 | PR [#20](https://github.com/Rei1000/PWE/pull/20) — Merge `bb436a5`, [ADR-0015](adr/0015-routine-ausfuehren-application-runner.md) | 7.3d |
 | 7.3f | Routine: API-Ausführung (schrittzentriert) | ✅ | P2 | PR [#21](https://github.com/Rei1000/PWE/pull/21) — Merge `c7beda3`, [ADR-0016](adr/0016-automatisierung-http-api.md) | 7.3e |
-| 7.4 | **Abbau der Übergangsarchitektur** (Gesamtfeature) | 🔄 | **P1** | Reihenfolge: 7.4a ✅ → 7.4b → 7.4c; Storage Exit nach 7.5 | 6.3 ✅, ADR-0014/0016/0018 |
+| 7.4 | **Abbau der Übergangsarchitektur** (Gesamtfeature) | 🔄 | **P1** | 7.4a/b ✅; 7.4c Monitoring; Storage Exit nach 7.5 | 6.3 ✅, ADR-0014/0016/0018 |
 | 7.4a | **API Exit** — deprecated Einzelkommando-HTTP + Use Case entfernen | ✅ | **P1** | PR [#26](https://github.com/Rei1000/PWE/pull/26) — Merge `0d24663`, [ADR-0018](adr/0018-legacy-automatisierung-exit.md) | 7.4 |
-| 7.4b | **Write Exit** — neue Versionen schreiben kein Legacy-`externes_kommando` | 🔄 | **P1** | [ADR-0018](adr/0018-legacy-automatisierung-exit.md); Lesen alter Daten bleibt | 7.4a |
-| 7.4c | Minimale fachliche Monitoring-Baseline | ⏳ | P2 | ADR-0016-Hinweis | 6.3b |
+| 7.4b | **Write Exit** — neue Versionen schreiben kein Legacy-`externes_kommando` | ✅ | **P1** | PR [#27](https://github.com/Rei1000/PWE/pull/27) — Merge `d0dcf4f`, [ADR-0018](adr/0018-legacy-automatisierung-exit.md) | 7.4a |
+| 7.4c | Minimale fachliche Monitoring-Baseline | 🔄 | P2 | [ADR-0016](adr/0016-automatisierung-http-api.md) Beobachtung `fehlgeschlagen` | 6.3b, 7.4b |
 | 7.5 | **Datenbankmigrationen** (Gesamtfeature) | ⏳ | P1 | — | — |
 | 7.5a | Alembic-Bootstrap und Initialmigration | ⏳ | P1 | Aus `schema.py` | 7.5 |
 | 7.5b | CI und Docker auf Migrationen umstellen | ⏳ | P1 | Ersetzt `create_all`-Only | 7.5a |
@@ -227,6 +227,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-16 | Gate 7.4c in Umsetzung — fachliche Monitoring-Baseline (ADR-0016) | Beobachtung über `fehlgeschlagen`; keine APM-Infrastruktur |
+| 2026-08-16 | Gate 7.4b abgeschlossen — PR #27, Merge `d0dcf4f` (Feature `e1e87af`) | Write Exit; Publish ohne Legacy-Snapshot |
 | 2026-08-16 | Gate 7.4b in Umsetzung — Write Exit (ADR-0018); Publish ohne Legacy-Snapshot | `materialisierte_routine` alleinige Wahrheit neuer Versionen; Lesen bleibt |
 | 2026-08-16 | Gate 7.4a abgeschlossen — PR #26, Merge `0d24663` (Feature `a220ce7`) | API Exit Legacy-HTTP + Use Case; ADR-0016 alleiniger Run-Time-Contract |
 | 2026-08-16 | Gate 7.4a in Umsetzung — API Exit (ADR-0018); Reihenfolge 7.4a→7.4b→7.4c bestätigt | Legacy-HTTP + `ExternesKommandoAusfuehren` entfernen; Write Exit getrennt |
@@ -263,4 +265,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 7.4b — Write Exit** (🔄, P1): Publish schreibt kein Legacy-`externes_kommando` mehr ([ADR-0018](adr/0018-legacy-automatisierung-exit.md)). Lesen alter Versionen bleibt. Storage Exit nach Gate 7.5.
+**Gate 7.4c — Monitoring-Baseline** (🔄, P2): fachliche Beobachtung der Automatisierung (`fehlgeschlagen`, strukturierte Logs). Keine APM-Plattform. Nächster Gate-7-Slice danach: **7.5 Alembic**.

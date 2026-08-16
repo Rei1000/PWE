@@ -5,6 +5,10 @@ from __future__ import annotations
 from fastapi import APIRouter, Body, Request
 from fastapi.responses import Response
 
+from api.automatisierung_beobachtung import (
+    beobachte_ausgefuehrte_automatisierung,
+    beobachte_automatisierung_nicht_begonnen,
+)
 from api.automatisierung_response import automatisierung_ausfuehren_response
 from api.deps import get_request_deps
 from api.schemas import (
@@ -31,6 +35,7 @@ from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschlies
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 from domain.pruefausfuehrung.typen import NachweisArt
+from domain.shared.errors import DomainError
 
 
 router = APIRouter(prefix="/prueflaeufe", tags=["Prüflauf"])
@@ -150,11 +155,20 @@ def automatisierung_ausfuehren(
     ),
 ) -> AutomatisierungAusfuehrenResponse:
     deps = get_request_deps(request)
-    ergebnis = RoutineAusfuehren(
-        deps.katalog,
-        deps.prueflauf_repo,
-        deps.kommando_port,
-    ).execute(prueflauf_id, schritt_id)
+    try:
+        ergebnis = RoutineAusfuehren(
+            deps.katalog,
+            deps.prueflauf_repo,
+            deps.kommando_port,
+        ).execute(prueflauf_id, schritt_id)
+    except DomainError as exc:
+        beobachte_automatisierung_nicht_begonnen(
+            exc, prueflauf_id=prueflauf_id, schritt_id=schritt_id
+        )
+        raise
+    beobachte_ausgefuehrte_automatisierung(
+        ergebnis, prueflauf_id=prueflauf_id, schritt_id=schritt_id
+    )
     return automatisierung_ausfuehren_response(ergebnis)
 
 

@@ -95,13 +95,23 @@ POST /prueflaeufe/{id}/schritte/{id}/kommandos/{kommando_id}/ausfuehren
 | Gerätefehler mit Rohantwort | 409 `{detail,code,nachweise}` | 200, volles Ergebnis |
 | Vor Ausführungsbeginn | 404/409 `{detail,code}` | 404/409/422 `{detail,code}` |
 
-### Monitoring (Hinweis)
+### Monitoring (Gate 7.4c)
 
-HTTP 200 bedeutet **nicht** automatisch fachlichen Erfolg. Metriken müssen `fehlgeschlagen` auswerten — keine Monitoring-Infrastruktur in Gate 7.3f.
+HTTP 200 bedeutet **nicht** automatisch fachlichen Erfolg.
+
+| Regel | Detail |
+|-------|--------|
+| Fachliche Kennzahl | `fehlgeschlagen` aus dem Ausführungsergebnis |
+| Beobachtung (begonnen) | strukturiertes Log-Event `automatisierung_ausgefuehrt` — Felder nur aus `RoutineAusfuehrungErgebnis` |
+| Beobachtung (nicht begonnen) | Event `automatisierung_nicht_begonnen` — Status/Code aus bestehender Fehlerabbildung |
+| Ableitung | `fachlicher_erfolg = not fehlgeschlagen` — keine Doppelberechnung von Fachregeln |
+| Nicht | Prometheus/Grafana/OpenTelemetry, APM, neue Metrik-Infrastruktur |
+
+Implementierung: `api/automatisierung_beobachtung.py` (Driving Adapter), Aufruf in der Automatisierungs-Route — **keine** Änderung an `RoutineAusfuehren` oder HTTP-Contract.
 
 ### Route-Verantwortung
 
-Nur: Request validieren → `RoutineAusfuehren` → Response mappen → HTTP 200. Keine Fachlogik.
+Nur: Request validieren → `RoutineAusfuehren` → (Beobachtung) → Response mappen → HTTP 200. Keine Fachlogik.
 
 ## Konsequenzen
 
@@ -123,4 +133,4 @@ Legacy-HTTP-Entfernung: Gate 7.4a — [ADR-0018](0018-legacy-automatisierung-exi
 - [ADR-0014](0014-routine-katalog-materialisierung.md)
 - [ADR-0015](0015-routine-ausfuehren-application-runner.md)
 - [ADR-0017](0017-katalog-setup-http-automatisierung.md) — Katalog-Setup vor Ausführung (Gate 6.3a)
-- [ADR-0018](0018-legacy-automatisierung-exit.md) — API Exit Legacy-Einzelkommando (Gate 7.4a)
+- [ADR-0018](0018-legacy-automatisierung-exit.md) — Legacy-Exit API/Write (Gate 7.4a/b); Monitoring = Gate 7.4c

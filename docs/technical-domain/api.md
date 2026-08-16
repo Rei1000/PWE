@@ -90,7 +90,7 @@ Führt die **materialisierte Automatisierung** des ProzedurSchritts aus (Einzelk
 | Ausführung begonnen | **immer HTTP 200** + `AutomatisierungAusfuehrenResponse` — auch bei Teilfehler |
 | Kein Hybrid-409 | Am Zielendpoint **niemals** 409 mit Ergebnisobjekt |
 | Idempotenz | **Nicht idempotent** — jeder POST = neue `ausfuehrung_id`, neue Nachweis-Welle |
-| Monitoring | HTTP 200 ≠ fachlicher Erfolg — Metriken müssen `fehlgeschlagen` auswerten |
+| Monitoring | HTTP 200 ≠ fachlicher Erfolg — Beobachtung wertet `fehlgeschlagen` aus (Gate 7.4c) |
 
 **Response (200):**
 
@@ -117,6 +117,8 @@ Führt die **materialisierte Automatisierung** des ProzedurSchritts aus (Einzelk
 Zulässige `fehlerart` im Ergebnis (nur bei `fehlgeschlagen=true`): `keine_geraeteantwort`, `geraetefehlschlag`, `ungueltige_antwort`.
 
 Route: nur Validierung, `RoutineAusfuehren`, Mapping — keine Fachlogik ([ADR-0016](../adr/0016-automatisierung-http-api.md)).
+
+**Fachliche Beobachtung (Gate 7.4c):** Nach begonnener Ausführung wird ein strukturiertes Log-Event `automatisierung_ausgefuehrt` geschrieben (`fehlgeschlagen`, `fachlicher_erfolg`, `ausfuehrung_id`, Nachweisanzahl, …). Vorbedingungsfehler vor Beginn: Event `automatisierung_nicht_begonnen`. Ableitung nur aus bestehendem Ergebnis bzw. Fehlerabbildung — keine Infrastruktur-Metriken, keine Änderung des HTTP-Contracts. Implementierung: `api/automatisierung_beobachtung.py`.
 
 **Legacy-Exit ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)):** Einzelkommando-HTTP entfernt (Gate 7.4a). Write Exit (Gate 7.4b): neue Versionen schreiben kein `externes_kommando`. Alte Versionen mit ausschließlich `externes_kommando` bleiben über ADR-0016 ausführbar. Storage Exit nach Gate 7.5.
 

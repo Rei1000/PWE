@@ -1,70 +1,63 @@
-# ADR-0018: Legacy-Automatisierung Exit — API Exit (Gate 7.4a)
+# ADR-0018: Legacy-Automatisierung Exit (Gate 7.4a / 7.4b)
 
 ## Status
 
-Angenommen (Gate 7.4a)
+Angenommen (Gate 7.4a API Exit; Gate 7.4b Write Exit)
 
 ## Kontext
 
-Gate 7.3f führte den schrittzentrierten Endpunkt ([ADR-0016](0016-automatisierung-http-api.md)) als führenden Run-Time-HTTP-Contract ein und markierte den Einzelkommando-Endpunkt (Gate 7.3b) als deprecated. Gate 6.3 hat Frontend und Demo vollständig auf ADR-0016 umgestellt.
-
-Die Übergangsarchitektur umfasste fünf getrennte Aspekte (Schreiben, Lesen, Legacy-Use-Case, HTTP, Persistenz). Ein Write Exit vor dem API Exit würde einen öffentlichen deprecated Endpunkt hinterlassen, der `schritt.externes_kommando` verlangt, während neue Versionen dieses Feld nicht mehr schreiben — kaputter Zwischenzustand.
+Gate 7.3f führte den schrittzentrierten Endpunkt ([ADR-0016](0016-automatisierung-http-api.md)) als führenden Run-Time-HTTP-Contract ein. Gate 6.3 stellte Frontend und Demo auf ADR-0016 um. Die Übergangsarchitektur umfasste Schreiben, Lesen, Legacy-Use-Case, HTTP und Persistenz des Felds `externes_kommando`.
 
 ## Entscheidung
 
-### Gate 7.4a — API Exit (dieser Slice)
-
-| Regel | Detail |
-|-------|--------|
-| Führender Contract | [ADR-0016](0016-automatisierung-http-api.md) ist der **einzige** aktive Run-Time-HTTP-Contract für Automatisierung |
-| Entfernt | `POST …/kommandos/{kommando_id}/ausfuehren` — vollständig, kein Redirect, kein Alias, keine stille Delegation |
-| Entfernt | Application Use Case `ExternesKommandoAusfuehren` (keine produktive Abhängigkeit außer Legacy-HTTP) |
-| Erhalten | `kommandoausfuehrung_kern` — weiterhin von `RoutineAusfuehren` genutzt; keine Kopie |
-| Erhalten | Legacy-Lesen: Feld `externes_kommando`, Deserialisierung, `aufgeloeste_materialisierte_routine()` |
-| Unverändert | Publish schreibt weiterhin Legacy-Snapshot neben `materialisierte_routine` (Write Exit = Gate 7.4b) |
-| Breaking Change | Bewusst vor Produktion und nach dokumentierter Deprecation |
-
 ### Exit-Reihenfolge (verbindlich)
 
-1. **Gate 7.4a — API Exit** (dieser ADR): Legacy-HTTP + Legacy-Use-Case
-2. **Gate 7.4b — Write Exit**: neue Versionen schreiben kein `externes_kommando` mehr
+1. **Gate 7.4a — API Exit** ✅: Legacy-HTTP + Use Case `ExternesKommandoAusfuehren`
+2. **Gate 7.4b — Write Exit** (dieser Slice): neue Versionen schreiben kein `externes_kommando` mehr
 3. **Gate 7.4c — Monitoring**: unabhängig; `fehlgeschlagen` auswerten
 4. **Storage Exit**: physische Entfernung aus Persistenz/Mapping **erst nach Gate 7.5 / Alembic** und bewusster Datenstrategie
 
-Physische Entfernung des Felds erfolgt **nicht** in Gate 7.4a oder 7.4b.
+### Gate 7.4a — API Exit
 
-### Legacy-Lesekompatibilität (P0)
+| Regel | Detail |
+|-------|--------|
+| Führender Contract | [ADR-0016](0016-automatisierung-http-api.md) alleiniger Run-Time-HTTP-Contract |
+| Entfernt | `POST …/kommandos/{kommando_id}/ausfuehren`; Use Case `ExternesKommandoAusfuehren` |
+| Erhalten | `kommandoausfuehrung_kern`, Legacy-Lesen, `aufgeloeste_materialisierte_routine()` |
 
-Alte Versionen mit ausschließlich `externes_kommando` (`materialisierte_routine=None`) bleiben lesbar und über ADR-0016 ausführbar:
+### Gate 7.4b — Write Exit
 
-- Read Model erkennt Automatisierung
-- `aufgeloeste_materialisierte_routine()` normalisiert zur synthetischen Ein-Aktions-Routine
-- `RoutineAusfuehren` / `POST …/automatisierung/ausfuehren` funktionieren
-- Nachweise werden erzeugt
+| Regel | Detail |
+|-------|--------|
+| Publish | schreibt **nur** `materialisierte_routine`; `externes_kommando=None` |
+| Wahrheit neuer Versionen | ausschließlich `materialisierte_routine` |
+| Unverändert | Runtime (`RoutineAusfuehren`), HTTP/API, Read Model, Frontend, Demo |
+| Unverändert | Mapping/Deserialisierung von `externes_kommando` (Lesen Altbestände) |
+| Unverändert | Domain-Feld und JSON-Schema-Option; **keine** Datenmigration, **kein** Alembic |
+| Design-Time | Bibliotheks-Entity `ExternesKommando` und Katalog-Setup-HTTP bleiben |
 
-### Nicht-Ziele (Gate 7.4a)
+### Legacy-Lesekompatibilität (P0, gilt weiter)
 
-- Write Exit / Materialisierungsänderung
-- Storage Exit / JSON- oder Datenmigration / Alembic
-- Entfernen von `externes_kommando` aus Domain-/Persistenzmodell
-- API-v2, Redirect/Compatibility-Endpoint
-- Refactoring von `kommandoausfuehrung_kern`
-- Monitoring, Auth, Katalog-Admin, neue Aktionsarten
-- Big-Bang-Umbau
+Alte Versionen mit ausschließlich `externes_kommando` (`materialisierte_routine=None`) bleiben lesbar und über ADR-0016 ausführbar über `aufgeloeste_materialisierte_routine()`.
+
+## Nicht-Ziele
+
+| Slice | Nicht |
+|-------|-------|
+| 7.4a | Write Exit, Storage Exit |
+| 7.4b | Storage Exit, Feldentfernung, Migration, Alembic, Monitoring, API-/Runtime-/Frontend-Änderung |
 
 ## Begründung
 
-- Nach Gate 6.3 ist der Legacy-HTTP-Pfad ohne Client-Nutzen und erhöht Vertragsfläche
-- API Exit vor Write Exit vermeidet den toten öffentlichen Endpoint
-- Gemeinsame Kernlogik bleibt eine Quelle der Wahrheit für COM/Simulation und Audit (ADR-0013/0015)
-- Stufenweiser Abbau statt Big Bang reduziert Migrationsrisiko
+- API Exit vor Write Exit vermeidet toten öffentlichen Legacy-Endpoint
+- Write Exit vor Storage Exit erlaubt Altbestände ohne Migration
+- Stufenweiser Abbau statt Big Bang
 
 ## Konsequenzen
 
-- OpenAPI enthält den Legacy-Pfad nicht mehr
-- Clients dürfen nur noch ADR-0016 verwenden
-- Historische ADR-/Changelog-Referenzen auf den deprecated Endpoint bleiben als Historie
-- Design-Time-Entity `ExternesKommando` und Bibliotheks-HTTP (Gate 6.3a) bleiben unverändert
+- Neue Veröffentlichungen persistieren kein Legacy-Feld mehr (JSON ohne `externes_kommando`)
+- Bestehende Versionen mit Legacy-Snapshot bleiben gültig
+- Storage Exit und physische Feldentfernung folgen erst nach Gate 7.5
 
 ## Referenzen
 

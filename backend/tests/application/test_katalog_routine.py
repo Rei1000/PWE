@@ -316,13 +316,12 @@ def test_einzelkommando_pfad_bleibt_funktionsfaehig():
     )
     schritt = version.schritt_by_id("schritt-a")
     assert schritt is not None
-    assert schritt.externes_kommando is not None
-    assert schritt.externes_kommando.kommandocode == "RST"
+    assert schritt.externes_kommando is None
     mr = schritt.materialisierte_routine
     assert mr is not None
     assert mr.herkunft == MaterialisierteRoutineHerkunft.EINZELKOMMANDO
     assert mr.routine_id is None
-
+    assert mr.aktionen[0].kommandocode == "RST"
 
 def test_entwurf_mit_doppelter_zuweisung_wird_bei_veroeffentlichen_abgelehnt():
     katalog, bibliothek = _setup()

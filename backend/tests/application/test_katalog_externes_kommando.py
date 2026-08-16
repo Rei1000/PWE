@@ -59,13 +59,12 @@ def test_produktdefinition_mit_kommando_referenz_veroeffentlichen():
     )
     schritt = version.schritt_by_id("schritt-a")
     assert schritt is not None
-    assert schritt.externes_kommando is not None
-    assert schritt.externes_kommando.kommando_id == kommando.kommando_id
-    assert schritt.externes_kommando.bezeichnung == "Reset"
-    assert schritt.externes_kommando.kommandocode == "RST"
+    assert schritt.externes_kommando is None
     assert schritt.materialisierte_routine is not None
     assert schritt.materialisierte_routine.herkunft == MaterialisierteRoutineHerkunft.EINZELKOMMANDO
-
+    assert schritt.materialisierte_routine.aktionen[0].kommando_id == kommando.kommando_id
+    assert schritt.materialisierte_routine.aktionen[0].bezeichnung == "Reset"
+    assert schritt.materialisierte_routine.aktionen[0].kommandocode == "RST"
 
 def test_veroeffentlichen_entwurf_nicht_gefunden():
     katalog, bibliothek = _setup()
@@ -177,10 +176,9 @@ def test_bibliotheksaenderung_nach_veroeffentlichung():
     assert gespeichert is not None
     schritt = gespeichert.schritt_by_id("schritt-a")
     assert schritt is not None
-    assert schritt.externes_kommando is not None
-    assert schritt.externes_kommando.bezeichnung == "Alt"
-    assert schritt.externes_kommando.kommandocode == "OLD"
+    assert schritt.externes_kommando is None
     assert schritt.materialisierte_routine is not None
+    assert schritt.materialisierte_routine.aktionen[0].bezeichnung == "Alt"
     assert schritt.materialisierte_routine.aktionen[0].kommandocode == "OLD"
 
 

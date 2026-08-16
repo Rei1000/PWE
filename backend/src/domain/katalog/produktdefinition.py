@@ -15,7 +15,7 @@ from domain.katalog.errors import (
     ExternesKommandoNichtGefunden,
     RoutineNichtGefunden,
 )
-from domain.katalog.externes_kommando import ExternesKommando, MaterialisiertesExternesKommando
+from domain.katalog.externes_kommando import ExternesKommando
 from domain.katalog.materialisierung import (
     materialisiere_sollvorgaben,
     validiere_materialisierter_schritt_automatisierung,
@@ -129,7 +129,6 @@ def _materialisiere_schritt(
     routinen: dict[str, Routine],
 ) -> MaterialisierterProzedurSchritt:
     materialisierte_routine: MaterialisierteRoutine | None = None
-    externes_kommando: MaterialisiertesExternesKommando | None = None
 
     if schritt.kommando_id is not None:
         kommando = kommandos.get(schritt.kommando_id)
@@ -138,7 +137,6 @@ def _materialisiere_schritt(
                 f"Externes Kommando {schritt.kommando_id} nicht gefunden"
             )
         materialisierte_routine = MaterialisierteRoutine.aus_einzelkommando(kommando=kommando)
-        externes_kommando = materialisierte_routine.erstes_kommando_snapshot()
     elif schritt.routine_id is not None:
         routine = routinen.get(schritt.routine_id)
         if routine is None:
@@ -160,7 +158,6 @@ def _materialisiere_schritt(
             schritt.sollvorgaben,
         ),
         materialisierte_routine=materialisierte_routine,
-        externes_kommando=externes_kommando,
     )
 
 
@@ -172,8 +169,8 @@ def _schritt_aus_automatisierung(
     reihenfolge: int,
     sollvorgaben: dict[str, Any],
     materialisierte_routine: MaterialisierteRoutine | None,
-    externes_kommando: MaterialisiertesExternesKommando | None,
 ) -> MaterialisierterProzedurSchritt:
+    # Gate 7.4b Write Exit: kein Legacy-Snapshot mehr; Lesen alter Daten bleibt.
     schritt = MaterialisierterProzedurSchritt(
         schritt_id=schritt_id,
         vorlage_id=vorlage_id,
@@ -181,7 +178,7 @@ def _schritt_aus_automatisierung(
         reihenfolge=reihenfolge,
         sollvorgaben=sollvorgaben,
         materialisierte_routine=materialisierte_routine,
-        externes_kommando=externes_kommando,
+        externes_kommando=None,
     )
     validiere_materialisierter_schritt_automatisierung(schritt)
     return schritt

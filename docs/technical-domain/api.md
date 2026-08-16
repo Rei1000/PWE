@@ -118,7 +118,7 @@ Zulässige `fehlerart` im Ergebnis (nur bei `fehlgeschlagen=true`): `keine_gerae
 
 Route: nur Validierung, `RoutineAusfuehren`, Mapping — keine Fachlogik ([ADR-0016](../adr/0016-automatisierung-http-api.md)).
 
-**Legacy-Exit (Gate 7.4a, [ADR-0018](../adr/0018-legacy-automatisierung-exit.md)):** Der frühere Einzelkommando-Endpunkt `POST …/kommandos/{kommando_id}/ausfuehren` ist entfernt (kein Redirect, kein Alias). Alte Versionen mit ausschließlich `externes_kommando` bleiben über diesen ADR-0016-Endpunkt ausführbar. Write Exit folgt in Gate 7.4b; Storage Exit nach Gate 7.5.
+**Legacy-Exit ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)):** Einzelkommando-HTTP entfernt (Gate 7.4a). Write Exit (Gate 7.4b): neue Versionen schreiben kein `externes_kommando`. Alte Versionen mit ausschließlich `externes_kommando` bleiben über ADR-0016 ausführbar. Storage Exit nach Gate 7.5.
 
 ### Kommando-Adapter (Gate 7.3c)
 

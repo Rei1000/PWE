@@ -70,9 +70,10 @@ def test_bibliotheksaenderung_aendert_veroeffentlichte_version_nicht():
     version = entwurf.veroeffentlichen(externe_kommandos={kommando.kommando_id: kommando})
     schritt = version.schritt_by_id("s1")
     assert schritt is not None
-    assert schritt.externes_kommando is not None
-    assert schritt.externes_kommando.bezeichnung == "Alt"
-    assert schritt.externes_kommando.kommandocode == "OLD"
+    assert schritt.externes_kommando is None
+    assert schritt.materialisierte_routine is not None
+    assert schritt.materialisierte_routine.aktionen[0].bezeichnung == "Alt"
+    assert schritt.materialisierte_routine.aktionen[0].kommandocode == "OLD"
 
     geaendert = ExternesKommando(
         kommando_id=kommando.kommando_id,
@@ -80,7 +81,6 @@ def test_bibliotheksaenderung_aendert_veroeffentlichte_version_nicht():
         kommandocode="NEW",
     )
     assert geaendert.kommando_id == kommando.kommando_id
-    assert schritt.externes_kommando.bezeichnung == "Alt"
-    assert schritt.externes_kommando.kommandocode == "OLD"
-    assert schritt.materialisierte_routine is not None
+    assert schritt.materialisierte_routine.aktionen[0].bezeichnung == "Alt"
+    assert schritt.materialisierte_routine.aktionen[0].kommandocode == "OLD"
     assert schritt.materialisierte_routine.herkunft == MaterialisierteRoutineHerkunft.EINZELKOMMANDO

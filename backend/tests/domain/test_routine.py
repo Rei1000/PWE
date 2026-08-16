@@ -137,8 +137,7 @@ def test_direkte_kommando_zuweisung_materialisiert_ein_aktions_routine():
     assert mr.routine_id is None
     assert len(mr.aktionen) == 1
     assert mr.aktionen[0].kommandocode == "RST"
-    assert schritt.externes_kommando is not None
-    assert schritt.externes_kommando.kommandocode == "RST"
+    assert schritt.externes_kommando is None
 
 
 def test_bibliotheksroutine_wird_vollstaendig_materialisiert():

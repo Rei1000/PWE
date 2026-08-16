@@ -93,6 +93,8 @@ Keine.
 
 **Schrittzentrierte Automatisierungs-API** ist der alleinige Run-Time-HTTP-Contract (Gate 7.3f / ADR-0016). Legacy-Einzelkommando-HTTP entfernt in Gate 7.4a ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)). Write Exit Gate 7.4b: neue Versionen schreiben kein `externes_kommando`; Altbestände bleiben über `aufgeloeste_materialisierte_routine()` les- und ausführbar.
 
+**Monitoring-Baseline (Gate 7.4c):** Fachliche Beobachtung der Automatisierung über strukturierte Logs (`automatisierung_ausgefuehrt` / `automatisierung_nicht_begonnen`). Kennzahl ist `fehlgeschlagen`, nicht der HTTP-Status. Keine APM-/Metrik-Infrastruktur.
+
 **Istbestückung** ist im Domain-Kern implementiert: `Prueflauf.erfasse_komponente()` (ADR-0006, Slice minimal).
 
 Gate 6.3b — Frontend-Ausführung / Read-Model-Flags

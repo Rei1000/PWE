@@ -37,7 +37,7 @@ In der Prüflauf-Schrittkarte:
 - Zielendpoint: `POST .../automatisierung/ausfuehren` ([ADR-0016](../../docs/adr/0016-automatisierung-http-api.md))
 - HTTP 200 mit `fehlgeschlagen=true` ist ein fachliches Ergebnis — kein API-Fehler
 - Kein Auto-Retry; Hinweis auf neue Nachweis-Welle
-- Kein Katalog-Setup und kein Legacy-Kommando-Endpunkt in der Prüfer-UI
+- Kein Katalog-Setup in der Prüfer-UI; Automatisierung ausschließlich über ADR-0016 (`…/automatisierung/ausfuehren`, Gate 7.4a)
 - Demo mit automatisierbarem Seed: Gate 6.3c
 
 ## Skripte

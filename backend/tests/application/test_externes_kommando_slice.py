@@ -1,4 +1,4 @@
-"""Vertical Slice — Externes Kommando via Simulation-Adapter."""
+"""Vertical Slice — Externes Kommando via Simulation-Adapter (über RoutineAusfuehren)."""
 
 from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
@@ -11,9 +11,9 @@ from adapters.persistence.in_memory import (
     InMemoryPrueflaufRepository,
 )
 from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
-from application.pruefausfuehrung.externes_kommando_ausfuehren import ExternesKommandoAusfuehren
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 
 
@@ -66,10 +66,9 @@ def test_externes_kommando_simulation_bis_gueltiger_lauf():
         pruefer_id="pruefer-1",
     )
 
-    ergebnis = ExternesKommandoAusfuehren(katalog, prueflauf_repo, kommando_port).execute(
+    ergebnis = RoutineAusfuehren(katalog, prueflauf_repo, kommando_port).execute(
         prueflauf.prueflauf_id,
         "schritt-a",
-        KOMMANDO_ID,
     )
     nachweise = ergebnis.nachweise
 

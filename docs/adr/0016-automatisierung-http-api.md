@@ -15,6 +15,7 @@ Eine Architekturprüfung (Variante D) hat entschieden:
 - **404/409/422** + `{detail, code}` nur **vor** Ausführungsbeginn
 - **Kein 409** mit Ergebnisobjekt am neuen Endpunkt
 - Legacy 7.3b deprecated, Verhalten unverändert
+- Legacy-HTTP-Exit: [ADR-0018](0018-legacy-automatisierung-exit.md) (Gate 7.4a)
 
 ## Entscheidung
 
@@ -83,7 +84,7 @@ POST /prueflaeufe/{id}/schritte/{id}/kommandos/{kommando_id}/ausfuehren
 |--------|-------|
 | OpenAPI | `deprecated: true` |
 | Verhalten | **unverändert** — kein Redirect, keine Delegation auf `RoutineAusfuehren` |
-| Entfernung | nach Frontend-Migration; kein Datum in 7.3f |
+| Entfernung | **Gate 7.4a** — siehe [ADR-0018](0018-legacy-automatisierung-exit.md) |
 
 #### Semantikdifferenz Legacy vs. Ziel
 
@@ -110,7 +111,9 @@ Nur: Request validieren → `RoutineAusfuehren` → Response mappen → HTTP 200
 
 ## Nicht-Ziele (Gate 7.3f)
 
-Frontend, Legacy-Entfernung, Idempotency-Key, Retry, Pause/Resume, weitere Aktionsarten, GET auf `ausfuehrung_id`, Materialisierungs-Exit `externes_kommando`.
+Frontend, Idempotency-Key, Retry, Pause/Resume, weitere Aktionsarten, GET auf `ausfuehrung_id`, Materialisierungs-Exit `externes_kommando` (Write Exit = Gate 7.4b).
+
+Legacy-HTTP-Entfernung: Gate 7.4a — [ADR-0018](0018-legacy-automatisierung-exit.md).
 
 ## Referenzen
 
@@ -120,3 +123,4 @@ Frontend, Legacy-Entfernung, Idempotency-Key, Retry, Pause/Resume, weitere Aktio
 - [ADR-0014](0014-routine-katalog-materialisierung.md)
 - [ADR-0015](0015-routine-ausfuehren-application-runner.md)
 - [ADR-0017](0017-katalog-setup-http-automatisierung.md) — Katalog-Setup vor Ausführung (Gate 6.3a)
+- [ADR-0018](0018-legacy-automatisierung-exit.md) — API Exit Legacy-Einzelkommando (Gate 7.4a)

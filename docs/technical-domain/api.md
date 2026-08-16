@@ -21,8 +21,7 @@ Brücke Application → HTTP. Fachliche Referenz: `docs/architecture.md` §6–�
 | POST | `/katalog/bibliothek/kommandos` | `ExternesKommandoAnlegen` (Gate 6.3a) |
 | PUT | `/katalog/entwuerfe/{id}/schritte/{schritt_id}/automatisierung` | `KommandoProzedurSchrittZuweisen` (Gate 6.3a) |
 | POST | `/prueflaeufe` | `PruefungStarten` |
-| POST | `/prueflaeufe/{id}/schritte/{schritt_id}/automatisierung/ausfuehren` | `RoutineAusfuehren` |
-| POST | `/prueflaeufe/{id}/schritte/{schritt_id}/kommandos/{kommando_id}/ausfuehren` | `ExternesKommandoAusfuehren` (**deprecated**, Gate 7.3b) |
+| POST | `/prueflaeufe/{id}/schritte/{schritt_id}/automatisierung/ausfuehren` | `RoutineAusfuehren` ([ADR-0016](../adr/0016-automatisierung-http-api.md) — alleiniger Run-Time-Contract) |
 | POST | `/prueflaeufe/{id}/komponenten` | `KomponenteErfassen` |
 | POST | `/prueflaeufe/{id}/schritte/{schritt_id}/nachweise` | `NachweisErfassen` |
 | POST | `/prueflaeufe/{id}/schritte/{schritt_id}/beurteilung` | `SchrittBeurteilen` |
@@ -119,43 +118,7 @@ Zulässige `fehlerart` im Ergebnis (nur bei `fehlgeschlagen=true`): `keine_gerae
 
 Route: nur Validierung, `RoutineAusfuehren`, Mapping — keine Fachlogik ([ADR-0016](../adr/0016-automatisierung-http-api.md)).
 
-## Externes Kommando ausführen (Gate 7.3b, **deprecated**)
-
-`POST /prueflaeufe/{prueflauf_id}/schritte/{schritt_id}/kommandos/{kommando_id}/ausfuehren`
-
-**Deprecated** — OpenAPI `deprecated: true`. Verhalten unverändert (Gate 7.3b); kein Redirect auf `RoutineAusfuehren`. Zielendpoint: `POST .../automatisierung/ausfuehren` (ADR-0016).
-
-Führt ein **bereits materialisiertes** Einzelkommando aus der referenzierten `ProduktdefinitionsVersion` aus. Request-Body: leeres JSON `{}` oder kein Body. **`extra="forbid"`** — unbekannte Felder (z. B. `kommandocode`) → HTTP 422.
-
-| Aspekt | Regel |
-|--------|-------|
-| Request-Body | `{}` oder kein Body; unbekannte Felder abgelehnt |
-| Identifikation | `prueflauf_id`, `schritt_id`, `kommando_id` (Pfad) |
-| Kommandocode-Quelle | Ausschließlich `MaterialisiertesExternesKommando` in der Version |
-| Mutable Bibliothek | Wird zur Laufzeit **nicht** gelesen |
-| Idempotenz | **Nicht idempotent** — jeder Aufruf erzeugt neue Nachweis-Wellen |
-| Adapter (V1) | `SimuliertesExternesKommandoPort` (Default Dev/CI); COM via `EXTERNES_KOMMANDO_ADAPTER=com` + `[com]`-Extra |
-
-**Response (201):**
-
-```json
-{
-  "nachweise": [
-    {"nachweis_id": "…", "art": "rohantwort"},
-    {"nachweis_id": "…", "art": "extrahierter_wert"}
-  ]
-}
-```
-
-| HTTP | `code` | Auslöser |
-|------|--------|----------|
-| 404 | `prueflauf_nicht_gefunden` | Unbekannter Prüflauf |
-| 404 | `materialisierter_prozedur_schritt_nicht_gefunden` | Schritt nicht in referenzierter Version |
-| 409 | `kommando_nicht_freigegeben` | `kommando_id` passt nicht zum materialisierten Schritt |
-| 409 | `invariant_verletzt` | Prüflauf bereits abgeschlossen |
-| 409 | `externes_kommando_adapter_fehler` | Adapter meldet fehlgeschlagene Ausführung **ohne** audit-relevante Rohantwort |
-| 409 | `externes_kommando_adapter_fehler` | Geräte-/Parserfehler **mit** Rohantwort — Body enthält zusätzlich `nachweise` (ROHANTWORT persistiert, Request commit) |
-| 422 | `validation` | Unerlaubter Request-Body (z. B. `kommandocode`) |
+**Legacy-Exit (Gate 7.4a, [ADR-0018](../adr/0018-legacy-automatisierung-exit.md)):** Der frühere Einzelkommando-Endpunkt `POST …/kommandos/{kommando_id}/ausfuehren` ist entfernt (kein Redirect, kein Alias). Alte Versionen mit ausschließlich `externes_kommando` bleiben über diesen ADR-0016-Endpunkt ausführbar. Write Exit folgt in Gate 7.4b; Storage Exit nach Gate 7.5.
 
 ### Kommando-Adapter (Gate 7.3c)
 

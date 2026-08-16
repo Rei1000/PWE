@@ -16,7 +16,6 @@ from application.katalog.kommando_zuweisen import KommandoProzedurSchrittZuweise
 from application.katalog.routine_anlegen import RoutineAnlegen
 from application.katalog.routine_zuweisen import RoutineProzedurSchrittZuweisen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
-from application.pruefausfuehrung.externes_kommando_ausfuehren import ExternesKommandoAusfuehren
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
@@ -383,7 +382,7 @@ def test_erneuter_routineaufruf_neue_ausfuehrung_id():
     assert len(reloaded.durchfuehrungen["schritt-a"].nachweise) == 4
 
 
-def test_einzelkommando_verwendet_dasselbe_audit_schema():
+def test_legacy_ek_only_verwendet_dasselbe_audit_schema():
     katalog = InMemoryKatalogRepository()
     _katalog_mit_legacy_kommando(katalog, kommando_id="cmd-legacy")
     prueflauf_repo = InMemoryPrueflaufRepository()
@@ -396,8 +395,8 @@ def test_einzelkommando_verwendet_dasselbe_audit_schema():
         {"LEG": ExternesKommandoAntwort(rohdaten="RAW:1", extrahierte_werte={"x": 1})}
     )
 
-    ergebnis = ExternesKommandoAusfuehren(katalog, prueflauf_repo, port).execute(
-        prueflauf.prueflauf_id, "schritt-a", "cmd-legacy"
+    ergebnis = RoutineAusfuehren(katalog, prueflauf_repo, port).execute(
+        prueflauf.prueflauf_id, "schritt-a"
     )
 
     audit = ergebnis.nachweise[0].payload["automatisierung"]

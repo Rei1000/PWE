@@ -1,10 +1,10 @@
-"""PostgreSQL-Integration — ExternesKommandoAusfuehren."""
+"""PostgreSQL-Integration — Legacy ek-only Version über RoutineAusfuehren (Gate 7.4a)."""
 
 import pytest
 
 from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
-from application.pruefausfuehrung.externes_kommando_ausfuehren import ExternesKommandoAusfuehren
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
 from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
@@ -16,7 +16,8 @@ KOMMANDO_ID = "cmd-pg-voltage"
 KOMMANDOCODE = "READ_VOLTAGE"
 
 
-def test_postgresql_kommando_ausfuehrung_persistiert_nachweise(pg_repos):
+def test_postgresql_legacy_ek_only_routine_ausfuehren_persistiert_nachweise(pg_repos):
+    """Alte Version: externes_kommando gesetzt, materialisierte_routine=None."""
     katalog, _, prueflauf_repo, _ = pg_repos
     katalog.save_version(
         ProduktdefinitionsVersion(
@@ -53,10 +54,9 @@ def test_postgresql_kommando_ausfuehrung_persistiert_nachweise(pg_repos):
         }
     )
 
-    ergebnis = ExternesKommandoAusfuehren(katalog, prueflauf_repo, port).execute(
+    ergebnis = RoutineAusfuehren(katalog, prueflauf_repo, port).execute(
         prueflauf.prueflauf_id,
         "schritt-a",
-        KOMMANDO_ID,
     )
 
     reloaded = prueflauf_repo.get(prueflauf.prueflauf_id)
@@ -66,7 +66,7 @@ def test_postgresql_kommando_ausfuehrung_persistiert_nachweise(pg_repos):
     assert reloaded.durchfuehrungen["schritt-a"].nachweise[0].art == NachweisArt.ROHANTWORT
 
 
-def test_postgresql_geraete_err_persistiert_rohantwort(pg_repos):
+def test_postgresql_legacy_ek_only_geraete_err_persistiert_rohantwort(pg_repos):
     katalog, _, prueflauf_repo, _ = pg_repos
     katalog.save_version(
         ProduktdefinitionsVersion(
@@ -103,10 +103,9 @@ def test_postgresql_geraete_err_persistiert_rohantwort(pg_repos):
         }
     )
 
-    ergebnis = ExternesKommandoAusfuehren(katalog, prueflauf_repo, port).execute(
+    ergebnis = RoutineAusfuehren(katalog, prueflauf_repo, port).execute(
         prueflauf.prueflauf_id,
         "schritt-a",
-        KOMMANDO_ID,
     )
 
     assert ergebnis.fehlgeschlagen is True

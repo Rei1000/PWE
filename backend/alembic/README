@@ -1,0 +1,5 @@
+PWE Alembic-Migrationen (Gate 7.5a).
+
+- Quelle der Wahrheit für die Initialmigration: `adapters.persistence.postgresql.schema.Base`
+- Ausführung: `cd backend && DATABASE_URL=… alembic upgrade head`
+- API-Runtime nutzt bis Gate 7.5b weiterhin `init_schema()` / `create_all`

@@ -42,7 +42,14 @@ EXTERNES_KOMMANDO_ADAPTER: simulation
 
 Default bleibt **ohne** Demo-Antworten (`PWE_DEMO_MODE=false`). Siehe Root-README Demo-Ablauf und `scripts/seed_demo_automatisierung.py`.
 
-Schema wird beim API-Start via `init_schema` angelegt (kein Alembic in diesem Slice).
+Schema wird beim API-Start via `init_schema` / `create_all` angelegt (Gate 7.5a: Alembic-Bootstrap vorhanden; CI/Docker-Umschaltung = Gate 7.5b). Manuell:
+
+```bash
+cd backend && pip install ".[persistence]"
+DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/app alembic upgrade head
+```
+
+Details: `docs/datenbankmodell.md` §4, `backend/alembic/README`.
 
 ## Frontend anbinden
 

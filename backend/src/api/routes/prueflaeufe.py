@@ -3,19 +3,16 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Body, Request
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import Response
 
 from api.automatisierung_response import automatisierung_ausfuehren_response
 from api.deps import get_request_deps
-from api.fehler import fehler_response, oeffentliche_fehlermeldung
 from api.schemas import (
     AbschlussResponse,
     AutomatisierungAusfuehrenRequest,
     AutomatisierungAusfuehrenResponse,
     BeurteilungResponse,
     ErrorResponse,
-    ExternesKommandoAusfuehrenRequest,
-    ExternesKommandoAusfuehrenResponse,
     KomponenteErfassenRequest,
     NachweisDetailResponse,
     NachweisErfassenRequest,
@@ -28,13 +25,11 @@ from api.schemas import (
 from application.pruefausfuehrung.prueflauf_lesen import PrueflaufDetailAnsicht, PrueflaufLesen
 from application.protokoll.erzeugen import ProtokollErzeugen
 from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
-from application.pruefausfuehrung.externes_kommando_ausfuehren import ExternesKommandoAusfuehren
 from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
-from domain.pruefausfuehrung.errors import ExternesKommandoAdapterFehler
 from domain.pruefausfuehrung.typen import NachweisArt
 
 
@@ -161,50 +156,6 @@ def automatisierung_ausfuehren(
         deps.kommando_port,
     ).execute(prueflauf_id, schritt_id)
     return automatisierung_ausfuehren_response(ergebnis)
-
-
-@router.post(
-    "/{prueflauf_id}/schritte/{schritt_id}/kommandos/{kommando_id}/ausfuehren",
-    status_code=201,
-    response_model=ExternesKommandoAusfuehrenResponse,
-    deprecated=True,
-    description=(
-        "Legacy (Gate 7.3b) — Einzelkommando über kommando_id. "
-        "Verwenden Sie POST .../schritte/{schritt_id}/automatisierung/ausfuehren (ADR-0016). "
-        "Verhalten unverändert; kein Redirect auf RoutineAusfuehren."
-    ),
-)
-def externes_kommando_ausfuehren(
-    prueflauf_id: str,
-    schritt_id: str,
-    kommando_id: str,
-    request: Request,
-    _body: ExternesKommandoAusfuehrenRequest = Body(
-        default_factory=ExternesKommandoAusfuehrenRequest
-    ),
-) -> ExternesKommandoAusfuehrenResponse | JSONResponse:
-    deps = get_request_deps(request)
-    ergebnis = ExternesKommandoAusfuehren(
-        deps.katalog,
-        deps.prueflauf_repo,
-        deps.kommando_port,
-    ).execute(prueflauf_id, schritt_id, kommando_id)
-    nachweis_responses = [
-        NachweisResponse(nachweis_id=n.nachweis_id, art=n.art.value)
-        for n in ergebnis.nachweise
-    ]
-    if ergebnis.fehlgeschlagen:
-        return JSONResponse(
-            status_code=409,
-            content={
-                **fehler_response(
-                    detail=oeffentliche_fehlermeldung(ExternesKommandoAdapterFehler()),
-                    code="externes_kommando_adapter_fehler",
-                ),
-                "nachweise": [n.model_dump() for n in nachweis_responses],
-            },
-        )
-    return ExternesKommandoAusfuehrenResponse(nachweise=nachweis_responses)
 
 
 @router.post(

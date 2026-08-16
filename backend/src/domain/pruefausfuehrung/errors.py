@@ -17,13 +17,5 @@ class MaterialisierterProzedurSchrittNichtGefunden(DomainError):
     pass
 
 
-class KommandoNichtFreigegeben(DomainError):
-    pass
-
-
-class ExternesKommandoAdapterFehler(DomainError):
-    pass
-
-
 class KeineAutomatisierungAmSchritt(DomainError):
     pass

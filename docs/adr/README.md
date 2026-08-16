@@ -21,3 +21,4 @@ Langfristig relevante Architekturentscheidungen. Fachdomäne: `docs/domain-model
 | [0015](0015-routine-ausfuehren-application-runner.md) | RoutineAusfuehren — Application Runner (Gate 7.3e) |
 | [0016](0016-automatisierung-http-api.md) | Automatisierung am ProzedurSchritt — HTTP-API (Gate 7.3f) |
 | [0017](0017-katalog-setup-http-automatisierung.md) | Katalog-Setup-HTTP für Automatisierung (Gate 6.3a) |
+| [0018](0018-legacy-automatisierung-exit.md) | Legacy-Automatisierung Exit — API Exit (Gate 7.4a) |

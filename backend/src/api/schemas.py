@@ -85,16 +85,6 @@ class AutomatisierungAusfuehrenResponse(BaseModel):
     nachweise: list[NachweisResponse]
 
 
-class ExternesKommandoAusfuehrenRequest(BaseModel):
-    """Leerer Body — unbekannte Felder (z. B. kommandocode) werden abgelehnt."""
-
-    model_config = ConfigDict(extra="forbid")
-
-
-class ExternesKommandoAusfuehrenResponse(BaseModel):
-    nachweise: list[NachweisResponse]
-
-
 class AbschlussResponse(BaseModel):
     prueflauf_id: str
     status: str

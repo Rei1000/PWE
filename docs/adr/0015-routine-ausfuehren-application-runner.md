@@ -51,7 +51,7 @@ Interne Funktion `kommandoausfuehrung_kern` (kein öffentlicher Use Case):
 - Darf **nicht**: Repositories laden/speichern, Transaktionen committen, HTTP/COM kennen
 - Verantwortlich: Port-Aufruf, Interpretation `ExternesKommandoAntwort`, Rohantwort-/Extraktions-Nachweise, Audit-Metadaten, generische Fehlerklassifikation
 
-`ExternesKommandoAusfuehren` und `RoutineAusfuehren` nutzen dieselbe Kernlogik.
+`ExternesKommandoAusfuehren` (historisch) und `RoutineAusfuehren` nutzen dieselbe Kernlogik. Nach Gate 7.4a nur noch `RoutineAusfuehren` ([ADR-0018](0018-legacy-automatisierung-exit.md)).
 
 ### Audit-Kontext (`automatisierung` im Nachweis-Payload)
 
@@ -74,7 +74,7 @@ Jeder automatisch erzeugte Nachweis enthält strukturiert:
 | `bibliothek` | `routine_id` Pflicht |
 | `einzelkommando` | keine künstliche `routine_id`, `aktion_position=1` |
 
-- Pro Aufruf von `RoutineAusfuehren` und `ExternesKommandoAusfuehren`: neue `ausfuehrung_id`
+- Pro Aufruf von `RoutineAusfuehren`: neue `ausfuehrung_id`
 - Alle Nachweise desselben Aufrufs tragen dieselbe Kennung
 - Keine neue Entity oder Aggregate Root
 - Manuelle Nachweise: **kein** Automatisierungsblock
@@ -133,14 +133,9 @@ Zulässige `fehlerart`-Werte: `keine_geraeteantwort`, `geraetefehlschlag`, `ungu
 - Fehler ohne Rohantwort → kein fingierter Nachweis
 - Erneuter Routineaufruf → neue `ausfuehrung_id`, neue Nachweise an dieselbe Durchführung
 
-### Einzelkommando-Pfad (Gate 7.3b)
+### Einzelkommando-Pfad (Gate 7.3b, historisch)
 
-`ExternesKommandoAusfuehren` nutzt dieselbe Kernlogik und dasselbe Audit-Schema:
-
-- HTTP-Contract Gate 7.3b **unverändert**
-- Audit-Regel Gate 7.3c **unverändert** (Transport ohne Rohantwort → Exception → API 409 Rollback)
-- `kommando_id` weiter gegen materialisierten Snapshot validiert
-- Pro Aufruf neue `ausfuehrung_id`, `herkunft=einzelkommando`, `aktion_position=1`
+`ExternesKommandoAusfuehren` nutzte dieselbe Kernlogik und dasselbe Audit-Schema. **Gate 7.4a ([ADR-0018](0018-legacy-automatisierung-exit.md)):** Use Case und HTTP-Endpunkt entfernt. Legacy-Daten (nur `externes_kommando`) laufen über `RoutineAusfuehren` / Normalisierung.
 
 ### Gate 7.3f — HTTP (ADR-0016)
 
@@ -148,7 +143,7 @@ Schrittzentrierter Endpunkt `POST .../automatisierung/ausfuehren` mappt `Routine
 
 - Vor Ausführungsbeginn: 404/409/422 + `{detail, code}`
 - Nach Beginn: immer 200 + `AutomatisierungAusfuehrenResponse`
-- Legacy 7.3b deprecated, Verhalten unverändert
+- Legacy 7.3b deprecated, Verhalten unverändert (historisch Gate 7.3f); entfernt Gate 7.4a → [ADR-0018](0018-legacy-automatisierung-exit.md)
 
 Siehe [ADR-0016](0016-automatisierung-http-api.md).
 
@@ -158,7 +153,7 @@ Alle lokal prüfbaren Domain-Invarianten werden **vor** dem ersten Aufruf von `E
 
 Domain-API: `Prueflauf.stelle_offen_sicher()` — dieselbe Invariante wie bei späteren Mutationen (`_ensure_offen`).
 
-Reihenfolge `ExternesKommandoAusfuehren`:
+Reihenfolge (historisch `ExternesKommandoAusfuehren`; heute äquivalent über Normalisierung in `RoutineAusfuehren`):
 
 1. Prüflauf laden
 2. Version und Schritt laden

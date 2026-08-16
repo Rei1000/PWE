@@ -511,16 +511,33 @@ def test_api_nicht_idempotent_zwei_wellen(client: TestClient):
     assert len(detail["schritte"][0]["nachweise"]) == 4
 
 
-def test_legacy_kommando_endpunkt_unveraendert_201(client: TestClient):
+def test_legacy_kommando_endpunkt_nicht_mehr_vorhanden(client: TestClient):
     prueflauf_id = _start_prueflauf(client)
     response = client.post(
         f"/prueflaeufe/{prueflauf_id}/schritte/schritt-a/kommandos/{KOMMANDO_ID}/ausfuehren"
     )
-    assert response.status_code == 201
-    assert "nachweise" in response.json()
+    assert response.status_code == 404
 
 
-def test_legacy_transport_ohne_roh_weiterhin_409_rollback():
+def test_api_legacy_ek_only_automatisierung_ausfuehren(client: TestClient):
+    """P0 Gate 7.4a: ek-only Version (ohne materialisierte_routine) über ADR-0016."""
+    prueflauf_id = _start_prueflauf(client)
+    detail = client.get(f"/prueflaeufe/{prueflauf_id}").json()
+    schritt = detail["schritte"][0]
+    assert schritt["hat_automatisierung"] is True
+    assert schritt["kann_automatisierung_ausfuehren"] is True
+
+    response = client.post(_auto_url(prueflauf_id))
+    assert response.status_code == 200
+    body = response.json()
+    assert body["fehlgeschlagen"] is False
+    assert len(body["nachweise"]) == 2
+
+    detail_nach = client.get(f"/prueflaeufe/{prueflauf_id}").json()
+    assert len(detail_nach["schritte"][0]["nachweise"]) == 2
+
+
+def test_legacy_transport_ohne_roh_ueber_adr0016_commit():
     deps = in_memory_deps()
     katalog = deps.katalog
     assert isinstance(katalog, InMemoryKatalogRepository)
@@ -547,9 +564,8 @@ def test_legacy_transport_ohne_roh_weiterhin_409_rollback():
     deps.kommando_port = SimuliertesExternesKommandoPort()
     with TestClient(create_app(deps)) as client:
         prueflauf_id = _start_prueflauf(client)
-        response = client.post(
-            f"/prueflaeufe/{prueflauf_id}/schritte/schritt-a/kommandos/{KOMMANDO_ID}/ausfuehren"
-        )
-    assert response.status_code == 409
-    assert response.json()["code"] == "externes_kommando_adapter_fehler"
-    assert "nachweise" not in response.json()
+        response = client.post(_auto_url(prueflauf_id))
+    assert response.status_code == 200
+    body = response.json()
+    assert body["fehlgeschlagen"] is True
+    assert body["fehlerart"] == "keine_geraeteantwort"

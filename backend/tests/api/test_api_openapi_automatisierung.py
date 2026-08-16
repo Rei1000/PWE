@@ -1,4 +1,4 @@
-"""OpenAPI-Contract — Automatisierung (Gate 7.3f)."""
+"""OpenAPI-Contract — Automatisierung (Gate 7.3f / Gate 7.4a API Exit)."""
 
 from api.app import create_app
 from api.deps import in_memory_deps
@@ -50,11 +50,33 @@ def test_openapi_automatisierung_request_forbid_extra():
     assert request_schema.get("additionalProperties") is False
 
 
-def test_openapi_legacy_endpunkt_deprecated():
+def test_openapi_legacy_endpunkt_entfernt():
+    """Gate 7.4a — Legacy-Pfad und Schemas dürfen nicht mehr in OpenAPI erscheinen."""
     spec = _openapi()
-    post = spec["paths"][LEGACY_PATH]["post"]
-    assert post["deprecated"] is True
-    assert "automatisierung/ausfuehren" in post["description"]
+    assert LEGACY_PATH not in spec["paths"]
+    schemas = spec["components"]["schemas"]
+    assert "ExternesKommandoAusfuehrenRequest" not in schemas
+    assert "ExternesKommandoAusfuehrenResponse" not in schemas
+    for path in spec["paths"]:
+        post = spec["paths"][path].get("post")
+        if post is None:
+            continue
+        assert post.get("deprecated") is not True
+
+
+def test_openapi_zielendpoint_adr0016_unverändert():
+    spec = _openapi()
+    assert AUTO_PATH in spec["paths"]
+    post = spec["paths"][AUTO_PATH]["post"]
+    assert post["responses"]["200"]["content"]["application/json"]["schema"][
+        "$ref"
+    ].endswith("AutomatisierungAusfuehrenResponse")
+    for status in ("404", "409", "422"):
+        assert (
+            post["responses"][status]["content"]["application/json"]["schema"]["$ref"].endswith(
+                "ErrorResponse"
+            )
+        )
 
 
 def test_openapi_ergebnis_schema_felder():

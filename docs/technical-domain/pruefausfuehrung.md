@@ -44,13 +44,13 @@ Brücke Domain Model → Code. Fachliche Referenz: `docs/domain-model.md` §4.15
 
 | Port | Adapter (V1) | Use Case |
 |------|--------------|----------|
-| `ExternesKommandoPort` | `adapters/simulation/externes_kommando.py` | `ExternesKommandoAusfuehren`, `RoutineAusfuehren` |
-| `ExternesKommandoPort` | `adapters/com/externes_kommando.py` | `ExternesKommandoAusfuehren`, `RoutineAusfuehren` |
+| `ExternesKommandoPort` | `adapters/simulation/externes_kommando.py` | `RoutineAusfuehren` |
+| `ExternesKommandoPort` | `adapters/com/externes_kommando.py` | `RoutineAusfuehren` |
 | `KatalogRepository` | — | Version/Snapshot lesen |
 
 Gate 7.3b: Ausführung bindet `kommando_id` an materialisierten Snapshot in der `ProduktdefinitionsVersion` — **kein** Zugriff auf `BibliothekRepository` zur Laufzeit. Fehler für fehlende materialisierte Schritte liegen in `domain/pruefausfuehrung/errors.py` (`MaterialisierterProzedurSchrittNichtGefunden`), nicht im Katalog-Context.
 
-Gate 7.3c: Adapterwahl ausschließlich in `api/kommando_wiring.py` (`create_kommando_port()`). Default: `SimuliertesExternesKommandoPort`. COM: `ComExternesKommandoPort` → `PySerialTransport` (optional Extra `[com]`). Transport-Lifecycle V1: **Port pro Kommando öffnen und schließen**. Technische Fehler ohne Geräte-Rohdaten → `ExternesKommandoAntwort(erfolgreich=False, rohdaten="")`; Application Einzelkommando wirft `ExternesKommandoAdapterFehler`. **Empfangene Geräte-Rohantwort** wird immer als ROHANTWORT-Nachweis persistiert (Domain Invariante 16), auch bei `erfolgreich=False`; Application liefert `ExternesKommandoAusfuehrungErgebnis`, API 409 mit `nachweise` ohne Exception-Rollback. Siehe [ADR-0013](../adr/0013-com-adapter-wiring-fehlerabbildung.md).
+Gate 7.3c: Adapterwahl ausschließlich in `api/kommando_wiring.py` (`create_kommando_port()`). Default: `SimuliertesExternesKommandoPort`. COM: `ComExternesKommandoPort` → `PySerialTransport` (optional Extra `[com]`). Transport-Lifecycle V1: **Port pro Kommando öffnen und schließen**. Technische Fehler ohne Geräte-Rohdaten → `ExternesKommandoAntwort(erfolgreich=False, rohdaten="")`. **Empfangene Geräte-Rohantwort** wird immer als ROHANTWORT-Nachweis persistiert (Domain Invariante 16), auch bei `erfolgreich=False`; fachlicher Ausgang über `RoutineAusfuehrungErgebnis.fehlgeschlagen` (ADR-0016: HTTP 200). Siehe [ADR-0013](../adr/0013-com-adapter-wiring-fehlerabbildung.md).
 
 COM-Adapter nutzt injizierbaren `SeriellerTransport` (`adapters/com/transport.py`); Tests: `InMemorySeriellerTransport`; Produktion: `PySerialTransport`.
 
@@ -91,7 +91,7 @@ Keine.
 
 - Fotospeicher
 
-**Schrittzentrierte Automatisierungs-API** ist implementiert (Gate 7.3f, ADR-0016). Legacy-Einzelkommando-Endpunkt (7.3b) bleibt deprecated.
+**Schrittzentrierte Automatisierungs-API** ist der alleinige Run-Time-HTTP-Contract (Gate 7.3f / ADR-0016). Legacy-Einzelkommando-HTTP entfernt in Gate 7.4a ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)). Legacy-Versionen mit ausschließlich `externes_kommando` bleiben über `aufgeloeste_materialisierte_routine()` les- und ausführbar; Write Exit = Gate 7.4b.
 
 **Istbestückung** ist im Domain-Kern implementiert: `Prueflauf.erfasse_komponente()` (ADR-0006, Slice minimal).
 

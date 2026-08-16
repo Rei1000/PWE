@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 
 from adapters.persistence.in_memory import InMemoryKatalogRepository, InMemoryPrueflaufRepository
-from application.pruefausfuehrung.externes_kommando_ausfuehren import ExternesKommandoAusfuehren
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
@@ -19,7 +18,6 @@ from domain.katalog.routine import (
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.pruefausfuehrung.errors import (
     KeineAutomatisierungAmSchritt,
-    KommandoNichtFreigegeben,
     MaterialisierterProzedurSchrittNichtGefunden,
 )
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
@@ -81,32 +79,6 @@ def _abgeschlossenen_prueflauf(
     return prueflauf
 
 
-def test_einzelkommando_abgeschlossener_prueflauf_ruft_port_nicht_auf():
-    katalog = InMemoryKatalogRepository()
-    _katalog_mit_kommando(katalog)
-    inner_repo = InMemoryPrueflaufRepository()
-    prueflauf_repo = CountingPrueflaufRepository(inner_repo)
-    prueflauf = _abgeschlossenen_prueflauf(katalog, inner_repo)
-    port = CountingKommandoPort(
-        antworten={
-            KOMMANDOCODE: ExternesKommandoAntwort(
-                rohdaten="RAW:230",
-                extrahierte_werte={"spannung": 230},
-            ),
-        }
-    )
-
-    with pytest.raises(InvariantViolation):
-        ExternesKommandoAusfuehren(katalog, prueflauf_repo, port).execute(
-            prueflauf.prueflauf_id, "schritt-a", KOMMANDO_ID
-        )
-
-    assert port.ausfuehren_count == 0
-    assert prueflauf_repo.save_count == 0
-    reloaded = inner_repo.get(prueflauf.prueflauf_id)
-    assert len(reloaded.durchfuehrungen["schritt-a"].nachweise) == 0
-
-
 def test_routine_abgeschlossener_prueflauf_ruft_port_nicht_auf():
     katalog = InMemoryKatalogRepository()
     _katalog_mit_kommando(katalog)
@@ -129,21 +101,8 @@ def test_routine_abgeschlossener_prueflauf_ruft_port_nicht_auf():
 
     assert port.ausfuehren_count == 0
     assert prueflauf_repo.save_count == 0
-
-
-def test_einzelkommando_falsche_kommando_id_ruft_port_nicht_auf():
-    katalog = InMemoryKatalogRepository()
-    _katalog_mit_kommando(katalog)
-    prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = _offenen_prueflauf(katalog, prueflauf_repo)
-    port = CountingKommandoPort()
-
-    with pytest.raises(KommandoNichtFreigegeben):
-        ExternesKommandoAusfuehren(katalog, prueflauf_repo, port).execute(
-            prueflauf.prueflauf_id, "schritt-a", "falsche-id"
-        )
-
-    assert port.ausfuehren_count == 0
+    reloaded = inner_repo.get(prueflauf.prueflauf_id)
+    assert len(reloaded.durchfuehrungen["schritt-a"].nachweise) == 0
 
 
 def test_routine_schritt_nicht_gefunden_ruft_port_nicht_auf():
@@ -246,7 +205,7 @@ def test_routine_inkonsistente_materialisierung_ruft_port_nicht_auf():
     assert port.ausfuehren_count == 0
 
 
-def test_einzelkommando_offener_lauf_ruft_port_genau_einmal():
+def test_legacy_ek_only_offener_lauf_ruft_port_genau_einmal():
     katalog = InMemoryKatalogRepository()
     _katalog_mit_kommando(katalog)
     prueflauf_repo = InMemoryPrueflaufRepository()
@@ -260,8 +219,8 @@ def test_einzelkommando_offener_lauf_ruft_port_genau_einmal():
         }
     )
 
-    ExternesKommandoAusfuehren(katalog, prueflauf_repo, port).execute(
-        prueflauf.prueflauf_id, "schritt-a", KOMMANDO_ID
+    RoutineAusfuehren(katalog, prueflauf_repo, port).execute(
+        prueflauf.prueflauf_id, "schritt-a"
     )
 
     assert port.ausfuehren_count == 1

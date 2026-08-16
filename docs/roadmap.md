@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3b ✅** — **Nächster Slice: Gate 6.3c** (Demo-/Seed-Konfiguration)
+**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3 ✅** — **Nächster Slice: Gate 7.4** (Abbau der Übergangsarchitektur)
 
 ---
 
@@ -100,10 +100,10 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 6.0 | **API Read-Slice** — `GET /prueflaeufe/{id}` (Schritte, Status, Nachweise) | ✅ | **P0** | PR [#10](https://github.com/Rei1000/PWE/pull/10) | 5.6 |
 | 6.1 | Frontend Bootstrap (Vite, React, API-Client, Dev-Proxy) | ✅ | P1 | PR [#11](https://github.com/Rei1000/PWE/pull/11) — Merge `f94387b` | 6.0, ADR-0009 |
 | 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path (manuell) | ✅ | P1 | PR [#12](https://github.com/Rei1000/PWE/pull/12) — Merge `e49fc99` | 6.1 |
-| 6.3 | **End-to-End Automatisierung** (Gesamtfeature) | ⏳ | **P0** | Schließt Wertlücke nach Gate 7.3f | 7.3f, 6.2 |
+| 6.3 | **End-to-End Automatisierung** (Gesamtfeature) | ✅ | **P0** | PR [#22](https://github.com/Rei1000/PWE/pull/22)–[#24](https://github.com/Rei1000/PWE/pull/24) — Merge `2bba9eb` … `4a2bb93` | 7.3f, 6.2 |
 | 6.3a | Minimaler Katalog-HTTP-Contract für Automatisierung | ✅ | **P0** | PR [#22](https://github.com/Rei1000/PWE/pull/22) — Merge `2bba9eb`, [ADR-0017](adr/0017-katalog-setup-http-automatisierung.md) | 7.3a, 5.6 |
 | 6.3b | Frontend-Ausführung der Automatisierung (ADR-0016) | ✅ | **P0** | PR [#23](https://github.com/Rei1000/PWE/pull/23) — Merge `e851f44` | 6.3a |
-| 6.3c | Demo-/Seed-Konfiguration mit automatisierbarem Schritt | 🔄 | **P0** | Nächster geplanter Slice | 6.3a, 6.3b |
+| 6.3c | Demo-/Seed-Konfiguration mit automatisierbarem Schritt | ✅ | **P0** | PR [#24](https://github.com/Rei1000/PWE/pull/24) — Merge `4a2bb93` | 6.3a, 6.3b |
 
 ### Roadmap-Anpassung (2026-06-27)
 
@@ -139,7 +139,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 7.3d | Routine: Katalogmodell + Materialisierung | ✅ | P2 | PR [#19](https://github.com/Rei1000/PWE/pull/19) — Merge `914b23e`, [ADR-0014](adr/0014-routine-katalog-materialisierung.md) | 7.3c |
 | 7.3e | Routine: minimaler Runner (nur Kommando-Aktion) | ✅ | P2 | PR [#20](https://github.com/Rei1000/PWE/pull/20) — Merge `bb436a5`, [ADR-0015](adr/0015-routine-ausfuehren-application-runner.md) | 7.3d |
 | 7.3f | Routine: API-Ausführung (schrittzentriert) | ✅ | P2 | PR [#21](https://github.com/Rei1000/PWE/pull/21) — Merge `c7beda3`, [ADR-0016](adr/0016-automatisierung-http-api.md) | 7.3e |
-| 7.4 | **Abbau der Übergangsarchitektur** (Gesamtfeature) | ⏳ | P1 | Nach Gate 6.3 — Frontend nutzt Ziel-API | 6.3b, ADR-0014/0016 |
+| 7.4 | **Abbau der Übergangsarchitektur** (Gesamtfeature) | 🔄 | **P1** | Nächster geplanter Slice — Frontend nutzt Ziel-API | 6.3 ✅, ADR-0014/0016 |
 | 7.4a | Materialisierungs-Exit für Legacy-`externes_kommando` | ⏳ | P1 | ADR ergänzen | 7.4 |
 | 7.4b | Entfernung des deprecated Einzelkommando-HTTP-Endpunkts | ⏳ | P1 | Nach 6.3b | 7.4a |
 | 7.4c | Minimale fachliche Monitoring-Baseline | ⏳ | P2 | ADR-0016-Hinweis | 6.3b |
@@ -215,6 +215,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-16 | Gate 6.3c abgeschlossen — PR #24, Merge `4a2bb93` (Feature `8541cda`); Gesamtfeature 6.3 ✅ | Demo-Seed-Script + `PWE_DEMO_MODE`; reproduzierbarer Labor-E2E-Weg |
+| 2026-08-16 | Gate 7.4 als nächster Slice markiert (🔄) | Übergangsabbau nach abgeschlossener Frontend-/Demo-Anbindung |
 | 2026-08-16 | Gate 6.3c in Umsetzung — Demo-Seed-Script + `PWE_DEMO_MODE` | CLI-Orchestrierung öffentlicher HTTP; Demo-Sim nur explizit aktiviert |
 | 2026-08-16 | Gate 6.3b abgeschlossen — PR #23, Merge `e851f44` (Feature `21d0b4e`) | Frontend-Ausführung ADR-0016; Read-Model-Flags; CI grün |
 | 2026-08-16 | Gate 6.3c als nächster Slice markiert (🔄) | Demo-/Seed für automatisierbaren Prüflauf; Orchestrierung öffentlicher 6.3a-HTTP |
@@ -245,4 +247,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 6.3c — Demo-/Seed-Konfiguration mit automatisierbarem Schritt** (🔄, P0) — Voraussetzung Gate 6.3a/6.3b ✅ (PR #22/`2bba9eb`, PR #23/`e851f44`).
+**Gate 7.4 — Abbau der Übergangsarchitektur** (🔄, P1) — Voraussetzung Gate 6.3 ✅ (PR #22–#24, Merge `2bba9eb` … `4a2bb93`).

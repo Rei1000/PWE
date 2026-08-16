@@ -2,6 +2,7 @@ export { ApiError, apiFetch, apiFetchBlob, apiGet, apiPost, getApiBaseUrl } from
 export { fetchHealth } from "@/adapters/api/health";
 export { createEntwurf, seedDemoKatalog, veroeffentlichen } from "@/adapters/api/katalog";
 export {
+  automatisierungAusfuehren,
   beurteileSchritt,
   erfasseKomponente,
   erfasseNachweis,
@@ -19,6 +20,7 @@ export {
 } from "@/adapters/api/schemas/katalog";
 export {
   type AbschlussResponse,
+  type AutomatisierungAusfuehrenResponse,
   type PrueflaufDetail,
   type PrueflaufResponse,
   type PrueflaufStartenRequest,

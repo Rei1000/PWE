@@ -90,6 +90,9 @@ def _prueflauf_detail_response(detail: PrueflaufDetailAnsicht) -> PrueflaufDetai
                 ),
                 kann_nachweis_erfassen=s.kann_nachweis_erfassen,
                 kann_beurteilt_werden=s.kann_beurteilt_werden,
+                hat_automatisierung=s.hat_automatisierung,
+                kann_automatisierung_ausfuehren=s.kann_automatisierung_ausfuehren,
+                automatisierung_bezeichnung=s.automatisierung_bezeichnung,
             )
             for s in detail.schritte
         ],

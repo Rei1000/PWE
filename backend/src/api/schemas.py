@@ -185,6 +185,9 @@ class SchrittDurchfuehrungResponse(BaseModel):
     beurteilung: BeurteilungResponse | None = None
     kann_nachweis_erfassen: bool = False
     kann_beurteilt_werden: bool = False
+    hat_automatisierung: bool = False
+    kann_automatisierung_ausfuehren: bool = False
+    automatisierung_bezeichnung: str | None = None
 
 
 class PrueflaufDetailResponse(BaseModel):

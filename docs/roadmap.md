@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3a 🔄** (Minimaler Katalog-HTTP-Contract für Automatisierung, ADR-0017)
+**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3b 🔄** (Frontend-Ausführung der Automatisierung, ADR-0016)
 
 ---
 
@@ -101,8 +101,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 6.1 | Frontend Bootstrap (Vite, React, API-Client, Dev-Proxy) | ✅ | P1 | PR [#11](https://github.com/Rei1000/PWE/pull/11) — Merge `f94387b` | 6.0, ADR-0009 |
 | 6.2 | Frontend Slice 1 — PC Prüflauf Happy Path (manuell) | ✅ | P1 | PR [#12](https://github.com/Rei1000/PWE/pull/12) — Merge `e49fc99` | 6.1 |
 | 6.3 | **End-to-End Automatisierung** (Gesamtfeature) | ⏳ | **P0** | Schließt Wertlücke nach Gate 7.3f | 7.3f, 6.2 |
-| 6.3a | Minimaler Katalog-HTTP-Contract für Automatisierung | 🔄 | **P0** | ADR-0017, Branch `feat/gate-6-3a-katalog-automatisierung-api` | 7.3a, 5.6 |
-| 6.3b | Frontend-Ausführung der Automatisierung (ADR-0016) | ⏳ | P0 | — | 6.3a |
+| 6.3a | Minimaler Katalog-HTTP-Contract für Automatisierung | ✅ | **P0** | PR [#22](https://github.com/Rei1000/PWE/pull/22) — Merge `2bba9eb`, [ADR-0017](adr/0017-katalog-setup-http-automatisierung.md) | 7.3a, 5.6 |
+| 6.3b | Frontend-Ausführung der Automatisierung (ADR-0016) | 🔄 | **P0** | Nächster geplanter Slice | 6.3a |
 | 6.3c | Demo-/Seed-Konfiguration mit automatisierbarem Schritt | ⏳ | P0 | — | 6.3a, 6.3b |
 
 ### Roadmap-Anpassung (2026-06-27)
@@ -215,6 +215,9 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-16 | Gate 6.3b in Umsetzung — Frontend-Ausführung + Read-Model-Flags | `hat_automatisierung` / `kann_automatisierung_ausfuehren` (UX-Führung Variante B); ADR-0016-Mutation |
+| 2026-07-14 | Gate 6.3a abgeschlossen — PR #22, Merge `2bba9eb` (Feature `52dd051`) | ADR-0017: POST `/katalog/bibliothek/kommandos`, PUT Automatisierung-Zuweisung; E2E-Tests grün |
+| 2026-07-14 | Gate 6.3b als nächster Slice markiert (🔄) | Frontend-Ausführung schrittzentriert (ADR-0016); Read-Model-Erweiterung erwartet |
 | 2026-07-14 | Gate 6.3a gestartet — Katalog-Setup-HTTP (ADR-0017) | POST Kommando + PUT Automatisierung-Zuweisung für E2E-Flow |
 | 2026-07-14 | Roadmap-Neupriorisierung: Gate 6.3, 7.4, 7.5 eingeführt; Gate 8 neu sortiert (8.2 vor 8.1) | Architektur-Neubewertung nach Gate 7.3-Abschluss |
 | 2026-07-14 | Gate 7.3 vollständig abgeschlossen — 7.3f merged (PR #21, `c7beda3`); Gesamtfeature 7.3 ✅ | Backend Run-Time-Kern E2E-fähig (ohne Frontend-Anbindung) |
@@ -239,4 +242,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 6.3a — Minimaler Katalog-HTTP-Contract für Automatisierung** (🔄, P0) — ADR-0017; Voraussetzung Gate 7.3 ✅.
+**Gate 6.3b — Frontend-Ausführung der Automatisierung** (🔄, P0) — ADR-0016; Voraussetzung Gate 6.3a ✅ (PR #22, Merge `2bba9eb`).

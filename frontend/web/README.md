@@ -29,6 +29,17 @@ npm run dev
 2. **Prüflauf** — Komponente erfassen, Nachweis, Beurteilung, Abschluss
 3. **Abschluss** — PDF herunterladen
 
+### Automatisierung (Gate 6.3b)
+
+In der Prüflauf-Schrittkarte:
+
+- Button nur bei `hat_automatisierung` / aktiv bei `kann_automatisierung_ausfuehren` (Backend-Read-Model)
+- Zielendpoint: `POST .../automatisierung/ausfuehren` ([ADR-0016](../../docs/adr/0016-automatisierung-http-api.md))
+- HTTP 200 mit `fehlgeschlagen=true` ist ein fachliches Ergebnis — kein API-Fehler
+- Kein Auto-Retry; Hinweis auf neue Nachweis-Welle
+- Kein Katalog-Setup und kein Legacy-Kommando-Endpunkt in der Prüfer-UI
+- Demo mit automatisierbarem Seed: Gate 6.3c
+
 ## Skripte
 
 | Befehl | Zweck |
@@ -36,11 +47,12 @@ npm run dev
 | `npm run dev` | Vite Dev-Server mit API-Proxy |
 | `npm run build` | Produktions-Build |
 | `npm run lint` | ESLint |
-| `npm run test` | Vitest (Transport-Schemas, API-Client) |
+| `npm run test` | Vitest (Schemas, Adapter, Komponenten) |
 
 ## Architektur
 
 - `src/adapters/api/` — einziger Backend-Zugang (fetch + Zod-Transportvalidierung)
 - `src/forms/` — UI-Formularschemas (keine Domain-Regeln)
 - `src/pages/` — Präsentation; delegiert an Adapter via TanStack Query
+- `src/components/SchrittAutomatisierung.tsx` / `AutomatisierungErgebnis.tsx` — Gate 6.3b
 - Keine Fachlogik, keine Domain-Regeln im Frontend

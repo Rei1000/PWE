@@ -18,6 +18,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 - Ein **Vertical-Slice-Test** pro Kern-Use-Case in `tests/application/`.
 - In-Memory-Repos in `adapters/persistence/in_memory.py` — nicht in Tests duplizieren.
 - PostgreSQL-Adapter in `adapters/persistence/postgresql/` — Mapping-Tests ohne DB; Repository-Tests mit `DATABASE_URL` (CI: Postgres-Service).
+- **Alembic Bootstrap** (Gate 7.5a): Upgrade/Downgrade + Schema-Parität zu `create_all` — `tests/adapters/test_alembic_bootstrap.py`.
 - **OpenAPI-Contract-Tests** (Gate 7.3f / 7.4a): Zielendpoint ADR-0016; Legacy-Pfad abwesend — `tests/api/test_api_openapi_automatisierung.py`.
 - **Write Exit** (Gate 7.4b): Publish ohne Legacy-Snapshot; Altbestände lesbar — `tests/application/test_write_exit_materialisierung.py`, PostgreSQL in `test_postgresql_routine_materialisierung.py`.
 - **Monitoring-Baseline** (Gate 7.4c): fachliche Beobachtung `fehlgeschlagen` — `tests/api/test_automatisierung_beobachtung.py`.

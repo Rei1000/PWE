@@ -62,6 +62,20 @@ Persistenz folgt der Fachdomäne — nicht umgekehrt. Das Domänenmodell beschre
 - Schemaänderungen versioniert und nachvollziehbar.
 - Veröffentlichte ProduktdefinitionsVersionen werden **nicht** nachträglich geändert — nur neue Versionen angelegt.
 
+### Alembic (Gate 7.5a)
+
+| Aspekt | Stand |
+|--------|-------|
+| Ort | `backend/alembic.ini`, `backend/alembic/` |
+| Quelle | `adapters.persistence.postgresql.schema.Base` |
+| Initialmigration | `alembic/versions/0001_initial_schema.py` — Ist-Zustand, keine fachlichen Änderungen |
+| CLI | `cd backend && DATABASE_URL=… alembic upgrade head` |
+| Runtime bis 7.5b | App-Start weiterhin `init_schema()` / `create_all` ([ADR-0011](adr/0011-api-postgresql-unit-of-work.md)) |
+| Tests | `tests/adapters/test_alembic_bootstrap.py` (Upgrade/Downgrade, Parität zu `create_all`) |
+| Bewusst später (7.5b) | CI/Docker auf Migrationen umstellen; `create_all` ersetzen |
+
+Optional für isolierte Testschemas: Umgebungsvariable `ALEMBIC_SCHEMA` (setzt `search_path` in `alembic/env.py`).
+
 ---
 
 ## 5. Trennung Fachdomäne vs. Persistenz
@@ -94,6 +108,4 @@ Persistenz folgt der Fachdomäne — nicht umgekehrt. Das Domänenmodell beschre
 
 ## 8. Nächster Schritt
 
-Persistenz-Adapter (PostgreSQL) und JSON-Mapping sind implementiert (Gate 5.2). Insert-only-Regeln für Versionen und ProtokollSnapshots: Gate 7.0 / [ADR-0010](adr/0010-prueflauf-abschluss-transaktion.md).
-
-Offen für Gate 7.1: API-Wiring, Session pro Request, vollständige Unit-of-Work-Strategie.
+PostgreSQL-Persistenz und API-Wiring sind produktiv (Gate 7.1+, ADR-0011). **Gate 7.5a** liefert Alembic-Bootstrap und Initialmigration; Runtime bleibt bis **Gate 7.5b** bei `init_schema`/`create_all` (CI/Docker-Umschaltung).

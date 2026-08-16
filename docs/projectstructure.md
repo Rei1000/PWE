@@ -2,7 +2,7 @@
 
 Ordnerstruktur orientiert sich an **`docs/architecture.md`**; Fachbegriffe gemäß **`docs/domain-model.md`**.
 
-**Stand:** Gate 6.2 — Domain, Application, Ports, Adapter und API sind implementiert; Identity und Auswertung sind Platzhalter.
+**Stand:** Gate 7.5a — Domain, Application, Ports, Adapter, API und Alembic-Bootstrap; Identity und Auswertung sind Platzhalter.
 
 ---
 
@@ -48,6 +48,9 @@ PWE/
 
 ```text
 backend/
+├── alembic.ini                   # Alembic-Konfiguration (Gate 7.5a)
+├── alembic/                      # Migrationen; Initialschema = Ist aus schema.py
+│   └── versions/
 ├── src/
 │   ├── domain/
 │   │   ├── katalog/              # Produktdefinition, Version, Bibliothek

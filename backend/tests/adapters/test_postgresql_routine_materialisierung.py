@@ -229,6 +229,18 @@ def test_postgresql_materialisierung_einzelkommando_und_routine(pg_repos, pg_ses
     sk = katalog.get_version(version_k.version_id).schritt_by_id("schritt-k")
     sr = katalog.get_version(version_r.version_id).schritt_by_id("schritt-r")
     assert sk.materialisierte_routine.herkunft == MaterialisierteRoutineHerkunft.EINZELKOMMANDO
-    assert sk.externes_kommando.kommandocode == "ONE"
+    assert sk.externes_kommando is None
     assert sr.materialisierte_routine.herkunft == MaterialisierteRoutineHerkunft.BIBLIOTHEK
     assert sr.externes_kommando is None
+
+    # Gate 7.4b: Persistenz-Payload neuer Versionen ohne Legacy-Feld
+    import json
+
+    from adapters.persistence.postgresql.schema import ProduktdefinitionsVersionRow
+
+    row = pg_session.get(ProduktdefinitionsVersionRow, version_k.version_id)
+    assert row is not None
+    payload = json.loads(row.payload)
+    schritt_payload = next(s for s in payload["prozedur_schritte"] if s["schritt_id"] == "schritt-k")
+    assert "materialisierte_routine" in schritt_payload
+    assert "externes_kommando" not in schritt_payload

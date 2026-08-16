@@ -28,10 +28,10 @@ Veröffentlichungsakt (Entwurf → Version): Katalog-Slice 2 + Gate 7.3a/d — `
 |-----|------|-----------|
 | Entity | `Produktdefinition` | Root im Slice 2; mutable Entwurf |
 | VO | `ProzedurSchrittEntwurf` | Schritt im Entwurf; optional `kommando_id` **oder** `routine_id` (XOR); Wechsel nur explizit (entfernen → neu zuweisen) |
-| VO | `MaterialisierterProzedurSchritt` | Aufgelöste Sollvorgaben; `MaterialisierteRoutine` (führend); `MaterialisiertesExternesKommando` (deprecated, Gate 7.3b) |
+| VO | `MaterialisierterProzedurSchritt` | Aufgelöste Sollvorgaben; `MaterialisierteRoutine` (führend); `MaterialisiertesExternesKommando` (Legacy-Lesen, Write Exit 7.4b) |
 | VO | `MaterialisierteRoutine` | Einheitlicher Automatisierungs-Snapshot; Herkunft `bibliothek` \| `einzelkommando` |
 | VO | `MaterialisierteKommandoAktion` | Materialisierte Kommando-Aktion innerhalb einer Routine |
-| VO | `MaterialisiertesExternesKommando` | Deprecated Kompatibilitäts-Snapshot (Einzelkommando-Pfad) |
+| VO | `MaterialisiertesExternesKommando` | Legacy-Kompatibilitäts-Snapshot (nur Lesen Altbestände; Write Exit Gate 7.4b) |
 | VO | `ProduktdefinitionsVersion` | Immutable nach Veröffentlichung |
 | AR | `ExternesKommando` | Mutable Bibliothek; stabile `kommando_id` |
 | AR | `Routine` | Mutable Bibliothek; stabile `routine_id`; mindestens eine Aktion |
@@ -42,19 +42,20 @@ Veröffentlichungsakt (Entwurf → Version): Katalog-Slice 2 + Gate 7.3a/d — `
 
 | Entwurf | Materialisiert |
 |---------|----------------|
-| `kommando_id` | `MaterialisierteRoutine` (`herkunft=einzelkommando`, keine `routine_id`) + deprecated `externes_kommando` |
+| `kommando_id` | `MaterialisierteRoutine` (`herkunft=einzelkommando`, keine `routine_id`); **kein** Legacy-`externes_kommando` (Gate 7.4b) |
 | `routine_id` | `MaterialisierteRoutine` (`herkunft=bibliothek`, `routine_id` gesetzt) |
 | keine Automatisierung | `materialisierte_routine=None` |
 
-**Führendes Feld:** `materialisierte_routine`. `externes_kommando` bleibt für Gate 7.3b-Kompatibilität beim Einzelkommando-Pfad.
+**Führendes Feld:** `materialisierte_routine`. Legacy-`externes_kommando` wird bei neuen Versionen **nicht** mehr geschrieben (Gate 7.4b, [ADR-0018](../adr/0018-legacy-automatisierung-exit.md)); Lesen alter Daten bleibt.
 
 ### Kompatibilitätsinvariante
 
 | Situation | Regel |
 |-----------|-------|
-| Einzelkommando (neu) | `materialisierte_routine` führend; `externes_kommando` abgeleitet, muss identisch sein |
+| Einzelkommando (neu, Gate 7.4b) | nur `materialisierte_routine`; `externes_kommando=None` |
 | Bibliotheksroutine | nur `materialisierte_routine`; `externes_kommando=None` |
-| Legacy (pre-7.3d) | nur `externes_kommando` — lesbar; Runner 7.3e normalisiert intern |
+| Legacy (pre-7.3d / Altbestand) | nur `externes_kommando` — lesbar; Runner normalisiert intern |
+| Beide gesetzt, konsistent (historisch) | erlaubt bei Deserialisierung |
 | Abweichung beider Felder | `MaterialisierteAutomatisierungInkonsistent` bei Materialisierung/Deserialisierung |
 
 Validierung: `domain/katalog/materialisierung.py` → `validiere_materialisierter_schritt_automatisierung()`.
@@ -70,7 +71,7 @@ Validierung: `domain/katalog/materialisierung.py` → `validiere_materialisierte
 
 Keine zweite Normalisierung in Application Layer oder Mapper.
 
-**Exit:** Gate 7.3f legt fest, wann `externes_kommando` nicht mehr geschrieben wird.
+**Exit:** Write Exit Gate 7.4b ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)) — neue Versionen schreiben kein `externes_kommando`. Storage Exit nach Gate 7.5.
 
 ### Entwurfs-Wechsel (Kommando ↔ Routine)
 

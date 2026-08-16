@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3 ✅** — **Nächster Slice: Gate 7.4a** (API Exit Legacy-Einzelkommando)
+**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3 ✅** — **Gate 7.4a ✅** — **Nächster Slice: Gate 7.4b** (Write Exit)
 
 ---
 
@@ -139,9 +139,9 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 7.3d | Routine: Katalogmodell + Materialisierung | ✅ | P2 | PR [#19](https://github.com/Rei1000/PWE/pull/19) — Merge `914b23e`, [ADR-0014](adr/0014-routine-katalog-materialisierung.md) | 7.3c |
 | 7.3e | Routine: minimaler Runner (nur Kommando-Aktion) | ✅ | P2 | PR [#20](https://github.com/Rei1000/PWE/pull/20) — Merge `bb436a5`, [ADR-0015](adr/0015-routine-ausfuehren-application-runner.md) | 7.3d |
 | 7.3f | Routine: API-Ausführung (schrittzentriert) | ✅ | P2 | PR [#21](https://github.com/Rei1000/PWE/pull/21) — Merge `c7beda3`, [ADR-0016](adr/0016-automatisierung-http-api.md) | 7.3e |
-| 7.4 | **Abbau der Übergangsarchitektur** (Gesamtfeature) | 🔄 | **P1** | Reihenfolge: 7.4a → 7.4b → 7.4c; Storage Exit nach 7.5 | 6.3 ✅, ADR-0014/0016/0018 |
-| 7.4a | **API Exit** — deprecated Einzelkommando-HTTP + Use Case entfernen | 🔄 | **P1** | [ADR-0018](adr/0018-legacy-automatisierung-exit.md) | 7.4 |
-| 7.4b | **Write Exit** — neue Versionen schreiben kein Legacy-`externes_kommando` | ⏳ | **P1** | Nach API Exit; Lesen alter Daten bleibt | 7.4a |
+| 7.4 | **Abbau der Übergangsarchitektur** (Gesamtfeature) | 🔄 | **P1** | Reihenfolge: 7.4a ✅ → 7.4b → 7.4c; Storage Exit nach 7.5 | 6.3 ✅, ADR-0014/0016/0018 |
+| 7.4a | **API Exit** — deprecated Einzelkommando-HTTP + Use Case entfernen | ✅ | **P1** | PR [#26](https://github.com/Rei1000/PWE/pull/26) — Merge `0d24663`, [ADR-0018](adr/0018-legacy-automatisierung-exit.md) | 7.4 |
+| 7.4b | **Write Exit** — neue Versionen schreiben kein Legacy-`externes_kommando` | 🔄 | **P1** | [ADR-0018](adr/0018-legacy-automatisierung-exit.md); Lesen alter Daten bleibt | 7.4a |
 | 7.4c | Minimale fachliche Monitoring-Baseline | ⏳ | P2 | ADR-0016-Hinweis | 6.3b |
 | 7.5 | **Datenbankmigrationen** (Gesamtfeature) | ⏳ | P1 | — | — |
 | 7.5a | Alembic-Bootstrap und Initialmigration | ⏳ | P1 | Aus `schema.py` | 7.5 |
@@ -227,6 +227,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-16 | Gate 7.4b in Umsetzung — Write Exit (ADR-0018); Publish ohne Legacy-Snapshot | `materialisierte_routine` alleinige Wahrheit neuer Versionen; Lesen bleibt |
+| 2026-08-16 | Gate 7.4a abgeschlossen — PR #26, Merge `0d24663` (Feature `a220ce7`) | API Exit Legacy-HTTP + Use Case; ADR-0016 alleiniger Run-Time-Contract |
 | 2026-08-16 | Gate 7.4a in Umsetzung — API Exit (ADR-0018); Reihenfolge 7.4a→7.4b→7.4c bestätigt | Legacy-HTTP + `ExternesKommandoAusfuehren` entfernen; Write Exit getrennt |
 | 2026-08-16 | Gate 7.4 Reihenfolge korrigiert: API Exit (7.4a) vor Write Exit (7.4b) | Verhindert toten öffentlichen Legacy-Endpoint nach Schreib-Exit |
 | 2026-08-16 | Gate 6.3c abgeschlossen — PR #24, Merge `4a2bb93` (Feature `8541cda`); Gesamtfeature 6.3 ✅ | Demo-Seed-Script + `PWE_DEMO_MODE`; reproduzierbarer Labor-E2E-Weg |
@@ -261,4 +263,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 7.4a — API Exit** (🔄, P1): deprecated Einzelkommando-HTTP + `ExternesKommandoAusfuehren` entfernen ([ADR-0018](adr/0018-legacy-automatisierung-exit.md)). Voraussetzung Gate 6.3 ✅. Write Exit = 7.4b; Storage Exit nach Gate 7.5.
+**Gate 7.4b — Write Exit** (🔄, P1): Publish schreibt kein Legacy-`externes_kommando` mehr ([ADR-0018](adr/0018-legacy-automatisierung-exit.md)). Lesen alter Versionen bleibt. Storage Exit nach Gate 7.5.

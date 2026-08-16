@@ -91,7 +91,7 @@ Keine.
 
 - Fotospeicher
 
-**Schrittzentrierte Automatisierungs-API** ist der alleinige Run-Time-HTTP-Contract (Gate 7.3f / ADR-0016). Legacy-Einzelkommando-HTTP entfernt in Gate 7.4a ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)). Legacy-Versionen mit ausschließlich `externes_kommando` bleiben über `aufgeloeste_materialisierte_routine()` les- und ausführbar; Write Exit = Gate 7.4b.
+**Schrittzentrierte Automatisierungs-API** ist der alleinige Run-Time-HTTP-Contract (Gate 7.3f / ADR-0016). Legacy-Einzelkommando-HTTP entfernt in Gate 7.4a ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)). Write Exit Gate 7.4b: neue Versionen schreiben kein `externes_kommando`; Altbestände bleiben über `aufgeloeste_materialisierte_routine()` les- und ausführbar.
 
 **Istbestückung** ist im Domain-Kern implementiert: `Prueflauf.erfasse_komponente()` (ADR-0006, Slice minimal).
 

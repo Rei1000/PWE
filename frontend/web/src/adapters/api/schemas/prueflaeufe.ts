@@ -73,6 +73,9 @@ export const schrittDurchfuehrungSchema = z.object({
   beurteilung: beurteilungSchema.nullable().optional(),
   kann_nachweis_erfassen: z.boolean().default(false),
   kann_beurteilt_werden: z.boolean().default(false),
+  hat_automatisierung: z.boolean().default(false),
+  kann_automatisierung_ausfuehren: z.boolean().default(false),
+  automatisierung_bezeichnung: z.string().nullable().optional(),
 });
 
 export const prueflaufDetailSchema = z.object({
@@ -93,9 +96,28 @@ export const prueflaufDetailSchema = z.object({
   kann_abgeschlossen_werden: z.boolean().default(false),
 });
 
+export const automatisierungFehlerartSchema = z.enum([
+  "keine_geraeteantwort",
+  "geraetefehlschlag",
+  "ungueltige_antwort",
+]);
+
+export const automatisierungAusfuehrenResponseSchema = z.object({
+  ausfuehrung_id: z.string(),
+  fehlgeschlagen: z.boolean(),
+  ausgefuehrte_aktionen: z.number().int(),
+  abgebrochen_bei_aktion_position: z.number().int().nullable(),
+  fehlerart: automatisierungFehlerartSchema.nullable(),
+  nachweise: z.array(nachweisResponseSchema),
+});
+
 export type PrueflaufStartenRequest = z.infer<typeof prueflaufStartenRequestSchema>;
 export type PrueflaufResponse = z.infer<typeof prueflaufResponseSchema>;
 export type PrueflaufDetail = z.infer<typeof prueflaufDetailSchema>;
 export type KomponenteErfassenRequest = z.infer<typeof komponenteErfassenRequestSchema>;
 export type NachweisErfassenRequest = z.infer<typeof nachweisErfassenRequestSchema>;
 export type AbschlussResponse = z.infer<typeof abschlussResponseSchema>;
+export type AutomatisierungAusfuehrenResponse = z.infer<
+  typeof automatisierungAusfuehrenResponseSchema
+>;
+export type AutomatisierungFehlerart = z.infer<typeof automatisierungFehlerartSchema>;

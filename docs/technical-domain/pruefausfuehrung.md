@@ -94,3 +94,22 @@ Keine.
 **Schrittzentrierte Automatisierungs-API** ist implementiert (Gate 7.3f, ADR-0016). Legacy-Einzelkommando-Endpunkt (7.3b) bleibt deprecated.
 
 **Istbestückung** ist im Domain-Kern implementiert: `Prueflauf.erfasse_komponente()` (ADR-0006, Slice minimal).
+
+## Gate 6.3b — Frontend-Ausführung / Read-Model-Flags
+
+| Feld | Bedeutung |
+|------|-----------|
+| `hat_automatisierung` | Fachlich: Schritt besitzt auflösbare Automatisierung via `aufgeloeste_materialisierte_routine` (inkl. Legacy). Inkonsistenz wird nicht verschluckt. |
+| `kann_automatisierung_ausfuehren` | **UI-Führungsflag** (Variante B): offener Prüflauf und vollständige Istbestückung laut Read-Model-Führung. |
+| `automatisierung_bezeichnung` | Optionale Anzeigehilfe aus der materialisierten Routine |
+
+**Bewusste Trennung:** Fehlende Komponenten blockieren **nicht** `RoutineAusfuehren` / den öffentlichen POST-Endpunkt. Die API bleibt technisch aufrufbar. Das Read-Model-Flag spiegelt die bestehende Prüferführung („Komponenten zuerst“), analog zu `kann_nachweis_erfassen` — keine zusätzliche Domain-Invariante.
+
+### Frontend-Semantik (ADR-0016)
+
+- HTTP 200 inkl. `fehlgeschlagen=true` → typisiertes Ergebnis, **kein** `ApiError`
+- 4xx vor Ausführungsbeginn → `ApiError` / `{detail, code}`
+- Mutation: `retry: false`; Doppelklick gesperrt während Pending
+- Nicht-Idempotenz: Hinweis auf neue Nachweis-Welle; bei Netzwerkfehler Read-Model invalidieren, **nicht** automatisch erneut ausführen
+- Prüfer-UI nutzt **keinen** Katalog-Setup-Endpunkt (Gate 6.3a) und **keinen** Legacy-Kommando-Endpunkt
+- Demo-/Seed-Orchestrierung mit Automatisierung: Gate 6.3c

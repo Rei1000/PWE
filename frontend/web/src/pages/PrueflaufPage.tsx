@@ -11,6 +11,7 @@ import {
   schliessePrueflaufAb,
 } from "@/adapters/api";
 import { ApiErrorAlert } from "@/components/ApiErrorAlert";
+import { SchrittAutomatisierung } from "@/components/SchrittAutomatisierung";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -158,6 +159,14 @@ export function PrueflaufPage() {
                     {schritt.nachweise.map((n) => JSON.stringify(n.payload)).join("; ")}
                   </p>
                 )}
+
+                <SchrittAutomatisierung
+                  prueflaufId={prueflaufId}
+                  schrittId={schritt.schritt_id}
+                  hatAutomatisierung={schritt.hat_automatisierung}
+                  kannAusfuehren={schritt.kann_automatisierung_ausfuehren}
+                  bezeichnung={schritt.automatisierung_bezeichnung}
+                />
 
                 {!istAbgeschlossen &&
                   (schritt.kann_nachweis_erfassen || schritt.kann_beurteilt_werden) && (

@@ -6,6 +6,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from domain.katalog.materialisierung import aufgeloeste_materialisierte_routine
+from domain.katalog.version import MaterialisierterProzedurSchritt
+from domain.pruefausfuehrung.errors import KeineAutomatisierungAmSchritt
 from domain.shared.errors import DomainError
 from ports.katalog_repository import KatalogRepository
 from ports.prueflauf_repository import PrueflaufRepository
@@ -46,6 +49,9 @@ class SchrittDurchfuehrungAnsicht:
     beurteilung: BeurteilungAnsicht | None
     kann_nachweis_erfassen: bool
     kann_beurteilt_werden: bool
+    hat_automatisierung: bool
+    kann_automatisierung_ausfuehren: bool
+    automatisierung_bezeichnung: str | None
 
 
 @dataclass(frozen=True)
@@ -65,6 +71,36 @@ class PrueflaufDetailAnsicht:
     fehlende_komponenten: tuple[str, ...]
     kann_komponente_erfassen: bool
     kann_abgeschlossen_werden: bool
+
+
+def _automatisierung_ansicht(
+    materialisiert: MaterialisierterProzedurSchritt,
+    *,
+    ist_abgeschlossen: bool,
+    fehlende_komponenten: tuple[str, ...],
+) -> tuple[bool, bool, str | None]:
+    """Liefert (hat_automatisierung, kann_automatisierung_ausfuehren, bezeichnung).
+
+    `hat_automatisierung` ist fachlich (zentrale Auflösung aus Gate 7.3d/7.3e).
+    Inkonsistente Materialisierung wird nicht verschluckt (Exception propagiert).
+
+    `kann_automatisierung_ausfuehren` ist ein UI-Führungsflag (Gate 6.3b, Variante B):
+    offener Prüflauf + vollständige Istbestückung laut Read-Model-Führung.
+    Das ist **keine** zusätzliche Domain-Invariante — `RoutineAusfuehren` prüft
+    fehlende Komponenten weiterhin nicht und bleibt API-seitig aufrufbar.
+    """
+    try:
+        routine = aufgeloeste_materialisierte_routine(materialisiert)
+    except KeineAutomatisierungAmSchritt:
+        return False, False, None
+
+    hat = len(routine.aktionen) > 0
+    if not hat:
+        return False, False, None
+
+    # Prüferführung analog zu kann_nachweis_erfassen — nicht Use-Case-Verschärfung.
+    kann = not ist_abgeschlossen and len(fehlende_komponenten) == 0
+    return True, kann, routine.bezeichnung
 
 
 @dataclass
@@ -99,6 +135,11 @@ class PrueflaufLesen:
             schritte_offen = not ist_abgeschlossen and len(fehlende) == 0
             kann_nachweis = schritte_offen and beurteilung is None and len(nachweise) == 0
             kann_beurteilung = schritte_offen and beurteilung is None and len(nachweise) > 0
+            hat_auto, kann_auto, auto_bezeichnung = _automatisierung_ansicht(
+                materialisiert,
+                ist_abgeschlossen=ist_abgeschlossen,
+                fehlende_komponenten=fehlende,
+            )
 
             schritte.append(
                 SchrittDurchfuehrungAnsicht(
@@ -128,6 +169,9 @@ class PrueflaufLesen:
                     ),
                     kann_nachweis_erfassen=kann_nachweis,
                     kann_beurteilt_werden=kann_beurteilung,
+                    hat_automatisierung=hat_auto,
+                    kann_automatisierung_ausfuehren=kann_auto,
+                    automatisierung_bezeichnung=auto_bezeichnung,
                 )
             )
 

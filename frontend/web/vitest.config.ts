@@ -7,7 +7,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       environment: "jsdom",
-      include: ["tests/**/*.test.ts"],
+      include: ["tests/**/*.{test,spec}.{ts,tsx}"],
     },
     resolve: {
       alias: {

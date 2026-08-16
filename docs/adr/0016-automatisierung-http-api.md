@@ -106,7 +106,7 @@ Nur: Request validieren → `RoutineAusfuehren` → Response mappen → HTTP 200
 
 - Klare Trennung API-Fehler vs. fachliches Ausführungsergebnis
 - OpenAPI ohne `oneOf`-Mischschema auf 200/409
-- Frontend kann begonnene Teilausfälle als erfolgreiche HTTP-Antwort mit `fehlgeschlagen=true` behandeln (späterer Slice)
+- Frontend behandelt begonnene Teilausfälle als HTTP-200-Ergebnis mit `fehlgeschlagen=true` (Gate 6.3b) — nicht als `ApiError`
 
 ## Nicht-Ziele (Gate 7.3f)
 

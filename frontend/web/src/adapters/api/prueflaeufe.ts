@@ -1,9 +1,11 @@
 import { apiFetchBlob, apiGet, apiPost } from "@/adapters/api/client";
 import {
   abschlussResponseSchema,
+  automatisierungAusfuehrenResponseSchema,
   prueflaufDetailSchema,
   prueflaufResponseSchema,
   type AbschlussResponse,
+  type AutomatisierungAusfuehrenResponse,
   type KomponenteErfassenRequest,
   type NachweisErfassenRequest,
   type PrueflaufDetail,
@@ -38,6 +40,18 @@ export async function erfasseNachweis(
 
 export async function beurteileSchritt(prueflaufId: string, schrittId: string): Promise<void> {
   await apiPost(`/prueflaeufe/${prueflaufId}/schritte/${schrittId}/beurteilung`);
+}
+
+/** ADR-0016 — schrittzentrierte Automatisierung. Kein Legacy-Endpunkt. */
+export async function automatisierungAusfuehren(
+  prueflaufId: string,
+  schrittId: string,
+): Promise<AutomatisierungAusfuehrenResponse> {
+  const data = await apiPost<unknown>(
+    `/prueflaeufe/${prueflaufId}/schritte/${schrittId}/automatisierung/ausfuehren`,
+    {},
+  );
+  return automatisierungAusfuehrenResponseSchema.parse(data);
 }
 
 export async function schliessePrueflaufAb(prueflaufId: string): Promise<AbschlussResponse> {

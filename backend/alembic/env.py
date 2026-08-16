@@ -9,7 +9,6 @@ Optional: ALEMBIC_SCHEMA setzt search_path (Tests mit isoliertem Schema).
 from __future__ import annotations
 
 import os
-from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool, text
@@ -18,8 +17,9 @@ from adapters.persistence.postgresql.schema import Base
 
 config = context.config
 
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+# Kein logging.config.fileConfig: die Standard-alembic.ini setzt root=WARN und
+# disable_existing_loggers=True — das zerstört pytest-caplog und App-Logger
+# nach CLI-/Test-Läufen. Alembic bleibt ohne ini-Logging voll nutzbar.
 
 target_metadata = Base.metadata
 

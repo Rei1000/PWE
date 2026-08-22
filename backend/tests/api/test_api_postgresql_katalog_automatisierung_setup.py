@@ -35,7 +35,9 @@ def test_postgresql_http_katalog_setup_und_automatisierung():
     kodierung = str(10_000_000_000 + uuid.uuid4().int % 9_000_000_000)
 
     def simulation_postgres_deps(pg_session):
-        deps = postgres_deps(pg_session)
+        from adapters.storage.in_memory import InMemoryDateiSpeicher
+
+        deps = postgres_deps(pg_session, InMemoryDateiSpeicher())
         assert isinstance(deps.kommando_port, SimuliertesExternesKommandoPort)
         deps.kommando_port.registriere_antwort(
             KOMMANDOCODE,

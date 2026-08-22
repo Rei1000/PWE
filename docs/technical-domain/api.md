@@ -42,7 +42,9 @@ Brücke Application → HTTP. Fachliche Referenz: `docs/architecture.md` §6–�
 | POST | `/prueflaeufe` | `PruefungStarten` |
 | POST | `/prueflaeufe/{id}/schritte/{schritt_id}/automatisierung/ausfuehren` | `RoutineAusfuehren` ([ADR-0016](../adr/0016-automatisierung-http-api.md) — alleiniger Run-Time-Contract) |
 | POST | `/prueflaeufe/{id}/komponenten` | `KomponenteErfassen` |
-| POST | `/prueflaeufe/{id}/schritte/{schritt_id}/nachweise` | `NachweisErfassen` |
+| POST | `/prueflaeufe/{id}/schritte/{schritt_id}/nachweise` | `NachweisErfassen` (ohne `art: foto`) |
+| POST | `/prueflaeufe/{id}/schritte/{schritt_id}/nachweise/foto` | `FotoNachweisErfassen` (Gate 8.3a, multipart) |
+| GET | `/prueflaeufe/{id}/nachweise/{nachweis_id}/datei` | `NachweisDateiLesen` (Gate 8.3a) |
 | POST | `/prueflaeufe/{id}/schritte/{schritt_id}/beurteilung` | `SchrittBeurteilen` |
 | POST | `/prueflaeufe/{id}/abschluss` | `PruefungAbschliessen` |
 | GET | `/prueflaeufe/{id}/protokoll/pdf` | `ProtokollErzeugen` |
@@ -57,8 +59,11 @@ Alle API-Fehler (Domain und Validierung) liefern ein einheitliches JSON-Objekt:
 
 | HTTP | `code` (Beispiele) | Auslöser |
 |------|---------------------|----------|
-| 404 | `version_nicht_gefunden`, `prueflauf_nicht_gefunden`, … | `DomainError`-Subklassen mit Suffix `NichtGefunden` |
-| 409 | `invariant_verletzt`, `kommando_in_verwendung`, `routine_in_verwendung`, … | `InvariantViolation` und übrige fachliche Konflikte |
+| 404 | `version_nicht_gefunden`, `prueflauf_nicht_gefunden`, `nachweis_nicht_gefunden`, `datei_nicht_gefunden`, `nachweis_kein_foto`, … | `DomainError`-Subklassen mit Suffix `NichtGefunden` bzw. `NachweisKeinFoto` |
+| 409 | `invariant_verletzt`, `foto_nur_per_multipart`, `kommando_in_verwendung`, `routine_in_verwendung`, … | `InvariantViolation` und übrige fachliche Konflikte |
+| 413 | `datei_zu_gross` | `DateiZuGross` |
+| 415 | `ungueltiger_dateityp` | `UngueltigerDateityp` |
+| 503 | `datei_speicherung_fehlgeschlagen` | Storage-Infrastrukturfehler |
 | 422 | `validation`, `ungueltiger_wert` | Pydantic / ungültige Enum-Werte |
 
 Öffentliche `detail`-Texte sind generisch; technische Exception-Texte werden nicht ausgegeben.
@@ -229,6 +234,31 @@ Ungültige Konfiguration → Startfehler (`KommandoAdapterConfigurationError`). 
 Mapping: `NachweisArtEnum` (Pydantic, `api/schemas.py`) → `NachweisArt(body.art.value)` in der Route — Domain bleibt unabhängig von Pydantic.
 
 Antworten (`NachweisResponse`, Read Model) liefern `art` als denselben String-Wert (`messwert`, …).
+
+**Gate 8.3a:** `art: "foto"` am generischen JSON-Endpunkt ist **verboten** (409 `foto_nur_per_multipart`). Foto-Nachweise nur über Multipart-Endpunkt — siehe [ADR-0022](../adr/0022-foto-nachweis-dateispeicher.md).
+
+## Foto-Nachweis (Gate 8.3a, ADR-0022)
+
+### Upload
+
+`POST /prueflaeufe/{id}/schritte/{schritt_id}/nachweise/foto`
+
+| Aspekt | Regel |
+|--------|-------|
+| Content-Type | `multipart/form-data` |
+| Feld | `datei` (Binärdatei) |
+| MIME V1 | `image/jpeg`, `image/png` — Magic-Byte-Prüfung |
+| Max. Größe | 5 MiB |
+| Response 201 | `{ nachweis_id, art, datei_id, mime_type, groesse_bytes, dateiname? }` |
+| Fehler | 404, 409, 413, 415, 503 |
+
+### Download
+
+`GET /prueflaeufe/{id}/nachweise/{nachweis_id}/datei`
+
+Fachliche Kontextvalidierung: Nachweis muss zum Prüflauf gehören und `art=foto` sein. Response: Binärinhalt, `Content-Type` aus Payload, `Content-Disposition: inline`.
+
+Kein Auth in Gate 8.3a — Gate 8.1 folgt später.
 
 ## Read Model (Gate 6.0)
 

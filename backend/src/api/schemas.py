@@ -57,6 +57,15 @@ class NachweisResponse(BaseModel):
     art: str
 
 
+class FotoNachweisResponse(BaseModel):
+    nachweis_id: str
+    art: str
+    datei_id: str
+    mime_type: str
+    groesse_bytes: int
+    dateiname: str | None = None
+
+
 class ErrorResponse(BaseModel):
     """Einheitliches API-Fehlerformat — vor Ausführungsbeginn."""
 

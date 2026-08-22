@@ -30,6 +30,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 - **Entwurfsbearbeitung HTTP** (Gate 8.2b2): Domain `test_produktdefinition_entwurf_bearbeitung.py`; Application `test_katalog_entwurf_bearbeitung.py`; API `test_api_katalog_entwurf_bearbeitung.py`; OpenAPI `test_api_openapi_katalog_entwurf_bearbeitung.py`; PostgreSQL `test_api_postgresql_katalog_entwurf_bearbeitung.py` — kein Alembic, kein Schema-Wechsel.
 - **Katalog-Admin Bibliothek UI** (Gate 8.2c1): Frontend Adapter `tests/api/bibliothek.test.ts`, `client-put-delete.test.ts`, Flow `katalog-bibliothek-flow.test.ts`; Hooks `useKommandos.test.ts`; Komponenten/Pages — kein Backend-Diff.
 - **Entwurfseditor UI** (Gate 8.2c2): Frontend Adapter `tests/api/entwurf.test.ts`, Flow `katalog-entwurf-flow.test.ts`; Hooks `useEntwurf.test.ts`; Lib `entwurf-editor.test.ts`, `entwurf-recents.test.ts`; Komponenten `sollvorgaben-editor.test.tsx`, `entwurf-automatisierung.test.tsx`; Pages `entwurf-neu.test.tsx` — kein Backend-Diff.
+- **Foto-Nachweis / DateiSpeicher** (Gate 8.3a): Domain `test_datei_verweis.py`; Adapter `test_datei_speicher_contract.py`; Application `test_foto_nachweis_erfassen.py`, `test_nachweis_datei_lesen.py`; API `test_api_foto_nachweis.py`; NachweisArt-Contract erweitert (`foto_nur_per_multipart`); PostgreSQL in `test_api_foto_nachweis.py` — kein Alembic.
 
 ## V1-Pflicht vor Merge
 

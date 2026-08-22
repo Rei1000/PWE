@@ -86,6 +86,7 @@ frontend/
 - `domain/katalog` — Konfigurations-Fachlogik; keine Protokoll- oder DB-Details.
 - `domain/pruefausfuehrung` — Prüflauf, Nachweise, Beurteilungen; externe Kommandos nur über Ports.
 - `adapters/com/` — technische Implementierung von `ExternesKommandoPort`.
+- `adapters/storage/` — `DateiSpeicherPort`-Implementierungen (Gate 8.3a).
 - Ergometer-Begriffe nur in Konfigurationsdaten, nicht in Modulnamen.
 
 ---

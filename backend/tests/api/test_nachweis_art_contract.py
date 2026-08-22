@@ -111,7 +111,7 @@ def _post_nachweis(client: TestClient, prueflauf_id: str, schritt_id: str, art: 
     )
 
 
-@pytest.mark.parametrize("art", NACHWEIS_ART_API_WERTE)
+@pytest.mark.parametrize("art", [a for a in NACHWEIS_ART_API_WERTE if a != "foto"])
 def test_gueltige_nachweis_art_in_memory(memory_client: TestClient, art: str):
     prueflauf_id, schritt_id = _prepare_nachweis_endpoint(memory_client)
     response = _post_nachweis(memory_client, prueflauf_id, schritt_id, art)
@@ -120,7 +120,7 @@ def test_gueltige_nachweis_art_in_memory(memory_client: TestClient, art: str):
 
 
 @pytest.mark.postgresql
-@pytest.mark.parametrize("art", NACHWEIS_ART_API_WERTE)
+@pytest.mark.parametrize("art", [a for a in NACHWEIS_ART_API_WERTE if a != "foto"])
 def test_gueltige_nachweis_art_postgresql(pg_client: TestClient, art: str):
     kodierung = _bootstrap_postgresql_katalog(pg_client)
     prueflauf_id, schritt_id = _prepare_nachweis_endpoint(pg_client, produktkodierung=kodierung)
@@ -139,6 +139,22 @@ def test_ungueltige_nachweis_art_422(memory_client: TestClient, ungueltige_art: 
     assert response.status_code == 422
     body = response.json()
     assert body == {"detail": "Validierungsfehler", "code": "validation"}
+
+
+def test_foto_nur_per_multipart_in_memory(memory_client: TestClient):
+    prueflauf_id, schritt_id = _prepare_nachweis_endpoint(memory_client)
+    response = _post_nachweis(memory_client, prueflauf_id, schritt_id, "foto")
+    assert response.status_code == 409
+    assert response.json()["code"] == "foto_nur_per_multipart"
+
+
+@pytest.mark.postgresql
+def test_foto_nur_per_multipart_postgresql(pg_client: TestClient):
+    kodierung = _bootstrap_postgresql_katalog(pg_client)
+    prueflauf_id, schritt_id = _prepare_nachweis_endpoint(pg_client, produktkodierung=kodierung)
+    response = _post_nachweis(pg_client, prueflauf_id, schritt_id, "foto")
+    assert response.status_code == 409
+    assert response.json()["code"] == "foto_nur_per_multipart"
 
 
 @pytest.mark.postgresql

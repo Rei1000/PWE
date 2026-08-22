@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 
+from api.datei_speicher_wiring import DateiSpeicherSettings, create_datei_speicher
 from api.deps import ApiDeps, in_memory_deps
 from api.errors import register_exception_handlers
 from api.kommando_wiring import KommandoAdapterSettings, configure_kommando_adapter
@@ -34,6 +35,7 @@ def create_app(
     async def lifespan(app: FastAPI):
         if deps is None:
             configure_kommando_adapter(KommandoAdapterSettings.from_env())
+            app.state.datei_speicher = create_datei_speicher(DateiSpeicherSettings.from_env())
         if deps is not None:
             app.state.persistence_mode = "in-memory"
             app.state.deps = deps
@@ -57,7 +59,7 @@ def create_app(
         @app.middleware("http")
         async def postgres_unit_of_work(request: Request, call_next) -> Response:
             session: Session = app.state.session_factory()
-            request.state.deps = resolve_postgres_deps(session)
+            request.state.deps = resolve_postgres_deps(session, app.state.datei_speicher)
             try:
                 response = await call_next(request)
                 session.commit()

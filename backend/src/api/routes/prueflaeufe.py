@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Body, Request
+from fastapi import APIRouter, Body, File, Request, UploadFile
 from fastapi.responses import Response
+from urllib.parse import quote
 
 from api.automatisierung_beobachtung import (
     beobachte_ausgefuehrte_automatisierung,
@@ -17,6 +18,7 @@ from api.schemas import (
     AutomatisierungAusfuehrenResponse,
     BeurteilungResponse,
     ErrorResponse,
+    FotoNachweisResponse,
     KomponenteErfassenRequest,
     NachweisDetailResponse,
     NachweisErfassenRequest,
@@ -28,12 +30,15 @@ from api.schemas import (
 )
 from application.pruefausfuehrung.prueflauf_lesen import PrueflaufDetailAnsicht, PrueflaufLesen
 from application.protokoll.erzeugen import ProtokollErzeugen
+from application.pruefausfuehrung.foto_nachweis_erfassen import FotoNachweisErfassen
+from application.pruefausfuehrung.nachweis_datei_lesen import NachweisDateiLesen
 from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
 from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
+from domain.pruefausfuehrung.datei_verweis import DateiVerweis
 from domain.pruefausfuehrung.typen import NachweisArt
 from domain.shared.errors import DomainError
 
@@ -192,6 +197,86 @@ def nachweis_erfassen(
         ist_automatisch=body.ist_automatisch,
     )
     return NachweisResponse(nachweis_id=nachweis.nachweis_id, art=nachweis.art.value)
+
+
+def _foto_nachweis_response(nachweis) -> FotoNachweisResponse:
+    verweis = DateiVerweis.from_payload(nachweis.payload)
+    return FotoNachweisResponse(
+        nachweis_id=nachweis.nachweis_id,
+        art=nachweis.art.value,
+        datei_id=verweis.datei_id,
+        mime_type=verweis.mime_type,
+        groesse_bytes=verweis.groesse_bytes,
+        dateiname=verweis.dateiname,
+    )
+
+
+def _sicherer_download_dateiname(dateiname: str | None, mime_type: str) -> str:
+    if dateiname:
+        basis = dateiname.replace("\r", "").replace("\n", "").replace('"', "")
+        basis = basis.rsplit("/", 1)[-1].rsplit("\\", 1)[-1].strip()
+        if basis:
+            return basis
+    if mime_type == "image/png":
+        return "foto.png"
+    return "foto.jpg"
+
+
+@router.post(
+    "/{prueflauf_id}/schritte/{schritt_id}/nachweise/foto",
+    status_code=201,
+    response_model=FotoNachweisResponse,
+    responses={
+        404: {"model": ErrorResponse},
+        409: {"model": ErrorResponse},
+        413: {"model": ErrorResponse},
+        415: {"model": ErrorResponse},
+        503: {"model": ErrorResponse},
+    },
+)
+async def foto_nachweis_erfassen(
+    prueflauf_id: str,
+    schritt_id: str,
+    request: Request,
+    datei: UploadFile = File(...),
+) -> FotoNachweisResponse:
+    deps = get_request_deps(request)
+    inhalt = await datei.read()
+    mime_type = datei.content_type or "application/octet-stream"
+    nachweis = FotoNachweisErfassen(deps.prueflauf_repo, deps.datei_speicher).execute(
+        prueflauf_id,
+        schritt_id,
+        inhalt,
+        mime_type,
+        dateiname=datei.filename,
+    )
+    return _foto_nachweis_response(nachweis)
+
+
+@router.get(
+    "/{prueflauf_id}/nachweise/{nachweis_id}/datei",
+    responses={
+        404: {"model": ErrorResponse},
+        503: {"model": ErrorResponse},
+    },
+)
+def nachweis_datei_lesen(
+    prueflauf_id: str,
+    nachweis_id: str,
+    request: Request,
+) -> Response:
+    deps = get_request_deps(request)
+    ergebnis = NachweisDateiLesen(deps.prueflauf_repo, deps.datei_speicher).execute(
+        prueflauf_id,
+        nachweis_id,
+    )
+    dateiname = _sicherer_download_dateiname(ergebnis.dateiname, ergebnis.mime_type)
+    disposition = f'inline; filename="{dateiname}"; filename*=UTF-8\'\'{quote(dateiname)}'
+    return Response(
+        content=ergebnis.inhalt,
+        media_type=ergebnis.mime_type,
+        headers={"Content-Disposition": disposition},
+    )
 
 
 @router.post(

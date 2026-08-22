@@ -24,10 +24,14 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/app
+      PWE_DATEI_STORAGE_PFAD: /var/pwe/dateien
       ENV: development
+    volumes:
+      - pwe_dateien:/var/pwe/dateien
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   pgdata:
+  pwe_dateien:

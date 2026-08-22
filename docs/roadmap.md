@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** **Gate 8.2c ✅** — **Gate 8.3 ⏳** (Storage / Foto) — Gate 8.2 ✅, Gate 7 ✅, Gate 6.3 ✅
+**▶ Aktueller Stand:** **Gate 8.3a ✅** — **Gate 8.3b ⏳** (Frontend Foto-Upload) — Gate 8.2 ✅, Gate 7 ✅, Gate 6.3 ✅
 
 ---
 
@@ -196,8 +196,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 8.2c | Katalog-Admin-UI (gesliced) | ✅ | P3 | 8.2c1, 8.2c2 |
 | 8.2c1 | Bibliothek-Admin-UI (Kommandos, Routinen, Vorlagen) | ✅ | P3 | PR [#38](https://github.com/Rei1000/PWE/pull/38) — Merge `3ab3bfd` (Feature `5a3d930`) | 8.2a, 8.2b1 |
 | 8.2c2 | Entwurfseditor-UI | ✅ | P3 | PR [#40](https://github.com/Rei1000/PWE/pull/40) — Merge `b1dbc56` (Feature `2955ca6`, Fix `8568c5e`) | 8.2b2, 8.2c1 |
-| 8.3 | Foto / Storage (`DateiSpeicherPort`) | ⏳ | P2 | 6.3, Ports offen |
-| 8.3a | Storage-Port und Nachweis-Integration | ⏳ | P2 | 8.3 |
+| 8.3 | Foto / Storage (`DateiSpeicherPort`) | ⏳ | P2 | 8.3a ✅, 8.3b offen |
+| 8.3a | Storage-Port und Nachweis-Integration | ✅ | P2 | [ADR-0022](adr/0022-foto-nachweis-dateispeicher.md) |
 | 8.3b | Frontend Foto-Upload | ⏳ | P3 | 8.3a |
 | 8.4 | Druck-Adapter (`DruckPort`) | ⏳ | P3 | PDF vorhanden (Gate 5.5) |
 | 8.1 | Identity / Auth (Middleware, Rollen) | ⏸ | P2 | Vor echtem Mehrbenutzerbetrieb; nach 8.2a empfohlen |
@@ -302,4 +302,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.3 — Foto / Storage (`DateiSpeicherPort`)** (⏳, P2): Storage-Port und Nachweis-Integration (8.3a), danach Frontend Foto-Upload (8.3b). Reihenfolge gemäß Roadmap-Neupriorisierung 2026-07-14: **8.3 vor 8.1 (Auth)**. Bewusst **ohne** Auth, Entwurfs-LIST, Aktivierungsregeln.
+**Gate 8.3b — Frontend Foto-Upload** (⏳, P3): UI für Multipart-Upload und Inline-Anzeige über die in Gate 8.3a eingeführten Endpunkte. Bewusst **ohne** Auth (Gate 8.1 ⏸), PDF-Foto-Einbettung, HEIC.

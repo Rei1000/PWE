@@ -8,6 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.app import create_app
+from adapters.storage.in_memory import InMemoryDateiSpeicher
 from api.persistence import postgres_deps
 
 pytestmark = pytest.mark.postgresql
@@ -21,7 +22,7 @@ def test_postgres_deps_factory_wird_pro_request_aufgerufen():
 
     def tracking_factory(session):
         session_ids.append(id(session))
-        return postgres_deps(session)
+        return postgres_deps(session, InMemoryDateiSpeicher())
 
     with TestClient(create_app(postgres_deps_factory=tracking_factory)) as client:
         assert client.get("/health").status_code == 200
@@ -38,7 +39,7 @@ def test_simulation_port_ist_pro_request_neu():
     port_ids: list[int] = []
 
     def tracking_factory(session):
-        deps = postgres_deps(session)
+        deps = postgres_deps(session, InMemoryDateiSpeicher())
         port_ids.append(id(deps.kommando_port))
         return deps
 

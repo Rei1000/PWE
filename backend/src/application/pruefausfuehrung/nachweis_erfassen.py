@@ -5,13 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from domain.pruefausfuehrung.errors import FotoNurPerMultipart, PrueflaufNichtGefunden
 from domain.pruefausfuehrung.prueflauf import Nachweis, NachweisArt, Prueflauf
-from domain.shared.errors import DomainError
 from ports.prueflauf_repository import PrueflaufRepository
-
-
-class PrueflaufNichtGefunden(DomainError):
-    pass
 
 
 @dataclass
@@ -27,6 +23,10 @@ class NachweisErfassen:
         *,
         ist_automatisch: bool = False,
     ) -> Nachweis:
+        if art == NachweisArt.FOTO:
+            raise FotoNurPerMultipart(
+                "Foto-Nachweise werden ausschließlich über den Multipart-Endpunkt erfasst"
+            )
         prueflauf = self._lade_offenen_prueflauf(prueflauf_id)
         nachweis = prueflauf.add_nachweis(
             prozedur_schritt_id, art, payload, ist_automatisch=ist_automatisch

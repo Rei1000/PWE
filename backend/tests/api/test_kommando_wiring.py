@@ -161,9 +161,10 @@ def test_postgres_deps_use_factory(monkeypatch):
 
     from unittest.mock import MagicMock
 
+    from adapters.storage.in_memory import InMemoryDateiSpeicher
     from api.persistence import postgres_deps
 
-    deps = postgres_deps(MagicMock())
+    deps = postgres_deps(MagicMock(), InMemoryDateiSpeicher())
 
     assert isinstance(deps.kommando_port, SimuliertesExternesKommandoPort)
 

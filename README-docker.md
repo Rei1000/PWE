@@ -30,6 +30,7 @@ Die API startet erst, wenn PostgreSQL healthy ist (`depends_on` + Healthcheck).
 | Variable | Wert im Compose-Stack |
 |----------|------------------------|
 | `DATABASE_URL` | `postgresql+psycopg://postgres:postgres@db:5432/app` |
+| `PWE_DATEI_STORAGE_PFAD` | `/var/pwe/dateien` (Volume `pwe_dateien`) |
 | `ENV` | `development` |
 
 Optional für Demo-/Labor-Automatisierung (Gate 6.3c):
@@ -63,9 +64,11 @@ cd frontend/web && npm install && npm run dev
 ## Stoppen / Daten
 
 ```bash
-docker compose down        # Container stoppen, Volume bleibt
-docker compose down -v     # inkl. PostgreSQL-Daten (pgdata)
+docker compose down        # Container stoppen, Volumes bleiben
+docker compose down -v     # inkl. PostgreSQL-Daten (pgdata) und Datei-Storage (pwe_dateien)
 ```
+
+**Backup:** Für vollständige Wiederherstellung müssen PostgreSQL-Volume (`pgdata`) und Datei-Volume (`pwe_dateien`) gemeinsam gesichert werden.
 
 ## Bewusst nicht enthalten
 
@@ -74,4 +77,4 @@ docker compose down -v     # inkl. PostgreSQL-Daten (pgdata)
 - Auth / Identity
 - Automatische Migration *innerhalb* der FastAPI-Runtime (Migration nur Entrypoint/CLI)
 
-Siehe `docs/roadmap.md` — Gate 7 ✅; nächster Slice Gate 8.2a.
+Siehe `docs/roadmap.md` — Gate 8.3a ✅; nächster Slice Gate 8.3b.

@@ -19,9 +19,10 @@ from adapters.persistence.postgresql.prueflauf_repository import PostgresPruefla
 from adapters.pdf.protokoll_erzeugung import PdfProtokollErzeugungAdapter
 from api.deps import ApiDeps
 from api.kommando_wiring import create_kommando_port
+from ports.datei_speicher_port import DateiSpeicherPort
 
 PersistenceMode = Literal["in-memory", "postgresql"]
-PostgresDepsFactory = Callable[[Session], ApiDeps]
+PostgresDepsFactory = Callable[[Session, DateiSpeicherPort], ApiDeps]
 
 # Erwartete Kern-Tabelle nach `alembic upgrade head` (Gate 7.5b).
 _REQUIRED_TABLE = "produktdefinitions_version"
@@ -84,7 +85,7 @@ def initialize_postgresql_engine(database_url: str) -> Engine:
     return engine
 
 
-def postgres_deps(session: Session) -> ApiDeps:
+def postgres_deps(session: Session, datei_speicher: DateiSpeicherPort) -> ApiDeps:
     """Request-scoped ApiDeps mit allen PostgreSQL-Repositories."""
     prueflauf_repo = PostgresPrueflaufRepository(session)
     protokoll_repo = PostgresProtokollRepository(session)
@@ -96,6 +97,7 @@ def postgres_deps(session: Session) -> ApiDeps:
         abschluss_persistenz=PostgresPrueflaufAbschlussPersistenz(session),
         erzeugung_port=PdfProtokollErzeugungAdapter(),
         kommando_port=create_kommando_port(),
+        datei_speicher=datei_speicher,
     )
 
 

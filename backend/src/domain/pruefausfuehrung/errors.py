@@ -19,3 +19,31 @@ class MaterialisierterProzedurSchrittNichtGefunden(DomainError):
 
 class KeineAutomatisierungAmSchritt(DomainError):
     pass
+
+
+class FotoNurPerMultipart(DomainError):
+    pass
+
+
+class UngueltigerDateityp(DomainError):
+    pass
+
+
+class DateiZuGross(DomainError):
+    pass
+
+
+class DateiNichtGefunden(DomainError):
+    pass
+
+
+class DateiSpeicherungFehlgeschlagen(DomainError):
+    pass
+
+
+class NachweisNichtGefunden(DomainError):
+    pass
+
+
+class NachweisKeinFoto(DomainError):
+    pass

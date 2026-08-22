@@ -31,7 +31,7 @@ Gate 6.3a schließt diese Lücke mit einem **minimalen Katalog-Setup-Contract**,
 | Adapter | **Keine** COM-, Baudraten-, Timeout- oder Port-Felder im Contract |
 | Freie Ausführung | **Kein** `kommandocode` zur Laufzeit — nur Bibliotheks-Anlage und Entwurfs-Zuweisung per `kommando_id` |
 | Routinen | **Kein** `routine_id` im Request; Routine-Anlage/-Zuweisung = Gate 8.2a |
-| Schema | **Keine** DB-Änderung; Alembic = Gate 7.5 |
+| Schema | **Keine** DB-Änderung in 6.3a; Alembic-Basis = Gate 7.5 ✅ |
 | Schichten | Katalog-HTTP delegiert ausschließlich an Katalog-Application |
 
 ### POST `/katalog/bibliothek/kommandos`

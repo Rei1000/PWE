@@ -2,7 +2,7 @@
 
 Ordnerstruktur orientiert sich an **`docs/architecture.md`**; Fachbegriffe gemäß **`docs/domain-model.md`**.
 
-**Stand:** Gate 7.5b — Domain, Application, Ports, Adapter, API; PostgreSQL-Schema nur via Alembic; Identity und Auswertung sind Platzhalter.
+**Stand:** Gate 7 ✅ — Domain, Application, Ports, Adapter, API; PostgreSQL-Schema ausschließlich via Alembic; Identity und Auswertung sind Platzhalter.
 
 ---
 

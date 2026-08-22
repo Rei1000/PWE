@@ -71,7 +71,7 @@ Validierung: `domain/katalog/materialisierung.py` → `validiere_materialisierte
 
 Keine zweite Normalisierung in Application Layer oder Mapper.
 
-**Exit:** Write Exit Gate 7.4b ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)) — neue Versionen schreiben kein `externes_kommando`. Storage Exit nach Gate 7.5.
+**Exit:** Write Exit Gate 7.4b ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)) — neue Versionen schreiben kein `externes_kommando`. **Storage Exit** offen (separater Slice; Alembic-Basis Gate 7.5 ✅).
 
 ### Entwurfs-Wechsel (Kommando ↔ Routine)
 

@@ -38,7 +38,7 @@ Gate 7.1 soll die FastAPI-Anwendung konfigurierbar mit PostgreSQL betreiben. Off
 ## Konsequenzen
 
 - Routen nutzen `get_request_deps(request)` statt `request.app.state.deps`
-- App-Lifespan: Engine create/dispose; Schema muss bereits via Alembic migriert sein (Gate 7.5b — keine `create_all`/`init_schema` in der Runtime)
+- App-Lifespan: Engine create/dispose; Schema muss bereits via Alembic migriert sein (Gate 7.5 ✅ — keine `create_all`/`init_schema` in der Runtime)
 - Ungültige `DATABASE_URL` → `PersistenceConfigurationError` beim Start (kein stilles Fallback auf In-Memory)
 - Gate 7.2 (docker-compose) kann `DATABASE_URL` für lokale Entwicklung setzen
 

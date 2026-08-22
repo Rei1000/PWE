@@ -2,7 +2,7 @@
 
 ## Status
 
-Angenommen — Gate 7.4a API Exit ✅, Gate 7.4b Write Exit ✅, Gate 7.4c Monitoring ✅. Storage Exit offen (nach Gate 7.5).
+Angenommen — Gate 7.4a API Exit ✅, Gate 7.4b Write Exit ✅, Gate 7.4c Monitoring ✅, Gate 7.5 Alembic ✅. **Storage Exit** offen (separater Slice mit Datenstrategie).
 
 ## Kontext
 
@@ -15,7 +15,7 @@ Gate 7.3f führte den schrittzentrierten Endpunkt ([ADR-0016](0016-automatisieru
 1. **Gate 7.4a — API Exit** ✅: Legacy-HTTP + Use Case `ExternesKommandoAusfuehren`
 2. **Gate 7.4b — Write Exit** ✅: neue Versionen schreiben kein `externes_kommando` mehr
 3. **Gate 7.4c — Monitoring** ✅: fachliche Beobachtung über `fehlgeschlagen` ([ADR-0016](0016-automatisierung-http-api.md)); keine APM-Plattform
-4. **Storage Exit**: physische Entfernung aus Persistenz/Mapping **erst nach Gate 7.5 / Alembic** und bewusster Datenstrategie
+4. **Storage Exit**: physische Entfernung aus Persistenz/Mapping — **offen**; Alembic-Basis (Gate 7.5 ✅) und bewusste Datenstrategie Voraussetzung
 
 ### Gate 7.4a — API Exit
 
@@ -57,7 +57,7 @@ Alte Versionen mit ausschließlich `externes_kommando` (`materialisierte_routine
 
 - Neue Veröffentlichungen persistieren kein Legacy-Feld mehr (JSON ohne `externes_kommando`)
 - Bestehende Versionen mit Legacy-Snapshot bleiben gültig
-- Storage Exit und physische Feldentfernung folgen erst nach Gate 7.5
+- Storage Exit und physische Feldentfernung folgen in einem **separaten Slice** (Alembic-Basis Gate 7.5 ✅)
 
 ## Referenzen
 

@@ -48,7 +48,7 @@ docker compose up --build
 
 Details: [`README-docker.md`](README-docker.md)
 
-### Datenbankschema / Alembic (Gate 7.5b)
+### Datenbankschema / Alembic (Gate 7.5 ✅)
 
 PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen. Die FastAPI-Runtime erzeugt oder verändert kein Datenbankschema.
 

@@ -40,6 +40,21 @@ In der Prüflauf-Schrittkarte:
 - Kein Katalog-Setup in der Prüfer-UI; Automatisierung ausschließlich über ADR-0016 (`…/automatisierung/ausfuehren`, Gate 7.4a)
 - Demo mit automatisierbarem Seed: Gate 6.3c
 
+### Katalog-Admin Bibliothek (Gate 8.2c1)
+
+Design-Time-Verwaltung der Bibliothek — **kein** Entwurfseditor (folgt in Gate 8.2c2):
+
+| Route | Inhalt |
+|-------|--------|
+| `/katalog` | Hub mit Links zu Kommandos, Routinen, Vorlagen |
+| `/katalog/kommandos` | Externe Kommandos CRUD |
+| `/katalog/routinen` | Routinen-Liste; Editor unter `/katalog/routinen/neu` bzw. `/:routineId` |
+| `/katalog/vorlagen` | PrüfschrittVorlagen CRUD (`bezeichnung`, `beschreibung`) |
+
+- Kennzeichnung „Katalog-Setup / Laborbetrieb“ ohne Auth (ADR-0001)
+- Routinen: geordnete `kommando_ids`, Hoch/Runter — kein Drag-and-Drop
+- Keine Kommandoausführung in diesem Bereich
+
 ## Skripte
 
 | Befehl | Zweck |

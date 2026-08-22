@@ -1,4 +1,21 @@
-export { ApiError, apiFetch, apiFetchBlob, apiGet, apiPost, getApiBaseUrl } from "@/adapters/api/client";
+export { ApiError, apiDelete, apiFetch, apiFetchBlob, apiGet, apiPost, apiPut, getApiBaseUrl } from "@/adapters/api/client";
+export {
+  createKommando,
+  createRoutine,
+  createVorlage,
+  deleteKommando,
+  deleteRoutine,
+  deleteVorlage,
+  getKommando,
+  getRoutine,
+  getVorlage,
+  listKommandos,
+  listRoutinen,
+  listVorlagen,
+  updateKommando,
+  updateRoutine,
+  updateVorlage,
+} from "@/adapters/api/bibliothek";
 export { fetchHealth } from "@/adapters/api/health";
 export { createEntwurf, seedDemoKatalog, veroeffentlichen } from "@/adapters/api/katalog";
 export {

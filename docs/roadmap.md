@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** **Gate 8.2b2 ✅** — **Gate 8.2c ⏳** (Katalog-Admin-UI) — Gate 8.2b1 ✅, Gate 8.2a ✅, Gate 7 ✅, Gate 6.3 ✅
+**▶ Aktueller Stand:** **Gate 8.2c1 🔄** (Bibliothek-Admin-UI) — Gate 8.2b2 ✅, Gate 8.2b1 ✅, Gate 8.2a ✅, Gate 7 ✅, Gate 6.3 ✅
 
 ---
 
@@ -193,7 +193,9 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 8.2b | Vorlagen und erweiterte Entwurfsbearbeitung (gesliced) | ✅ | P3 | 8.2b1, 8.2b2 |
 | 8.2b1 | PrüfschrittVorlage: Bibliothek, Materialisierung und HTTP | ✅ | P3 | PR [#34](https://github.com/Rei1000/PWE/pull/34) — Merge `64f4735` (Feature `7905ad7`, PG-Fix `29151d1`), [ADR-0020](adr/0020-pruefschritt-vorlage-materialisierung.md) | 8.2a |
 | 8.2b2 | Erweiterte Entwurfsbearbeitung HTTP | ✅ | P3 | PR [#36](https://github.com/Rei1000/PWE/pull/36) — Merge `61da712` (Feature `41aa6d4`), [ADR-0021](adr/0021-entwurfsbearbeitung-http.md) | 8.2b1 |
-| 8.2c | Katalog-Admin-UI | ⏳ | P3 | 8.2b1, 8.2b2 |
+| 8.2c | Katalog-Admin-UI (gesliced) | ⏳ | P3 | 8.2b1, 8.2b2 |
+| 8.2c1 | Bibliothek-Admin-UI (Kommandos, Routinen, Vorlagen) | 🔄 | P3 | 8.2a, 8.2b1 |
+| 8.2c2 | Entwurfseditor-UI | ⏳ | P3 | 8.2b2, 8.2c1 |
 | 8.3 | Foto / Storage (`DateiSpeicherPort`) | ⏳ | P2 | 6.3, Ports offen |
 | 8.3a | Storage-Port und Nachweis-Integration | ⏳ | P2 | 8.3 |
 | 8.3b | Frontend Foto-Upload | ⏳ | P3 | 8.3a |
@@ -205,6 +207,12 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 **Erkenntnis:** Bibliotheks-Aggregat `PrüfschrittVorlage` und Produktdefinitions-Entwurfsbearbeitung sind zwei unterschiedliche fachliche Verantwortlichkeiten; zusammen als ein Slice nicht reviewbar (~1.800+ Nettozeilen).
 
 **Entscheidung:** Gate 8.2b → **8.2b1** (Vorlage + Materialisierung + HTTP) und **8.2b2** (Entwurfsbearbeitung HTTP). Offener P1-E2E-Test (Routine-HTTP) wird in **8.2b1** als Regressionstest ergänzt.
+
+### Roadmap-Anpassung (2026-08-22) — Gate 8.2c Zerlegung
+
+**Erkenntnis:** Gate 8.2c enthält zwei unabhängige UI-Verantwortlichkeiten — Bibliotheksverwaltung und Entwurfseditor (~2.500+ Nettozeilen als ein Slice).
+
+**Entscheidung:** Gate 8.2c → **8.2c1** (Bibliothek-Admin: Navigation, Kommandos, Routinen, Vorlagen) und **8.2c2** (Entwurfseditor: Schritte, Sollvorgaben, Automatisierung, Veröffentlichung). Reviewbare PRs, kein zusätzlicher Backend-Slice.
 
 ### Offene Punkte nach Gate 8.2b2
 
@@ -291,4 +299,6 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.2c — Katalog-Admin-UI** (⏳, P3): Entwurfseditor, Vorlagenverwaltung, Routineverwaltung — baut auf den HTTP-Contracts aus Gate 8.2a, 8.2b1 und 8.2b2 auf. Bewusst **ohne** Auth, Storage, Aktivierungsregeln, Eingabefelder.
+**Gate 8.2c1 — Bibliothek-Admin-UI** (🔄, P3): Katalog-Hub, Navigation, CRUD für Kommandos/Routinen/Vorlagen — baut auf Gate 8.2a/8.2b1 HTTP auf. Bewusst **ohne** Entwurfseditor (8.2c2), Auth, Storage.
+
+**Gate 8.2c2 — Entwurfseditor-UI** (⏳, P3): Entwurf laden/bearbeiten, Schritte, Sollvorgaben, Automatisierung, Veröffentlichung — baut auf Gate 8.2b2 HTTP auf.

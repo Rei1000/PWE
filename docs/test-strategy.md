@@ -28,6 +28,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 - **Bibliothek-HTTP CRUD** (Gate 8.2a): Application `test_katalog_bibliothek_crud.py`; API `test_api_katalog_bibliothek_crud.py`; OpenAPI `test_api_openapi_katalog_bibliothek_crud.py`; PostgreSQL `test_api_postgresql_katalog_bibliothek_crud.py`; Contract-Tests erweitert in `test_bibliothek_repository_contract.py`.
 - **PrüfschrittVorlage** (Gate 8.2b1): Domain `test_pruefschritt_vorlage.py`; Application `test_katalog_pruefschritt_vorlage_crud.py`; API `test_api_katalog_pruefschritt_vorlage_crud.py`; OpenAPI `test_api_openapi_katalog_pruefschritt_vorlage_crud.py`; PostgreSQL `test_api_postgresql_katalog_pruefschritt_vorlage_crud.py`; Routine-HTTP-E2E-Regression `test_api_katalog_routine_http_e2e.py`; Contract-Tests in `test_bibliothek_repository_contract.py`; Alembic `0002` in `test_alembic_bootstrap.py`.
 - **Entwurfsbearbeitung HTTP** (Gate 8.2b2): Domain `test_produktdefinition_entwurf_bearbeitung.py`; Application `test_katalog_entwurf_bearbeitung.py`; API `test_api_katalog_entwurf_bearbeitung.py`; OpenAPI `test_api_openapi_katalog_entwurf_bearbeitung.py`; PostgreSQL `test_api_postgresql_katalog_entwurf_bearbeitung.py` — kein Alembic, kein Schema-Wechsel.
+- **Katalog-Admin Bibliothek UI** (Gate 8.2c1): Frontend Adapter `tests/api/bibliothek.test.ts`, `client-put-delete.test.ts`, Flow `katalog-bibliothek-flow.test.ts`; Hooks `useKommandos.test.ts`; Komponenten/Pages — kein Backend-Diff.
 
 ## V1-Pflicht vor Merge
 

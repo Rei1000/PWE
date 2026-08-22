@@ -153,7 +153,7 @@ Keine — erst bei Persistenz/Event-Integration.
 
 ## Offen (nach Gate 8.2b2)
 
-- Katalog-Admin-UI (Gate 8.2c)
+- Entwurfseditor-UI (Gate 8.2c2)
 - Eingabefelder an PrüfschrittVorlage
 - Aktivierungsregeln-Auswertung zur Laufzeit
 - Version deaktivieren (V1: neue Version ersetzt aktive)

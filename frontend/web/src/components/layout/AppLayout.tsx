@@ -15,6 +15,9 @@ export function AppLayout() {
             <Link to="/" className="text-muted-foreground hover:text-foreground">
               Start
             </Link>
+            <Link to="/katalog" className="text-muted-foreground hover:text-foreground">
+              Katalog (Setup)
+            </Link>
             <Link to="/health" className="text-muted-foreground hover:text-foreground">
               Health
             </Link>

@@ -191,7 +191,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 8.2 | Katalog-Administration (Bibliothek, Vorlagen, Routinen — HTTP + UI, gesliced) | ⏳ | P2 | 6.3, 7.5 |
 | 8.2a | Bibliothek-HTTP CRUD (Kommandos, Routinen, Listen) | ✅ | P2 | PR [#32](https://github.com/Rei1000/PWE/pull/32) — Merge `3956914`, [ADR-0019](adr/0019-bibliothek-http-crud.md) | 6.3a |
 | 8.2b | Vorlagen und erweiterte Entwurfsbearbeitung (gesliced) | ⏳ | P3 | 8.2a |
-| 8.2b1 | PrüfschrittVorlage: Bibliothek, Materialisierung und HTTP | ✅ | P3 | 8.2a, ADR-0020 |
+| 8.2b1 | PrüfschrittVorlage: Bibliothek, Materialisierung und HTTP | ✅ | P3 | PR [#34](https://github.com/Rei1000/PWE/pull/34) — Merge `64f4735` (Feature `7905ad7`, PG-Fix `29151d1`), [ADR-0020](adr/0020-pruefschritt-vorlage-materialisierung.md) | 8.2a |
 | 8.2b2 | Erweiterte Entwurfsbearbeitung HTTP | ⏳ | P3 | 8.2b1 |
 | 8.2c | Katalog-Admin-UI | ⏳ | P3 | 8.2b1 |
 | 8.3 | Foto / Storage (`DateiSpeicherPort`) | ⏳ | P2 | 6.3, Ports offen |
@@ -206,11 +206,11 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 **Entscheidung:** Gate 8.2b → **8.2b1** (Vorlage + Materialisierung + HTTP) und **8.2b2** (Entwurfsbearbeitung HTTP). Offener P1-E2E-Test (Routine-HTTP) wird in **8.2b1** als Regressionstest ergänzt.
 
-### Offene Punkte nach Gate 8.2a
+### Offene Punkte nach Gate 8.2b1
 
 | Prio | Thema | Status |
 |------|-------|--------|
-| **P1** | Vollständiger HTTP-E2E-Pfad Routine → zuweisen → veröffentlichen → Prüflauf → ausführen | → Regressionstest in Gate 8.2b1 |
+| ~~**P1**~~ | ~~Vollständiger HTTP-E2E-Pfad Routine → zuweisen → veröffentlichen → Prüflauf → ausführen~~ | ✅ erledigt in Gate 8.2b1 (`test_api_katalog_routine_http_e2e.py`) |
 | P2 | Storage Exit (`externes_kommando` physisch entfernen) | separater Slice (siehe Gate 7.4) |
 | P2 | Pagination, Suche, Bulk-Operationen Bibliothek-HTTP | bewusst nicht in 8.2a (ADR-0019) |
 
@@ -242,8 +242,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
-| 2026-08-22 | Gate 8.2b1 abgeschlossen — PrüfschrittVorlage Bibliothek/Materialisierung/HTTP (ADR-0020); Routine-HTTP-E2E-Regression grün | Slice 8.2b1 lokal; kein Push bis Freigabe |
-| 2026-08-22 | Gate 8.2b zerlegt — 8.2b1 (Vorlage) + 8.2b2 (Entwurfsbearbeitung); 8.2b1 🔄 | Zwei Aggregate, Alembic, Materialisierung — ein Slice zu groß |
+| 2026-08-22 | Gate 8.2b1 abgeschlossen — PR #34, Merge `64f4735` (Feature `7905ad7`, PG-Fix `29151d1`); PrüfschrittVorlage Bibliothek/Materialisierung/HTTP (ADR-0020); Routine-HTTP-E2E-Regression ✅ | Nach-Merge-Pflege |
+| 2026-08-22 | Gate 8.2b zerlegt — 8.2b1 (Vorlage) + 8.2b2 (Entwurfsbearbeitung) | Zwei Aggregate, Alembic, Materialisierung — ein Slice zu groß |
 | 2026-08-22 | Gate 8.2a Doku abgeschlossen — PR #33, Merge `db11326` | Roadmap + Datenbankmodell §8 |
 | 2026-08-22 | Gate 8.2a abgeschlossen — PR #32, Merge `3956914` (Feature `7e0c4b0`, PG-Fix `2c4afd9`) | Bibliothek-HTTP CRUD (ADR-0019); Kommandos/Routinen LIST/GET/PUT/DELETE; Routine-Zuweisung; Automatisierung entfernen; DELETE-Referenzschutz |
 | 2026-08-22 | Gate 8.2a in Umsetzung — Bibliothek-HTTP CRUD (ADR-0019) | Kommandos/Routinen LIST/GET/PUT/DELETE; Routine-Zuweisung; Automatisierung entfernen |

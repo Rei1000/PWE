@@ -114,7 +114,8 @@ Adapter dürfen mutable save technisch per INSERT/UPDATE oder SQL-Upsert umsetze
 | Externe Kommandos listen | `application/katalog/externe_kommandos_listen.py` |
 | Externes Kommando lesen/aktualisieren/löschen | `externes_kommando_lesen.py`, `externes_kommando_aktualisieren.py`, `externes_kommando_loeschen.py` |
 | Routinen listen/lesen/aktualisieren/löschen | `routinen_listen.py`, `routine_lesen.py`, `routine_aktualisieren.py`, `routine_loeschen.py` |
-| PrüfschrittVorlagen anlegen/listen/lesen/aktualisieren/löschen | `pruefschritt_vorlage_anlegen.py`, `pruefschritt_vorlagen_listen.py`, `pruefschritt_vorlage_lesen.py`, `pruefschritt_vorlage_aktualisieren.py`, `pruefschritt_vorlage_loeschen.py` |
+| PrüfschrittVorlagen anlegen/listen/lesen/aktualisieren/löschen | `pruefschritt_vorlage_anlegen.py`, `pruefschritt_vorlagen_listen.py`, `pruefschritt_vorlage_lesen.py`, `pruefschritt_vorlage_aktualisieren.py`, `pruefschritt_vorlage_loeschen.py` (Gate 8.2b1) |
+| Entwurf lesen / Schritt-CRUD / Reihenfolge | `entwurf_lesen.py`, `prozedur_schritt_anlegen.py`, `prozedur_schritt_aktualisieren.py`, `prozedur_schritt_loeschen.py`, `prozedur_schritt_reihenfolge_aendern.py` (Gate 8.2b2, ADR-0021) |
 
 ## HTTP (Gate 6.3a + 8.2a, ADR-0017, ADR-0019)
 
@@ -136,6 +137,11 @@ Adapter dürfen mutable save technisch per INSERT/UPDATE oder SQL-Upsert umsetze
 | `PUT /katalog/bibliothek/vorlagen/{id}` | `PruefschrittVorlageAktualisieren` |
 | `DELETE /katalog/bibliothek/vorlagen/{id}` | `PruefschrittVorlageLoeschen` |
 | `PUT /katalog/entwuerfe/{id}/schritte/{schritt_id}/automatisierung` | `KommandoProzedurSchrittZuweisen` / `RoutineProzedurSchrittZuweisen` / `AutomatisierungEntfernen` |
+| `GET /katalog/entwuerfe/{id}` | `EntwurfLesen` (Gate 8.2b2) |
+| `POST /katalog/entwuerfe/{id}/schritte` | `ProzedurSchrittAnlegen` (Gate 8.2b2) |
+| `PUT /katalog/entwuerfe/{id}/schritte/{schritt_id}` | `ProzedurSchrittAktualisieren` (Gate 8.2b2) |
+| `DELETE /katalog/entwuerfe/{id}/schritte/{schritt_id}` | `ProzedurSchrittLoeschen` (Gate 8.2b2) |
+| `PUT /katalog/entwuerfe/{id}/schritte/reihenfolge` | `ProzedurSchrittReihenfolgeAendern` (Gate 8.2b2) |
 
 Kommando- oder Routine-Zuweisung XOR; Entfernen mit `{ "kommando_id": null, "routine_id": null }`. Keine Ausführung, keine Adapterfelder. Laborbetrieb ohne Auth ([ADR-0001](../adr/0001-v1-scope-deferrals.md)).
 
@@ -145,10 +151,9 @@ Entwurfs-Wechsel: andere `kommando_id` bei gesetztem Kommando → `Automatisieru
 
 Keine — erst bei Persistenz/Event-Integration.
 
-## Offen (nach Gate 8.2b1)
+## Offen (nach Gate 8.2b2)
 
 - Katalog-Admin-UI (Gate 8.2c)
-- Erweiterte Entwurfsbearbeitung HTTP (Gate 8.2b2)
 - Eingabefelder an PrüfschrittVorlage
 - Aktivierungsregeln-Auswertung zur Laufzeit
 - Version deaktivieren (V1: neue Version ersetzt aktive)

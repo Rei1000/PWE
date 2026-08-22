@@ -114,6 +114,46 @@ class EntwurfResponse(BaseModel):
     produktkodierung: str
 
 
+class ProzedurSchrittEntwurfResponse(BaseModel):
+    schritt_id: str
+    vorlage_id: str
+    ist_pflicht: bool
+    reihenfolge: int
+    sollvorgaben: dict[str, Any] = Field(default_factory=dict)
+    kommando_id: str | None = None
+    routine_id: str | None = None
+
+
+class EntwurfDetailResponse(BaseModel):
+    produktdefinition_id: str
+    produktkodierung: str
+    sollbestueckung: list[str] = Field(default_factory=list)
+    prozedur_schritte: list[ProzedurSchrittEntwurfResponse] = Field(default_factory=list)
+
+
+class ProzedurSchrittAnlegenRequest(BaseModel):
+    schritt_id: str
+    vorlage_id: str
+    ist_pflicht: bool
+    sollvorgaben: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class ProzedurSchrittAktualisierenRequest(BaseModel):
+    vorlage_id: str
+    ist_pflicht: bool
+    sollvorgaben: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class ProzedurSchrittReihenfolgeRequest(BaseModel):
+    schritt_ids: list[str]
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class VersionResponse(BaseModel):
     version_id: str
     produktdefinition_id: str

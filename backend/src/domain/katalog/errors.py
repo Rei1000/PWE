@@ -55,3 +55,11 @@ class VorlageNichtGefunden(DomainError):
 
 class VorlageInVerwendung(DomainError):
     pass
+
+
+class SchrittIdBereitsVorhanden(DomainError):
+    pass
+
+
+class UngueltigeSchrittReihenfolge(DomainError):
+    pass

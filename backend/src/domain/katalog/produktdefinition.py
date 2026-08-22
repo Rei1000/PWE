@@ -13,7 +13,10 @@ from uuid import uuid4
 from domain.katalog.errors import (
     AutomatisierungDoppeltZugewiesen,
     ExternesKommandoNichtGefunden,
+    ProzedurSchrittNichtGefunden,
     RoutineNichtGefunden,
+    SchrittIdBereitsVorhanden,
+    UngueltigeSchrittReihenfolge,
     VorlageNichtGefunden,
 )
 from domain.katalog.externes_kommando import ExternesKommando
@@ -125,6 +128,99 @@ class Produktdefinition:
         )
         self.aktive_version_id = version.version_id
         return version
+
+    def schritt_hinzufuegen(self, schritt: ProzedurSchrittEntwurf) -> ProzedurSchrittEntwurf:
+        schritt_id = schritt.schritt_id.strip()
+        if not schritt_id:
+            raise InvariantViolation("ProzedurSchritt erfordert eine nicht-leere schritt_id")
+        if any(s.schritt_id == schritt_id for s in self.prozedur_schritte):
+            raise SchrittIdBereitsVorhanden(
+                f"ProzedurSchritt {schritt_id} existiert bereits im Entwurf"
+            )
+        naechste_reihenfolge = (
+            max((s.reihenfolge for s in self.prozedur_schritte), default=0) + 1
+        )
+        neu = ProzedurSchrittEntwurf(
+            schritt_id=schritt_id,
+            vorlage_id=schritt.vorlage_id,
+            ist_pflicht=schritt.ist_pflicht,
+            reihenfolge=naechste_reihenfolge,
+            sollvorgaben=dict(schritt.sollvorgaben),
+        )
+        self.prozedur_schritte.append(neu)
+        return neu
+
+    def schritt_aktualisieren(
+        self,
+        schritt_id: str,
+        *,
+        vorlage_id: str,
+        ist_pflicht: bool,
+        sollvorgaben: dict[str, Any],
+    ) -> ProzedurSchrittEntwurf:
+        schritt = self._schritt_oder_fehler(schritt_id)
+        aktualisiert = ProzedurSchrittEntwurf(
+            schritt_id=schritt.schritt_id,
+            vorlage_id=vorlage_id,
+            ist_pflicht=ist_pflicht,
+            reihenfolge=schritt.reihenfolge,
+            sollvorgaben=dict(sollvorgaben),
+            kommando_id=schritt.kommando_id,
+            routine_id=schritt.routine_id,
+        )
+        idx = self.prozedur_schritte.index(schritt)
+        self.prozedur_schritte[idx] = aktualisiert
+        return aktualisiert
+
+    def schritt_entfernen(self, schritt_id: str) -> None:
+        schritt = self._schritt_oder_fehler(schritt_id)
+        self.prozedur_schritte.remove(schritt)
+        self._reihenfolge_normalisieren()
+
+    def schritte_neu_ordnen(self, schritt_ids: list[str]) -> None:
+        if len(schritt_ids) != len(self.prozedur_schritte):
+            raise UngueltigeSchrittReihenfolge(
+                "Reihenfolge muss alle Schritt-IDs des Entwurfs exakt einmal enthalten"
+            )
+        if len(set(schritt_ids)) != len(schritt_ids):
+            raise UngueltigeSchrittReihenfolge("Schritt-IDs in der Reihenfolge müssen eindeutig sein")
+        nach_id = {s.schritt_id: s for s in self.prozedur_schritte}
+        for schritt_id in schritt_ids:
+            if schritt_id not in nach_id:
+                raise ProzedurSchrittNichtGefunden(f"ProzedurSchritt {schritt_id} nicht gefunden")
+        self.prozedur_schritte = [
+            ProzedurSchrittEntwurf(
+                schritt_id=nach_id[sid].schritt_id,
+                vorlage_id=nach_id[sid].vorlage_id,
+                ist_pflicht=nach_id[sid].ist_pflicht,
+                reihenfolge=position,
+                sollvorgaben=dict(nach_id[sid].sollvorgaben),
+                kommando_id=nach_id[sid].kommando_id,
+                routine_id=nach_id[sid].routine_id,
+            )
+            for position, sid in enumerate(schritt_ids, start=1)
+        ]
+
+    def _schritt_oder_fehler(self, schritt_id: str) -> ProzedurSchrittEntwurf:
+        schritt = next((s for s in self.prozedur_schritte if s.schritt_id == schritt_id), None)
+        if schritt is None:
+            raise ProzedurSchrittNichtGefunden(f"ProzedurSchritt {schritt_id} nicht gefunden")
+        return schritt
+
+    def _reihenfolge_normalisieren(self) -> None:
+        sortiert = sorted(self.prozedur_schritte, key=lambda s: s.reihenfolge)
+        self.prozedur_schritte = [
+            ProzedurSchrittEntwurf(
+                schritt_id=s.schritt_id,
+                vorlage_id=s.vorlage_id,
+                ist_pflicht=s.ist_pflicht,
+                reihenfolge=position,
+                sollvorgaben=dict(s.sollvorgaben),
+                kommando_id=s.kommando_id,
+                routine_id=s.routine_id,
+            )
+            for position, s in enumerate(sortiert, start=1)
+        ]
 
 
 def _materialisiere_schritt(

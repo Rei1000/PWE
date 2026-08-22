@@ -34,6 +34,11 @@ Brücke Application → HTTP. Fachliche Referenz: `docs/architecture.md` §6–�
 | PUT | `/katalog/bibliothek/vorlagen/{vorlage_id}` | `PruefschrittVorlageAktualisieren` (Gate 8.2b1) |
 | DELETE | `/katalog/bibliothek/vorlagen/{vorlage_id}` | `PruefschrittVorlageLoeschen` (Gate 8.2b1) |
 | PUT | `/katalog/entwuerfe/{id}/schritte/{schritt_id}/automatisierung` | `KommandoProzedurSchrittZuweisen` / `RoutineProzedurSchrittZuweisen` / `AutomatisierungEntfernen` (6.3a + 8.2a) |
+| GET | `/katalog/entwuerfe/{produktdefinition_id}` | `EntwurfLesen` (Gate 8.2b2) |
+| POST | `/katalog/entwuerfe/{produktdefinition_id}/schritte` | `ProzedurSchrittAnlegen` (Gate 8.2b2) |
+| PUT | `/katalog/entwuerfe/{produktdefinition_id}/schritte/{schritt_id}` | `ProzedurSchrittAktualisieren` (Gate 8.2b2) |
+| DELETE | `/katalog/entwuerfe/{produktdefinition_id}/schritte/{schritt_id}` | `ProzedurSchrittLoeschen` (Gate 8.2b2) |
+| PUT | `/katalog/entwuerfe/{produktdefinition_id}/schritte/reihenfolge` | `ProzedurSchrittReihenfolgeAendern` (Gate 8.2b2) |
 | POST | `/prueflaeufe` | `PruefungStarten` |
 | POST | `/prueflaeufe/{id}/schritte/{schritt_id}/automatisierung/ausfuehren` | `RoutineAusfuehren` ([ADR-0016](../adr/0016-automatisierung-http-api.md) — alleiniger Run-Time-Contract) |
 | POST | `/prueflaeufe/{id}/komponenten` | `KomponenteErfassen` |
@@ -117,6 +122,30 @@ Vollständige Design-Time-Verwaltung von `PruefschrittVorlage` in der Bibliothek
 | Legacy-Versionen | ohne Snapshot weiterhin lesbar/ausführbar — keine Rückmigration |
 
 Regressionstest: vollständiger Routine-HTTP-E2E-Pfad in `tests/api/test_api_katalog_routine_http_e2e.py`.
+
+## Entwurfsbearbeitung HTTP (Gate 8.2b2, ADR-0021)
+
+Erweiterte Bearbeitung von `ProzedurSchrittEntwurf` im mutable Entwurf. **Kein** Root-Metadaten-Edit, **keine** Entwurfs-Liste, **keine** Automatisierung in Schritt-Write-Contracts.
+
+| Methode | Pfad | Use Case |
+|---------|------|----------|
+| GET | `/katalog/entwuerfe/{produktdefinition_id}` | `EntwurfLesen` |
+| POST | `/katalog/entwuerfe/{produktdefinition_id}/schritte` | `ProzedurSchrittAnlegen` |
+| PUT | `/katalog/entwuerfe/{produktdefinition_id}/schritte/{schritt_id}` | `ProzedurSchrittAktualisieren` |
+| DELETE | `/katalog/entwuerfe/{produktdefinition_id}/schritte/{schritt_id}` | `ProzedurSchrittLoeschen` |
+| PUT | `/katalog/entwuerfe/{produktdefinition_id}/schritte/reihenfolge` | `ProzedurSchrittReihenfolgeAendern` |
+
+| Aspekt | Regel |
+|--------|-------|
+| Schritt-POST | `schritt_id`, `vorlage_id`, `ist_pflicht`, `sollvorgaben`; neue Schritte am Ende; **kein** `kommando_id`/`routine_id` |
+| Schritt-PUT | Vollständiges PUT: `vorlage_id`, `ist_pflicht`, `sollvorgaben`; Automatisierung bleibt unverändert |
+| Reihenfolge | separater Endpoint; vollständige Permutation `{ "schritt_ids": [...] }`; Ergebnis 1..n |
+| DELETE | 204; Reihenfolge normalisiert |
+| Vorlage | gegen `BibliothekRepository.get_pruefschritt_vorlage`; 404 `vorlage_nicht_gefunden` |
+| Write-Schemas | `extra="forbid"` |
+| Publish | unverändert; leerer Entwurf → 409 `invariant_verletzt` |
+
+Automatisierung weiterhin ausschließlich über `PUT .../automatisierung` (Gate 6.3a + 8.2a).
 
 ## Automatisierung ausführen (Gate 7.3f, ADR-0016)
 

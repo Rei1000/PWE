@@ -8,6 +8,7 @@ export default mergeConfig(
     test: {
       environment: "jsdom",
       include: ["tests/**/*.{test,spec}.{ts,tsx}"],
+      setupFiles: ["tests/setup.ts"],
     },
     resolve: {
       alias: {

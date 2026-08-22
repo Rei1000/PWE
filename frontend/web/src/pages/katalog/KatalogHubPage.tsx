@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Command, ListOrdered, FileText } from "lucide-react";
+import { ArrowRight, Command, FileEdit, ListOrdered, FileText } from "lucide-react";
+
+import { EntwurfOeffnenSection } from "@/components/katalog/EntwurfOeffnenSection";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +25,12 @@ const sections = [
     to: "/katalog/vorlagen",
     icon: FileText,
   },
+  {
+    title: "Produktdefinitions-Entwürfe",
+    description: "Design-Time-Editor für Schritte, Sollvorgaben, Automatisierung und Veröffentlichung.",
+    to: "/katalog/entwuerfe/neu",
+    icon: FileEdit,
+  },
 ] as const;
 
 export function KatalogHubPage() {
@@ -31,10 +39,10 @@ export function KatalogHubPage() {
       <div>
         <h1 className="text-2xl font-semibold">Katalog-Administration</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Bibliothek für Design-Time-Konfiguration — Entwurfseditor folgt in Gate 8.2c2.
+          Bibliothek und Entwurfseditor für Design-Time-Konfiguration.
         </p>
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {sections.map((section) => (
           <Card key={section.to}>
             <CardHeader>
@@ -55,6 +63,7 @@ export function KatalogHubPage() {
           </Card>
         ))}
       </div>
+      <EntwurfOeffnenSection />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   DEMO_KATALOG_ENTWURF,
+  entwurfAnlegenRequestSchema,
   entwurfResponseSchema,
   versionResponseSchema,
 } from "@/adapters/api/schemas/katalog";
@@ -22,6 +23,15 @@ describe("katalog schemas", () => {
 
   it("Demo-Katalog ist valide", () => {
     expect(DEMO_KATALOG_ENTWURF.prozedur_schritte).toHaveLength(1);
+  });
+
+  it("erlaubt leeren Entwurf im Request-Schema", () => {
+    expect(
+      entwurfAnlegenRequestSchema.parse({
+        produktkodierung: "1234567890",
+        prozedur_schritte: [],
+      }).prozedur_schritte,
+    ).toEqual([]);
   });
 });
 

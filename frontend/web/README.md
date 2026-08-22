@@ -42,11 +42,11 @@ In der Prüflauf-Schrittkarte:
 
 ### Katalog-Admin Bibliothek (Gate 8.2c1)
 
-Design-Time-Verwaltung der Bibliothek — **kein** Entwurfseditor (folgt in Gate 8.2c2):
+Design-Time-Verwaltung der Bibliothek:
 
 | Route | Inhalt |
 |-------|--------|
-| `/katalog` | Hub mit Links zu Kommandos, Routinen, Vorlagen |
+| `/katalog` | Hub mit Links zu Kommandos, Routinen, Vorlagen, Entwürfe |
 | `/katalog/kommandos` | Externe Kommandos CRUD |
 | `/katalog/routinen` | Routinen-Liste; Editor unter `/katalog/routinen/neu` bzw. `/:routineId` |
 | `/katalog/vorlagen` | PrüfschrittVorlagen CRUD (`bezeichnung`, `beschreibung`) |
@@ -54,6 +54,22 @@ Design-Time-Verwaltung der Bibliothek — **kein** Entwurfseditor (folgt in Gate
 - Kennzeichnung „Katalog-Setup / Laborbetrieb“ ohne Auth (ADR-0001)
 - Routinen: geordnete `kommando_ids`, Hoch/Runter — kein Drag-and-Drop
 - Keine Kommandoausführung in diesem Bereich
+
+### Entwurfseditor (Gate 8.2c2)
+
+Design-Time-Editor für Produktdefinitions-Entwürfe — **kein** Prüflaufstart, keine Run-Time-Ausführung:
+
+| Route | Inhalt |
+|-------|--------|
+| `/katalog/entwuerfe/neu` | Entwurf anlegen (leer), Entwurf per ID öffnen, zuletzt bearbeitete Entwürfe |
+| `/katalog/entwuerfe/:produktdefinitionId` | Schritte, Sollvorgaben, Automatisierung, Veröffentlichung |
+
+- Wiederaufnahme per Produktdefinitions-ID + optionale localStorage-Historie (nur Metadaten, kein Entwurfs-LIST)
+- Schritt-PUT ändert keine Automatisierung; Zuweisung über separaten Bereich (`PUT …/automatisierung`)
+- Wechsel Kommando ↔ Routine: ConfirmDialog → explizit entfernen, dann neu zuweisen
+- Sollvorgaben: einfacher Key/Min/Max-Editor (Transport-Dict, keine Domain-Materialisierung)
+- Publish erzeugt neue Version (`version_id`); Entwurf bleibt bearbeitbar
+- Hoch/Runter-Reihenfolge — kein Drag-and-Drop
 
 ## Skripte
 

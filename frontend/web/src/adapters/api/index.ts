@@ -17,7 +17,7 @@ export {
   updateVorlage,
 } from "@/adapters/api/bibliothek";
 export { fetchHealth } from "@/adapters/api/health";
-export { createEntwurf, seedDemoKatalog, veroeffentlichen } from "@/adapters/api/katalog";
+export { createEntwurf, getEntwurf, createSchritt, updateSchritt, deleteSchritt, reorderSchritte, assignAutomatisierung, seedDemoKatalog, veroeffentlichen } from "@/adapters/api/katalog";
 export {
   automatisierungAusfuehren,
   beurteileSchritt,

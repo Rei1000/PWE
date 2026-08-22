@@ -4,6 +4,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { KatalogLayout } from "@/components/layout/KatalogLayout";
 import { AbschlussPage } from "@/pages/AbschlussPage";
 import { HealthPage } from "@/pages/HealthPage";
+import { EntwurfEditorPage } from "@/pages/katalog/EntwurfEditorPage";
+import { EntwurfNeuPage } from "@/pages/katalog/EntwurfNeuPage";
 import { KatalogHubPage } from "@/pages/katalog/KatalogHubPage";
 import { KommandosPage } from "@/pages/katalog/KommandosPage";
 import { RoutineEditorPage } from "@/pages/katalog/RoutineEditorPage";
@@ -31,6 +33,8 @@ export const routes = [
           { path: "routinen/neu", element: <RoutineEditorPage /> },
           { path: "routinen/:routineId", element: <RoutineEditorPage /> },
           { path: "vorlagen", element: <VorlagenPage /> },
+          { path: "entwuerfe/neu", element: <EntwurfNeuPage /> },
+          { path: "entwuerfe/:produktdefinitionId", element: <EntwurfEditorPage /> },
         ],
       },
       { path: "*", element: <Navigate to="/" replace /> },

@@ -14,13 +14,19 @@ def client():
         yield http_client
 
 
-def _standard_entwurf_payload(produktkodierung: str = "1234567890") -> dict:
+def _standard_entwurf_payload(client: TestClient, produktkodierung: str = "1234567890") -> dict:
+    vorlage = client.post(
+        "/katalog/bibliothek/vorlagen",
+        json={"bezeichnung": "Standardvorlage"},
+    )
+    assert vorlage.status_code == 201
+    vorlage_id = vorlage.json()["vorlage_id"]
     return {
         "produktkodierung": produktkodierung,
         "prozedur_schritte": [
             {
                 "schritt_id": "schritt-a",
-                "vorlage_id": "vorlage-a",
+                "vorlage_id": vorlage_id,
                 "ist_pflicht": True,
                 "reihenfolge": 1,
                 "sollvorgaben": {"spannung": {"min": 220, "max": 240}},
@@ -31,7 +37,7 @@ def _standard_entwurf_payload(produktkodierung: str = "1234567890") -> dict:
 
 
 def test_katalog_entwurf_und_veroeffentlichen(client: TestClient):
-    entwurf = client.post("/katalog/entwuerfe", json=_standard_entwurf_payload())
+    entwurf = client.post("/katalog/entwuerfe", json=_standard_entwurf_payload(client))
     assert entwurf.status_code == 201
     body = entwurf.json()
     assert body["produktkodierung"] == "1234567890"
@@ -56,7 +62,7 @@ def test_katalog_veroeffentlichen_ohne_entwurf_404(client: TestClient):
 
 def test_api_prueflauf_nach_katalog_setup(client: TestClient):
     """Frontend-relevanter Flow: Katalog anlegen, dann Prüflauf starten."""
-    entwurf = client.post("/katalog/entwuerfe", json=_standard_entwurf_payload("9876543210"))
+    entwurf = client.post("/katalog/entwuerfe", json=_standard_entwurf_payload(client, "9876543210"))
     pd_id = entwurf.json()["produktdefinition_id"]
     client.post(f"/katalog/entwuerfe/{pd_id}/veroeffentlichen")
 

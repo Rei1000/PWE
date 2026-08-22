@@ -67,6 +67,14 @@ class RoutineRow(Base):
     payload: Mapped[str] = mapped_column(Text, nullable=False)
 
 
+class PruefschrittVorlageRow(Base):
+    __tablename__ = "pruefschritt_vorlage"
+
+    vorlage_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    bezeichnung: Mapped[str] = mapped_column(String(128), nullable=False)
+    beschreibung: Mapped[str | None] = mapped_column(String(512), nullable=True)
+
+
 class ProtokollSnapshotRow(Base):
     __tablename__ = "protokoll_snapshot"
 

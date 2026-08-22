@@ -47,3 +47,11 @@ class KommandoInVerwendung(DomainError):
 
 class RoutineInVerwendung(DomainError):
     pass
+
+
+class VorlageNichtGefunden(DomainError):
+    pass
+
+
+class VorlageInVerwendung(DomainError):
+    pass

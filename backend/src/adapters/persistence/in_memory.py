@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from domain.katalog.externes_kommando import ExternesKommando
+from domain.katalog.pruefschritt_vorlage import PruefschrittVorlage
 from domain.katalog.routine import Routine
 from domain.katalog.produktdefinition import Produktdefinition
 from domain.katalog.version import ProduktdefinitionsVersion
@@ -50,6 +51,7 @@ class InMemoryBibliothekRepository:
     def __init__(self) -> None:
         self._kommandos: dict[str, ExternesKommando] = {}
         self._routinen: dict[str, Routine] = {}
+        self._vorlagen: dict[str, PruefschrittVorlage] = {}
 
     def save_externes_kommando(self, kommando: ExternesKommando) -> None:
         self._kommandos[kommando.kommando_id] = kommando
@@ -74,6 +76,18 @@ class InMemoryBibliothekRepository:
 
     def delete_routine(self, routine_id: str) -> None:
         self._routinen.pop(routine_id, None)
+
+    def save_pruefschritt_vorlage(self, vorlage: PruefschrittVorlage) -> None:
+        self._vorlagen[vorlage.vorlage_id] = vorlage
+
+    def get_pruefschritt_vorlage(self, vorlage_id: str) -> PruefschrittVorlage | None:
+        return self._vorlagen.get(vorlage_id)
+
+    def list_pruefschritt_vorlagen(self) -> list[PruefschrittVorlage]:
+        return list(self._vorlagen.values())
+
+    def delete_pruefschritt_vorlage(self, vorlage_id: str) -> None:
+        self._vorlagen.pop(vorlage_id, None)
 
 
 class InMemoryPrueflaufRepository:

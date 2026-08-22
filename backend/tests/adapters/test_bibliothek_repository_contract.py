@@ -7,6 +7,7 @@ import pytest
 from adapters.persistence.in_memory import InMemoryBibliothekRepository
 from adapters.persistence.postgresql.bibliothek_repository import PostgresBibliothekRepository
 from domain.katalog.externes_kommando import ExternesKommando
+from domain.katalog.pruefschritt_vorlage import PruefschrittVorlage
 from domain.katalog.routine import Routine, RoutineAktion, RoutineAktionsart
 
 
@@ -70,6 +71,22 @@ def _run_bibliothek_contract(repo_factory):
 
     repo.delete_externes_kommando(kommando.kommando_id)
     assert repo.get_externes_kommando(kommando.kommando_id) is None
+
+    vorlage = PruefschrittVorlage.anlegen(bezeichnung="Vorlage", beschreibung="B")
+    assert repo.get_pruefschritt_vorlage(vorlage.vorlage_id) is None
+    repo.save_pruefschritt_vorlage(vorlage)
+    loaded_vorlage = repo.get_pruefschritt_vorlage(vorlage.vorlage_id)
+    assert loaded_vorlage == vorlage
+
+    updated_vorlage = vorlage.aktualisieren(bezeichnung="Geändert", beschreibung=None)
+    repo.save_pruefschritt_vorlage(updated_vorlage)
+    assert repo.get_pruefschritt_vorlage(vorlage.vorlage_id) == updated_vorlage
+
+    listed_vorlagen = repo.list_pruefschritt_vorlagen()
+    assert len(listed_vorlagen) == 1
+
+    repo.delete_pruefschritt_vorlage(vorlage.vorlage_id)
+    assert repo.get_pruefschritt_vorlage(vorlage.vorlage_id) is None
 
 
 def test_in_memory_bibliothek_contract():

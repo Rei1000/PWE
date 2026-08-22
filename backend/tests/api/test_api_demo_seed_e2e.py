@@ -40,6 +40,13 @@ def test_http_e2e_demo_seed_und_automatisierung(demo_client: TestClient):
     assert kommando.status_code == 201
     kommando_id = kommando.json()["kommando_id"]
 
+    vorlage = client.post(
+        "/katalog/bibliothek/vorlagen",
+        json={"bezeichnung": "Demo Vorlage"},
+    )
+    assert vorlage.status_code == 201
+    vorlage_id = vorlage.json()["vorlage_id"]
+
     entwurf = client.post(
         "/katalog/entwuerfe",
         json={
@@ -47,7 +54,7 @@ def test_http_e2e_demo_seed_und_automatisierung(demo_client: TestClient):
             "prozedur_schritte": [
                 {
                     "schritt_id": SCHRITT_ID,
-                    "vorlage_id": "demo-vorlage-1",
+                    "vorlage_id": vorlage_id,
                     "ist_pflicht": True,
                     "reihenfolge": 1,
                     "sollvorgaben": {"messwert": {"min": 1, "max": 100}},

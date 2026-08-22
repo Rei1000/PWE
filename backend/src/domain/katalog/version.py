@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
+from domain.katalog.pruefschritt_vorlage import MaterialisiertePruefschrittVorlage
 from domain.katalog.routine import MaterialisierteRoutine
 
 
@@ -24,6 +25,7 @@ class MaterialisierterProzedurSchritt:
     ist_pflicht: bool
     reihenfolge: int
     sollvorgaben: dict[str, Any] = field(default_factory=dict)
+    materialisierte_vorlage: MaterialisiertePruefschrittVorlage | None = None
     materialisierte_routine: MaterialisierteRoutine | None = None
     externes_kommando: MaterialisiertesExternesKommando | None = None
 

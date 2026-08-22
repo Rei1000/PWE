@@ -5,8 +5,9 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from adapters.persistence.postgresql.mapping import routine_from_payload, routine_to_payload
-from adapters.persistence.postgresql.schema import ExternesKommandoRow, RoutineRow
+from adapters.persistence.postgresql.schema import ExternesKommandoRow, PruefschrittVorlageRow, RoutineRow
 from domain.katalog.externes_kommando import ExternesKommando
+from domain.katalog.pruefschritt_vorlage import PruefschrittVorlage
 from domain.katalog.routine import Routine
 
 
@@ -88,6 +89,53 @@ class PostgresBibliothekRepository:
 
     def delete_routine(self, routine_id: str, *, commit: bool = False) -> None:
         row = self._session.get(RoutineRow, routine_id)
+        if row is not None:
+            self._session.delete(row)
+            self._session.flush()
+        if commit:
+            self._session.commit()
+
+    def save_pruefschritt_vorlage(
+        self, vorlage: PruefschrittVorlage, *, commit: bool = False
+    ) -> None:
+        row = self._session.get(PruefschrittVorlageRow, vorlage.vorlage_id)
+        if row is None:
+            self._session.add(
+                PruefschrittVorlageRow(
+                    vorlage_id=vorlage.vorlage_id,
+                    bezeichnung=vorlage.bezeichnung,
+                    beschreibung=vorlage.beschreibung,
+                )
+            )
+        else:
+            row.bezeichnung = vorlage.bezeichnung
+            row.beschreibung = vorlage.beschreibung
+        if commit:
+            self._session.commit()
+
+    def get_pruefschritt_vorlage(self, vorlage_id: str) -> PruefschrittVorlage | None:
+        row = self._session.get(PruefschrittVorlageRow, vorlage_id)
+        if row is None:
+            return None
+        return PruefschrittVorlage(
+            vorlage_id=row.vorlage_id,
+            bezeichnung=row.bezeichnung,
+            beschreibung=row.beschreibung,
+        )
+
+    def list_pruefschritt_vorlagen(self) -> list[PruefschrittVorlage]:
+        rows = self._session.query(PruefschrittVorlageRow).all()
+        return [
+            PruefschrittVorlage(
+                vorlage_id=row.vorlage_id,
+                bezeichnung=row.bezeichnung,
+                beschreibung=row.beschreibung,
+            )
+            for row in rows
+        ]
+
+    def delete_pruefschritt_vorlage(self, vorlage_id: str, *, commit: bool = False) -> None:
+        row = self._session.get(PruefschrittVorlageRow, vorlage_id)
         if row is not None:
             self._session.delete(row)
             self._session.flush()

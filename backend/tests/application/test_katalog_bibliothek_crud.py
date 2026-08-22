@@ -25,10 +25,14 @@ from domain.katalog.errors import (
     RoutineNichtGefunden,
 )
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
+from helpers import registriere_standard_vorlagen
 
 
 def _setup():
-    return InMemoryKatalogRepository(), InMemoryBibliothekRepository()
+    katalog = InMemoryKatalogRepository()
+    bibliothek = InMemoryBibliothekRepository()
+    registriere_standard_vorlagen(bibliothek, "vorlage-a", "v")
+    return katalog, bibliothek
 
 
 def _schritt() -> ProzedurSchrittEntwurf:

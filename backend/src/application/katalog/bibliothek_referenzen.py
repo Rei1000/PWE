@@ -31,3 +31,14 @@ def ist_routine_in_verwendung(
             if schritt.routine_id == routine_id:
                 return True
     return False
+
+
+def ist_vorlage_in_verwendung(
+    katalog: KatalogRepository,
+    vorlage_id: str,
+) -> bool:
+    for entwurf in katalog.list_entwuerfe():
+        for schritt in entwurf.prozedur_schritte:
+            if schritt.vorlage_id == vorlage_id:
+                return True
+    return False

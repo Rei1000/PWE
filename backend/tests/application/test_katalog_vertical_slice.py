@@ -18,13 +18,18 @@ from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 
 
+from helpers import registriere_standard_vorlagen
+
+
 def _setup():
-    return (
+    katalog, bibliothek, prueflauf_repo, protokoll_repo = (
         InMemoryKatalogRepository(),
         InMemoryBibliothekRepository(),
         InMemoryPrueflaufRepository(),
         InMemoryProtokollRepository(),
     )
+    registriere_standard_vorlagen(bibliothek, "vorlage-a", "vorlage-b")
+    return katalog, bibliothek, prueflauf_repo, protokoll_repo
 
 
 def test_katalog_slice_entwurf_veroeffentlichen_und_prueflauf():

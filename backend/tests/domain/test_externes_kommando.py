@@ -7,6 +7,7 @@ from domain.katalog.routine import MaterialisierteRoutineHerkunft
 from domain.katalog.externes_kommando import ExternesKommando, MaterialisiertesExternesKommando
 from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittEntwurf
 from domain.shared.errors import InvariantViolation
+from helpers import vorlage_map
 
 
 def test_gueltiges_externes_kommando():
@@ -49,7 +50,7 @@ def test_veroeffentlichen_mit_unbekannter_kommando_id_schlaegt_fehl():
         ],
     )
     with pytest.raises(ExternesKommandoNichtGefunden):
-        entwurf.veroeffentlichen(externe_kommandos={})
+        entwurf.veroeffentlichen(externe_kommandos={}, vorlagen=vorlage_map("v1"))
 
 
 def test_bibliotheksaenderung_aendert_veroeffentlichte_version_nicht():
@@ -67,7 +68,10 @@ def test_bibliotheksaenderung_aendert_veroeffentlichte_version_nicht():
             ),
         ],
     )
-    version = entwurf.veroeffentlichen(externe_kommandos={kommando.kommando_id: kommando})
+    version = entwurf.veroeffentlichen(
+        externe_kommandos={kommando.kommando_id: kommando},
+        vorlagen=vorlage_map("v1"),
+    )
     schritt = version.schritt_by_id("s1")
     assert schritt is not None
     assert schritt.externes_kommando is None

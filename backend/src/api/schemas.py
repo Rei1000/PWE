@@ -273,3 +273,37 @@ class RoutineAktualisierenRequest(BaseModel):
     kommando_ids: list[str]
 
     model_config = ConfigDict(extra="forbid")
+
+
+class PruefschrittVorlageAnlegenRequest(BaseModel):
+    bezeichnung: str
+    beschreibung: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class PruefschrittVorlageAnlegenResponse(BaseModel):
+    vorlage_id: str
+    bezeichnung: str
+
+
+class PruefschrittVorlageListenEintragResponse(BaseModel):
+    vorlage_id: str
+    bezeichnung: str
+
+
+class PruefschrittVorlageListeResponse(BaseModel):
+    vorlagen: list[PruefschrittVorlageListenEintragResponse]
+
+
+class PruefschrittVorlageDetailResponse(BaseModel):
+    vorlage_id: str
+    bezeichnung: str
+    beschreibung: str | None = None
+
+
+class PruefschrittVorlageAktualisierenRequest(BaseModel):
+    bezeichnung: str
+    beschreibung: str | None = None
+
+    model_config = ConfigDict(extra="forbid")

@@ -8,9 +8,11 @@ from domain.katalog.errors import (
     EntwurfNichtGefunden,
     ExternesKommandoNichtGefunden,
     RoutineNichtGefunden,
+    VorlageNichtGefunden,
 )
 from domain.katalog.externes_kommando import ExternesKommando
 from domain.katalog.produktdefinition import Produktdefinition
+from domain.katalog.pruefschritt_vorlage import PruefschrittVorlage
 from domain.katalog.routine import Routine
 from domain.katalog.version import ProduktdefinitionsVersion
 from ports.bibliothek_repository import BibliothekRepository
@@ -32,9 +34,11 @@ class ProduktdefinitionVeroeffentlichen:
 
         routinen = self._aufloesen_routinen(entwurf)
         externe_kommandos = self._aufloesen_kommandos(entwurf, routinen)
+        vorlagen = self._aufloesen_vorlagen(entwurf)
         version = entwurf.veroeffentlichen(
             externe_kommandos=externe_kommandos,
             routinen=routinen,
+            vorlagen=vorlagen,
         )
         self.katalog.save_version(version)
         self.katalog.save_entwurf(entwurf)
@@ -76,4 +80,17 @@ class ProduktdefinitionVeroeffentlichen:
                     f"Externes Kommando {kommando_id} nicht gefunden"
                 )
             aufgeloest[kommando_id] = kommando
+        return aufgeloest
+
+    def _aufloesen_vorlagen(self, entwurf: Produktdefinition) -> dict[str, PruefschrittVorlage]:
+        aufgeloest: dict[str, PruefschrittVorlage] = {}
+        for schritt in entwurf.prozedur_schritte:
+            if schritt.vorlage_id in aufgeloest:
+                continue
+            vorlage = self.bibliothek.get_pruefschritt_vorlage(schritt.vorlage_id)
+            if vorlage is None:
+                raise VorlageNichtGefunden(
+                    f"PrüfschrittVorlage {schritt.vorlage_id} nicht gefunden"
+                )
+            aufgeloest[schritt.vorlage_id] = vorlage
         return aufgeloest

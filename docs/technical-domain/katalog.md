@@ -31,10 +31,12 @@ Veröffentlichungsakt (Entwurf → Version): Katalog-Slice 2 + Gate 7.3a/d — `
 | VO | `MaterialisierterProzedurSchritt` | Aufgelöste Sollvorgaben; `MaterialisierteRoutine` (führend); `MaterialisiertesExternesKommando` (Legacy-Lesen, Write Exit 7.4b) |
 | VO | `MaterialisierteRoutine` | Einheitlicher Automatisierungs-Snapshot; Herkunft `bibliothek` \| `einzelkommando` |
 | VO | `MaterialisierteKommandoAktion` | Materialisierte Kommando-Aktion innerhalb einer Routine |
+| VO | `MaterialisiertePruefschrittVorlage` | Vorlagen-Snapshot in `MaterialisierterProzedurSchritt` (Gate 8.2b1) |
 | VO | `MaterialisiertesExternesKommando` | Legacy-Kompatibilitäts-Snapshot (nur Lesen Altbestände; Write Exit Gate 7.4b) |
 | VO | `ProduktdefinitionsVersion` | Immutable nach Veröffentlichung |
 | AR | `ExternesKommando` | Mutable Bibliothek; stabile `kommando_id` |
 | AR | `Routine` | Mutable Bibliothek; stabile `routine_id`; mindestens eine Aktion |
+| AR | `PruefschrittVorlage` | Mutable Bibliothek; stabile `vorlage_id` (Gate 8.2b1, ADR-0020) |
 | VO | `RoutineAktion` | Gate 7.3d: nur `ExternesKommandoAusfuehren` |
 | Service | `materialisiere_sollvorgaben` | ADR-0005 Auflösungskette |
 
@@ -44,6 +46,7 @@ Veröffentlichungsakt (Entwurf → Version): Katalog-Slice 2 + Gate 7.3a/d — `
 |---------|----------------|
 | `kommando_id` | `MaterialisierteRoutine` (`herkunft=einzelkommando`, keine `routine_id`); **kein** Legacy-`externes_kommando` (Gate 7.4b) |
 | `routine_id` | `MaterialisierteRoutine` (`herkunft=bibliothek`, `routine_id` gesetzt) |
+| `vorlage_id` (Entwurf) | bei Veröffentlichung → `MaterialisiertePruefschrittVorlage` in `MaterialisierterProzedurSchritt` (Gate 8.2b1, ADR-0020) |
 | keine Automatisierung | `materialisierte_routine=None` |
 
 **Führendes Feld:** `materialisierte_routine`. Legacy-`externes_kommando` wird bei neuen Versionen **nicht** mehr geschrieben (Gate 7.4b, [ADR-0018](../adr/0018-legacy-automatisierung-exit.md)); Lesen alter Daten bleibt.
@@ -82,7 +85,7 @@ Keine stille Ersetzung (projektrules §6). Bei gesetzter Gegenreferenz schlägt 
 | Port | Methode (V1) |
 |------|--------------|
 | `KatalogRepository` | `get_aktive_version_fuer_kodierung`, `get_version`, `save_version`, `get_entwurf`, `save_entwurf`, `list_entwuerfe` |
-| `BibliothekRepository` | `save_externes_kommando`, `get_externes_kommando`, `save_routine`, `get_routine`, `list_externe_kommandos`, `list_routinen`, `delete_externes_kommando`, `delete_routine` |
+| `BibliothekRepository` | `save_externes_kommando`, `get_externes_kommando`, `save_routine`, `get_routine`, `list_externe_kommandos`, `list_routinen`, `delete_externes_kommando`, `delete_routine`, `save_pruefschritt_vorlage`, `get_pruefschritt_vorlage`, `list_pruefschritt_vorlagen`, `delete_pruefschritt_vorlage` |
 
 `BibliothekRepository` ist fachliche Facade des **Bibliotheks-Moduls** innerhalb des Katalog-Bounded-Contexts — kein eigener Context, kein Mega-Aggregat, kein separates Repository pro Typ (ADR-0012, ADR-0014).
 
@@ -111,6 +114,7 @@ Adapter dürfen mutable save technisch per INSERT/UPDATE oder SQL-Upsert umsetze
 | Externe Kommandos listen | `application/katalog/externe_kommandos_listen.py` |
 | Externes Kommando lesen/aktualisieren/löschen | `externes_kommando_lesen.py`, `externes_kommando_aktualisieren.py`, `externes_kommando_loeschen.py` |
 | Routinen listen/lesen/aktualisieren/löschen | `routinen_listen.py`, `routine_lesen.py`, `routine_aktualisieren.py`, `routine_loeschen.py` |
+| PrüfschrittVorlagen anlegen/listen/lesen/aktualisieren/löschen | `pruefschritt_vorlage_anlegen.py`, `pruefschritt_vorlagen_listen.py`, `pruefschritt_vorlage_lesen.py`, `pruefschritt_vorlage_aktualisieren.py`, `pruefschritt_vorlage_loeschen.py` |
 
 ## HTTP (Gate 6.3a + 8.2a, ADR-0017, ADR-0019)
 
@@ -126,6 +130,11 @@ Adapter dürfen mutable save technisch per INSERT/UPDATE oder SQL-Upsert umsetze
 | `GET /katalog/bibliothek/routinen/{id}` | `RoutineLesen` |
 | `PUT /katalog/bibliothek/routinen/{id}` | `RoutineAktualisieren` |
 | `DELETE /katalog/bibliothek/routinen/{id}` | `RoutineLoeschen` |
+| `POST /katalog/bibliothek/vorlagen` | `PruefschrittVorlageAnlegen` (Gate 8.2b1) |
+| `GET /katalog/bibliothek/vorlagen` | `PruefschrittVorlagenListen` |
+| `GET /katalog/bibliothek/vorlagen/{id}` | `PruefschrittVorlageLesen` |
+| `PUT /katalog/bibliothek/vorlagen/{id}` | `PruefschrittVorlageAktualisieren` |
+| `DELETE /katalog/bibliothek/vorlagen/{id}` | `PruefschrittVorlageLoeschen` |
 | `PUT /katalog/entwuerfe/{id}/schritte/{schritt_id}/automatisierung` | `KommandoProzedurSchrittZuweisen` / `RoutineProzedurSchrittZuweisen` / `AutomatisierungEntfernen` |
 
 Kommando- oder Routine-Zuweisung XOR; Entfernen mit `{ "kommando_id": null, "routine_id": null }`. Keine Ausführung, keine Adapterfelder. Laborbetrieb ohne Auth ([ADR-0001](../adr/0001-v1-scope-deferrals.md)).
@@ -136,9 +145,10 @@ Entwurfs-Wechsel: andere `kommando_id` bei gesetztem Kommando → `Automatisieru
 
 Keine — erst bei Persistenz/Event-Integration.
 
-## Offen (nach Gate 8.2a)
+## Offen (nach Gate 8.2b1)
 
 - Katalog-Admin-UI (Gate 8.2c)
-- `PrüfschrittVorlage` in Bibliothek (Gate 8.2b)
+- Erweiterte Entwurfsbearbeitung HTTP (Gate 8.2b2)
+- Eingabefelder an PrüfschrittVorlage
 - Aktivierungsregeln-Auswertung zur Laufzeit
 - Version deaktivieren (V1: neue Version ersetzt aktive)

@@ -4,6 +4,7 @@ import pytest
 
 from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittEntwurf
 from domain.shared.errors import InvariantViolation
+from helpers import vorlage_map
 
 
 def _schritt_a(**kwargs) -> ProzedurSchrittEntwurf:
@@ -26,7 +27,7 @@ def test_veroeffentlichen_materialisiert_sollvorgaben():
     ]
     entwurf.sollbestueckung = ("mainboard",)
 
-    version = entwurf.veroeffentlichen()
+    version = entwurf.veroeffentlichen(vorlagen=vorlage_map("vorlage-a"))
 
     assert version.produktkodierung == "1234567890"
     assert version.produktdefinition_id == entwurf.produktdefinition_id
@@ -41,15 +42,15 @@ def test_veroeffentlichen_ohne_schritte_verboten():
     entwurf = Produktdefinition.anlegen(produktkodierung="1234567890")
 
     with pytest.raises(InvariantViolation):
-        entwurf.veroeffentlichen()
+        entwurf.veroeffentlichen(vorlagen=vorlage_map("vorlage-a"))
 
 
 def test_neue_version_ersetzt_aktive_referenz_im_entwurf():
     entwurf = Produktdefinition.anlegen(produktkodierung="1234567890")
     entwurf.prozedur_schritte = [_schritt_a()]
 
-    v1 = entwurf.veroeffentlichen()
-    v2 = entwurf.veroeffentlichen()
+    v1 = entwurf.veroeffentlichen(vorlagen=vorlage_map("vorlage-a"))
+    v2 = entwurf.veroeffentlichen(vorlagen=vorlage_map("vorlage-a"))
 
     assert v1.version_id != v2.version_id
     assert entwurf.aktive_version_id == v2.version_id

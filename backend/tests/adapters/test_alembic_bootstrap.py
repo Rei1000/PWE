@@ -26,6 +26,7 @@ EXPECTED_TABLES = {
     "prueflauf",
     "externes_kommando",
     "routine",
+    "pruefschritt_vorlage",
     "protokoll_snapshot",
 }
 

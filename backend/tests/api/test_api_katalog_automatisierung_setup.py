@@ -41,7 +41,17 @@ def client():
         yield http_client
 
 
+def _vorlage_anlegen(client: TestClient, bezeichnung: str = "Testvorlage") -> str:
+    response = client.post(
+        "/katalog/bibliothek/vorlagen",
+        json={"bezeichnung": bezeichnung},
+    )
+    assert response.status_code == 201
+    return response.json()["vorlage_id"]
+
+
 def _entwurf_anlegen(client: TestClient, produktkodierung: str) -> str:
+    vorlage_id = _vorlage_anlegen(client)
     response = client.post(
         "/katalog/entwuerfe",
         json={
@@ -49,7 +59,7 @@ def _entwurf_anlegen(client: TestClient, produktkodierung: str) -> str:
             "prozedur_schritte": [
                 {
                     "schritt_id": SCHRIITT_ID,
-                    "vorlage_id": "vorlage-a",
+                    "vorlage_id": vorlage_id,
                     "ist_pflicht": True,
                     "reihenfolge": 1,
                     "sollvorgaben": {"spannung": {"min": 220, "max": 240}},

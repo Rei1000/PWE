@@ -5,10 +5,43 @@ from __future__ import annotations
 from adapters.persistence.in_memory import InMemoryProtokollRepository, InMemoryPrueflaufRepository
 from adapters.persistence.in_memory_abschluss import InMemoryPrueflaufAbschlussPersistenz
 from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
+from domain.katalog.pruefschritt_vorlage import PruefschrittVorlage
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAnfrage, ExternesKommandoAntwort
 from domain.pruefausfuehrung.prueflauf import Prueflauf
+from ports.bibliothek_repository import BibliothekRepository
 from ports.externes_kommando_port import ExternesKommandoPort
 from ports.prueflauf_repository import PrueflaufRepository
+
+
+def registriere_pruefschritt_vorlage(
+    bibliothek: BibliothekRepository,
+    vorlage_id: str,
+    *,
+    bezeichnung: str = "Testvorlage",
+    beschreibung: str | None = None,
+) -> PruefschrittVorlage:
+    vorlage = PruefschrittVorlage(
+        vorlage_id=vorlage_id,
+        bezeichnung=bezeichnung,
+        beschreibung=beschreibung,
+    )
+    bibliothek.save_pruefschritt_vorlage(vorlage)
+    return vorlage
+
+
+def registriere_standard_vorlagen(
+    bibliothek: BibliothekRepository,
+    *vorlage_ids: str,
+) -> None:
+    for vorlage_id in vorlage_ids:
+        registriere_pruefschritt_vorlage(bibliothek, vorlage_id)
+
+
+def vorlage_map(*vorlage_ids: str) -> dict[str, PruefschrittVorlage]:
+    return {
+        vorlage_id: PruefschrittVorlage(vorlage_id=vorlage_id, bezeichnung=f"Vorlage {vorlage_id}")
+        for vorlage_id in vorlage_ids
+    }
 
 
 def in_memory_abschluss_persistenz(

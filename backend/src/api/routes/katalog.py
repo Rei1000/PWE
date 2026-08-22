@@ -17,6 +17,12 @@ from api.schemas import (
     ExternesKommandoDetailResponse,
     ExternesKommandoListeResponse,
     ExternesKommandoListenEintragResponse,
+    PruefschrittVorlageAktualisierenRequest,
+    PruefschrittVorlageAnlegenRequest,
+    PruefschrittVorlageAnlegenResponse,
+    PruefschrittVorlageDetailResponse,
+    PruefschrittVorlageListeResponse,
+    PruefschrittVorlageListenEintragResponse,
     RoutineAktionResponse,
     RoutineAnlegenRequest,
     RoutineAnlegenResponse,
@@ -34,6 +40,11 @@ from application.katalog.externes_kommando_anlegen import ExternesKommandoAnlege
 from application.katalog.externes_kommando_lesen import ExternesKommandoLesen
 from application.katalog.externes_kommando_loeschen import ExternesKommandoLoeschen
 from application.katalog.kommando_zuweisen import KommandoProzedurSchrittZuweisen
+from application.katalog.pruefschritt_vorlage_aktualisieren import PruefschrittVorlageAktualisieren
+from application.katalog.pruefschritt_vorlage_anlegen import PruefschrittVorlageAnlegen
+from application.katalog.pruefschritt_vorlage_lesen import PruefschrittVorlageLesen
+from application.katalog.pruefschritt_vorlage_loeschen import PruefschrittVorlageLoeschen
+from application.katalog.pruefschritt_vorlagen_listen import PruefschrittVorlagenListen
 from application.katalog.routine_anlegen import RoutineAnlegen
 from application.katalog.routine_aktualisieren import RoutineAktualisieren
 from application.katalog.routine_lesen import RoutineLesen
@@ -242,6 +253,97 @@ def routine_aktualisieren(
 def routine_loeschen(routine_id: str, request: Request) -> Response:
     deps = get_request_deps(request)
     RoutineLoeschen(deps.katalog, deps.bibliothek).execute(routine_id)
+    return Response(status_code=204)
+
+
+@router.post(
+    "/bibliothek/vorlagen",
+    status_code=201,
+    response_model=PruefschrittVorlageAnlegenResponse,
+    responses={409: {"model": ErrorResponse}, 422: {"model": ErrorResponse}},
+)
+def pruefschritt_vorlage_anlegen(
+    body: PruefschrittVorlageAnlegenRequest,
+    request: Request,
+) -> PruefschrittVorlageAnlegenResponse:
+    deps = get_request_deps(request)
+    vorlage = PruefschrittVorlageAnlegen(deps.bibliothek).execute(
+        bezeichnung=body.bezeichnung,
+        beschreibung=body.beschreibung,
+    )
+    return PruefschrittVorlageAnlegenResponse(
+        vorlage_id=vorlage.vorlage_id,
+        bezeichnung=vorlage.bezeichnung,
+    )
+
+
+@router.get(
+    "/bibliothek/vorlagen",
+    response_model=PruefschrittVorlageListeResponse,
+)
+def pruefschritt_vorlagen_listen(request: Request) -> PruefschrittVorlageListeResponse:
+    deps = get_request_deps(request)
+    vorlagen = PruefschrittVorlagenListen(deps.bibliothek).execute()
+    return PruefschrittVorlageListeResponse(
+        vorlagen=[
+            PruefschrittVorlageListenEintragResponse(
+                vorlage_id=v.vorlage_id,
+                bezeichnung=v.bezeichnung,
+            )
+            for v in vorlagen
+        ]
+    )
+
+
+@router.get(
+    "/bibliothek/vorlagen/{vorlage_id}",
+    response_model=PruefschrittVorlageDetailResponse,
+    responses={404: {"model": ErrorResponse}},
+)
+def pruefschritt_vorlage_lesen(
+    vorlage_id: str, request: Request
+) -> PruefschrittVorlageDetailResponse:
+    deps = get_request_deps(request)
+    vorlage = PruefschrittVorlageLesen(deps.bibliothek).execute(vorlage_id)
+    return PruefschrittVorlageDetailResponse(
+        vorlage_id=vorlage.vorlage_id,
+        bezeichnung=vorlage.bezeichnung,
+        beschreibung=vorlage.beschreibung,
+    )
+
+
+@router.put(
+    "/bibliothek/vorlagen/{vorlage_id}",
+    response_model=PruefschrittVorlageDetailResponse,
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}, 422: {"model": ErrorResponse}},
+)
+def pruefschritt_vorlage_aktualisieren(
+    vorlage_id: str,
+    body: PruefschrittVorlageAktualisierenRequest,
+    request: Request,
+) -> PruefschrittVorlageDetailResponse:
+    deps = get_request_deps(request)
+    vorlage = PruefschrittVorlageAktualisieren(deps.bibliothek).execute(
+        vorlage_id,
+        bezeichnung=body.bezeichnung,
+        beschreibung=body.beschreibung,
+    )
+    return PruefschrittVorlageDetailResponse(
+        vorlage_id=vorlage.vorlage_id,
+        bezeichnung=vorlage.bezeichnung,
+        beschreibung=vorlage.beschreibung,
+    )
+
+
+@router.delete(
+    "/bibliothek/vorlagen/{vorlage_id}",
+    status_code=204,
+    response_class=Response,
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+)
+def pruefschritt_vorlage_loeschen(vorlage_id: str, request: Request) -> Response:
+    deps = get_request_deps(request)
+    PruefschrittVorlageLoeschen(deps.katalog, deps.bibliothek).execute(vorlage_id)
     return Response(status_code=204)
 
 

@@ -71,6 +71,7 @@ PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen.
 | Ort | `backend/alembic.ini`, `backend/alembic/` |
 | Quelle | `adapters.persistence.postgresql.schema.Base` |
 | Initialmigration | `alembic/versions/0001_initial_schema.py` |
+| Gate 8.2b1 | `alembic/versions/0002_pruefschritt_vorlage.py` — Tabelle `pruefschritt_vorlage`; Version-Payload optional `materialisierte_vorlage` |
 | CLI / lokal | `cd backend && DATABASE_URL=… alembic upgrade head` |
 | Docker | Entrypoint: `alembic upgrade head` → uvicorn |
 | CI | Step `alembic upgrade head` vor pytest |
@@ -113,4 +114,4 @@ Optional für isolierte Testschemas: Umgebungsvariable `ALEMBIC_SCHEMA` (setzt `
 
 ## 8. Nächster Schritt
 
-Gate **7.5** abgeschlossen: Alembic ist der einzige PostgreSQL-Schema-Pfad (Docker/CI/Runtime). Gate **8.2a** abgeschlossen (PR [#32](https://github.com/Rei1000/PWE/pull/32), Merge `3956914`) — kein Schema-Impact; Bibliothek-HTTP CRUD über bestehende Tabellen. **Storage Exit** für Legacy-`externes_kommando` (physische Feldentfernung, Datenstrategie) bleibt offen — separater Slice nach Gate 7, siehe [ADR-0018](adr/0018-legacy-automatisierung-exit.md). Nächster Roadmap-Slice: Gate **8.2b**.
+Gate **7.5** abgeschlossen: Alembic ist der einzige PostgreSQL-Schema-Pfad (Docker/CI/Runtime). Gate **8.2a** abgeschlossen (PR [#32](https://github.com/Rei1000/PWE/pull/32), Merge `3956914`) — Bibliothek-HTTP CRUD über bestehende Tabellen. Gate **8.2b1** abgeschlossen — `PruefschrittVorlage` in Bibliothek, Publish-Materialisierung, Alembic `0002`; siehe [ADR-0020](adr/0020-pruefschritt-vorlage-materialisierung.md). **Storage Exit** für Legacy-`externes_kommando` (physische Feldentfernung, Datenstrategie) bleibt offen — separater Slice nach Gate 7, siehe [ADR-0018](adr/0018-legacy-automatisierung-exit.md). Nächster Roadmap-Slice: Gate **8.2b2**.

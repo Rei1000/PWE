@@ -14,12 +14,14 @@ from domain.katalog.errors import (
     AutomatisierungDoppeltZugewiesen,
     ExternesKommandoNichtGefunden,
     RoutineNichtGefunden,
+    VorlageNichtGefunden,
 )
 from domain.katalog.externes_kommando import ExternesKommando
 from domain.katalog.materialisierung import (
     materialisiere_sollvorgaben,
     validiere_materialisierter_schritt_automatisierung,
 )
+from domain.katalog.pruefschritt_vorlage import MaterialisiertePruefschrittVorlage, PruefschrittVorlage
 from domain.katalog.routine import MaterialisierteRoutine, Routine
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.shared.errors import InvariantViolation
@@ -92,12 +94,14 @@ class Produktdefinition:
         *,
         externe_kommandos: dict[str, ExternesKommando] | None = None,
         routinen: dict[str, Routine] | None = None,
+        vorlagen: dict[str, PruefschrittVorlage] | None = None,
     ) -> ProduktdefinitionsVersion:
         if not self.prozedur_schritte:
             raise InvariantViolation("Veröffentlichen erfordert mindestens einen ProzedurSchritt")
 
         aufgeloeste_kommandos = externe_kommandos or {}
         aufgeloeste_routinen = routinen or {}
+        aufgeloeste_vorlagen = vorlagen or {}
         materialisierte: list[MaterialisierterProzedurSchritt] = []
         for schritt in self.prozedur_schritte:
             schritt.validiere_automatisierung()
@@ -107,6 +111,7 @@ class Produktdefinition:
                     self,
                     aufgeloeste_kommandos,
                     aufgeloeste_routinen,
+                    aufgeloeste_vorlagen,
                 )
             )
         materialisierte_tuple = tuple(materialisierte)
@@ -127,7 +132,12 @@ def _materialisiere_schritt(
     entwurf: Produktdefinition,
     kommandos: dict[str, ExternesKommando],
     routinen: dict[str, Routine],
+    vorlagen: dict[str, PruefschrittVorlage],
 ) -> MaterialisierterProzedurSchritt:
+    vorlage = vorlagen.get(schritt.vorlage_id)
+    if vorlage is None:
+        raise VorlageNichtGefunden(f"PrüfschrittVorlage {schritt.vorlage_id} nicht gefunden")
+
     materialisierte_routine: MaterialisierteRoutine | None = None
 
     if schritt.kommando_id is not None:
@@ -157,6 +167,7 @@ def _materialisiere_schritt(
             entwurf.definition_sollvorgaben,
             schritt.sollvorgaben,
         ),
+        materialisierte_vorlage=MaterialisiertePruefschrittVorlage.aus(vorlage),
         materialisierte_routine=materialisierte_routine,
     )
 
@@ -168,6 +179,7 @@ def _schritt_aus_automatisierung(
     ist_pflicht: bool,
     reihenfolge: int,
     sollvorgaben: dict[str, Any],
+    materialisierte_vorlage: MaterialisiertePruefschrittVorlage,
     materialisierte_routine: MaterialisierteRoutine | None,
 ) -> MaterialisierterProzedurSchritt:
     # Gate 7.4b Write Exit: kein Legacy-Snapshot mehr; Lesen alter Daten bleibt.
@@ -177,6 +189,7 @@ def _schritt_aus_automatisierung(
         ist_pflicht=ist_pflicht,
         reihenfolge=reihenfolge,
         sollvorgaben=sollvorgaben,
+        materialisierte_vorlage=materialisierte_vorlage,
         materialisierte_routine=materialisierte_routine,
         externes_kommando=None,
     )

@@ -8,6 +8,7 @@ from typing import Any
 
 from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
 from domain.katalog.materialisierung import validiere_materialisierter_schritt_automatisierung
+from domain.katalog.pruefschritt_vorlage import MaterialisiertePruefschrittVorlage
 from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittEntwurf
 from domain.katalog.routine import (
     MaterialisierteKommandoAktion,
@@ -142,6 +143,24 @@ def _materialisierte_routine_from_dict(data: dict[str, Any]) -> MaterialisierteR
     )
 
 
+def _materialisierte_vorlage_to_dict(v: MaterialisiertePruefschrittVorlage) -> dict[str, Any]:
+    data: dict[str, Any] = {
+        "vorlage_id": v.vorlage_id,
+        "bezeichnung": v.bezeichnung,
+    }
+    if v.beschreibung is not None:
+        data["beschreibung"] = v.beschreibung
+    return data
+
+
+def _materialisierte_vorlage_from_dict(data: dict[str, Any]) -> MaterialisiertePruefschrittVorlage:
+    return MaterialisiertePruefschrittVorlage(
+        vorlage_id=data["vorlage_id"],
+        bezeichnung=data["bezeichnung"],
+        beschreibung=data.get("beschreibung"),
+    )
+
+
 def _materialisierter_schritt_to_dict(s: MaterialisierterProzedurSchritt) -> dict[str, Any]:
     data: dict[str, Any] = {
         "schritt_id": s.schritt_id,
@@ -150,6 +169,8 @@ def _materialisierter_schritt_to_dict(s: MaterialisierterProzedurSchritt) -> dic
         "reihenfolge": s.reihenfolge,
         "sollvorgaben": s.sollvorgaben,
     }
+    if s.materialisierte_vorlage is not None:
+        data["materialisierte_vorlage"] = _materialisierte_vorlage_to_dict(s.materialisierte_vorlage)
     if s.materialisierte_routine is not None:
         data["materialisierte_routine"] = _materialisierte_routine_to_dict(s.materialisierte_routine)
     if s.externes_kommando is not None:
@@ -182,6 +203,11 @@ def _materialisierter_schritt_from_dict(data: dict[str, Any]) -> Materialisierte
         ist_pflicht=data["ist_pflicht"],
         reihenfolge=data["reihenfolge"],
         sollvorgaben=data.get("sollvorgaben", {}),
+        materialisierte_vorlage=(
+            _materialisierte_vorlage_from_dict(mv)
+            if (mv := data.get("materialisierte_vorlage"))
+            else None
+        ),
         materialisierte_routine=(
             _materialisierte_routine_from_dict(mr)
             if (mr := data.get("materialisierte_routine"))

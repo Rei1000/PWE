@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** **Gate 8.2c1 ✅** — **Gate 8.2c2 ⏳** (Entwurfseditor-UI) — Gate 8.2b2 ✅, Gate 8.2a ✅, Gate 7 ✅, Gate 6.3 ✅
+**▶ Aktueller Stand:** **Gate 8.2c ✅** — **Gate 8.3 ⏳** (Storage / Foto) — Gate 8.2 ✅, Gate 7 ✅, Gate 6.3 ✅
 
 ---
 
@@ -188,14 +188,14 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | # | Schritt | Status | Prio | Abhängigkeit |
 |---|---------|--------|------|--------------|
-| 8.2 | Katalog-Administration (Bibliothek, Vorlagen, Routinen — HTTP + UI, gesliced) | ⏳ | P2 | 6.3, 7.5 |
+| 8.2 | Katalog-Administration (Bibliothek, Vorlagen, Routinen — HTTP + UI, gesliced) | ✅ | P2 | 8.2a–8.2c | 6.3, 7.5 |
 | 8.2a | Bibliothek-HTTP CRUD (Kommandos, Routinen, Listen) | ✅ | P2 | PR [#32](https://github.com/Rei1000/PWE/pull/32) — Merge `3956914`, [ADR-0019](adr/0019-bibliothek-http-crud.md) | 6.3a |
 | 8.2b | Vorlagen und erweiterte Entwurfsbearbeitung (gesliced) | ✅ | P3 | 8.2b1, 8.2b2 |
 | 8.2b1 | PrüfschrittVorlage: Bibliothek, Materialisierung und HTTP | ✅ | P3 | PR [#34](https://github.com/Rei1000/PWE/pull/34) — Merge `64f4735` (Feature `7905ad7`, PG-Fix `29151d1`), [ADR-0020](adr/0020-pruefschritt-vorlage-materialisierung.md) | 8.2a |
 | 8.2b2 | Erweiterte Entwurfsbearbeitung HTTP | ✅ | P3 | PR [#36](https://github.com/Rei1000/PWE/pull/36) — Merge `61da712` (Feature `41aa6d4`), [ADR-0021](adr/0021-entwurfsbearbeitung-http.md) | 8.2b1 |
-| 8.2c | Katalog-Admin-UI (gesliced) | ⏳ | P3 | 8.2b1, 8.2b2 |
+| 8.2c | Katalog-Admin-UI (gesliced) | ✅ | P3 | 8.2c1, 8.2c2 |
 | 8.2c1 | Bibliothek-Admin-UI (Kommandos, Routinen, Vorlagen) | ✅ | P3 | PR [#38](https://github.com/Rei1000/PWE/pull/38) — Merge `3ab3bfd` (Feature `5a3d930`) | 8.2a, 8.2b1 |
-| 8.2c2 | Entwurfseditor-UI | ⏳ | P3 | 8.2b2, 8.2c1 |
+| 8.2c2 | Entwurfseditor-UI | ✅ | P3 | PR [#40](https://github.com/Rei1000/PWE/pull/40) — Merge `b1dbc56` (Feature `2955ca6`, Fix `8568c5e`) | 8.2b2, 8.2c1 |
 | 8.3 | Foto / Storage (`DateiSpeicherPort`) | ⏳ | P2 | 6.3, Ports offen |
 | 8.3a | Storage-Port und Nachweis-Integration | ⏳ | P2 | 8.3 |
 | 8.3b | Frontend Foto-Upload | ⏳ | P3 | 8.3a |
@@ -214,11 +214,11 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 **Entscheidung:** Gate 8.2c → **8.2c1** (Bibliothek-Admin: Navigation, Kommandos, Routinen, Vorlagen) und **8.2c2** (Entwurfseditor: Schritte, Sollvorgaben, Automatisierung, Veröffentlichung). Reviewbare PRs, kein zusätzlicher Backend-Slice.
 
-### Offene Punkte nach Gate 8.2c1
+### Offene Punkte nach Gate 8.2c
 
 | Prio | Thema | Status |
 |------|-------|--------|
-| P2 | Entwurfs-LIST (`GET /entwuerfe`) — Wiederaufnahme offener Entwürfe | Workaround in 8.2c2 (ID-URL/localStorage); optional Mini-Backend-Slice |
+| P2 | Entwurfs-LIST (`GET /entwuerfe`) — Wiederaufnahme offener Entwürfe | optional Mini-Backend-Slice; UI-Workaround in 8.2c2 (ID + localStorage) |
 | P2 | Storage Exit (`externes_kommando` physisch entfernen) | separater Slice (siehe Gate 7.4) |
 | P2 | Pagination, Suche, Bulk-Operationen Bibliothek-HTTP | bewusst nicht in 8.2a (ADR-0019) |
 | P2 | Optionale `detail`-Texte für `schritt_id_bereits_vorhanden` / `ungueltige_schritt_reihenfolge` in `api/fehler.py` | kosmetisch; Codes funktionieren generisch |
@@ -251,6 +251,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-23 | Gate 8.2c2 abgeschlossen — PR #40, Merge `b1dbc56` (Feature `2955ca6`, Fix `8568c5e`); Entwurfseditor-UI Frontend-only; Gate 8.2c und Gate 8.2 gesamt ✅; CI 86 Frontend / 350 Backend | Nach-Merge-Pflege |
 | 2026-08-22 | Gate 8.2c1 abgeschlossen — PR #38, Merge `3ab3bfd` (Feature `5a3d930`); Bibliothek-Admin-UI Frontend-only; CI 50 Frontend / 350 Backend | Nach-Merge-Pflege |
 | 2026-08-22 | Gate 8.2b2 abgeschlossen — PR #36, Merge `61da712` (Feature `41aa6d4`); Entwurfsbearbeitung HTTP GET/Schritt-CRUD/Reihenfolge (ADR-0021); CI 350/350 | Nach-Merge-Pflege |
 | 2026-08-22 | Gate 8.2b1 abgeschlossen — PR #34, Merge `64f4735` (Feature `7905ad7`, PG-Fix `29151d1`); PrüfschrittVorlage Bibliothek/Materialisierung/HTTP (ADR-0020); Routine-HTTP-E2E-Regression ✅ | Nach-Merge-Pflege |
@@ -301,4 +302,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.2c2 — Entwurfseditor-UI** (⏳, P3): Entwurf anlegen/öffnen, Schritte, Sollvorgaben, Automatisierung, Veröffentlichung — baut auf Gate 8.2b2 HTTP und 8.2c1 Bibliothek-UI auf. Bewusst **ohne** Auth, Storage, Entwurfs-LIST (Workaround), Aktivierungsregeln.
+**Gate 8.3 — Foto / Storage (`DateiSpeicherPort`)** (⏳, P2): Storage-Port und Nachweis-Integration (8.3a), danach Frontend Foto-Upload (8.3b). Reihenfolge gemäß Roadmap-Neupriorisierung 2026-07-14: **8.3 vor 8.1 (Auth)**. Bewusst **ohne** Auth, Entwurfs-LIST, Aktivierungsregeln.

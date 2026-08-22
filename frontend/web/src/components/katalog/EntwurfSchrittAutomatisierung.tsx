@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { ApiErrorAlert } from "@/components/ApiErrorAlert";
 import { ConfirmDialog } from "@/components/katalog/ConfirmDialog";
@@ -8,6 +9,7 @@ import { useKommandosQuery } from "@/hooks/katalog/useKommandos";
 import { useRoutinenQuery } from "@/hooks/katalog/useRoutinen";
 import { useAutomatisierungZuweisenMutation } from "@/hooks/katalog/useEntwurf";
 import type { ProzedurSchrittEntwurfResponse } from "@/adapters/api/schemas/katalog";
+import { katalogEntwurfKey } from "@/lib/katalogQueryKeys";
 
 type EntwurfSchrittAutomatisierungProps = {
   produktdefinitionId: string;
@@ -22,6 +24,7 @@ export function EntwurfSchrittAutomatisierung({
 }: EntwurfSchrittAutomatisierungProps) {
   const { data: kommandos = [] } = useKommandosQuery();
   const { data: routinen = [] } = useRoutinenQuery();
+  const queryClient = useQueryClient();
   const mutation = useAutomatisierungZuweisenMutation(produktdefinitionId, schritt.schritt_id);
   const [selectedKommandoId, setSelectedKommandoId] = useState("");
   const [selectedRoutineId, setSelectedRoutineId] = useState("");
@@ -85,6 +88,7 @@ export function EntwurfSchrittAutomatisierung({
       }
     } catch (error) {
       setSwitchError(error);
+      await queryClient.invalidateQueries({ queryKey: katalogEntwurfKey(produktdefinitionId) });
     } finally {
       setPendingAssign(null);
     }

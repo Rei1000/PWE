@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from fastapi.testclient import TestClient
+
 from adapters.persistence.in_memory import InMemoryProtokollRepository, InMemoryPrueflaufRepository
 from adapters.persistence.in_memory_abschluss import InMemoryPrueflaufAbschlussPersistenz
 from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
@@ -42,6 +44,15 @@ def vorlage_map(*vorlage_ids: str) -> dict[str, PruefschrittVorlage]:
         vorlage_id: PruefschrittVorlage(vorlage_id=vorlage_id, bezeichnung=f"Vorlage {vorlage_id}")
         for vorlage_id in vorlage_ids
     }
+
+
+def vorlage_anlegen_http(client: TestClient, *, bezeichnung: str = "Testvorlage") -> str:
+    response = client.post(
+        "/katalog/bibliothek/vorlagen",
+        json={"bezeichnung": bezeichnung},
+    )
+    assert response.status_code == 201
+    return response.json()["vorlage_id"]
 
 
 def in_memory_abschluss_persistenz(

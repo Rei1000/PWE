@@ -13,6 +13,7 @@ from api.app import create_app
 from api.deps import in_memory_deps
 from api.schemas import NACHWEIS_ART_API_WERTE
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
+from helpers import vorlage_anlegen_http
 
 
 def _unique_kodierung() -> str:
@@ -67,6 +68,7 @@ def _start_prueflauf(client: TestClient, *, produktkodierung: str = "1234567890"
 
 def _bootstrap_postgresql_katalog(client: TestClient) -> str:
     kodierung = _unique_kodierung()
+    vorlage_id = vorlage_anlegen_http(client)
     entwurf = client.post(
         "/katalog/entwuerfe",
         json={
@@ -74,7 +76,7 @@ def _bootstrap_postgresql_katalog(client: TestClient) -> str:
             "prozedur_schritte": [
                 {
                     "schritt_id": "schritt-a",
-                    "vorlage_id": "vorlage-a",
+                    "vorlage_id": vorlage_id,
                     "ist_pflicht": True,
                     "reihenfolge": 1,
                     "sollvorgaben": {"spannung": {"min": 220, "max": 240}},

@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 from api.app import create_app
 from api.persistence import PersistenceConfigurationError, PersistenceSettings
+from helpers import vorlage_anlegen_http
 
 pytestmark = pytest.mark.postgresql
 
@@ -56,6 +57,7 @@ def pg_api_client():
 
 def test_prueflauf_happy_path_over_postgresql(pg_api_client: TestClient):
     kodierung = _unique_kodierung()
+    vorlage_id = vorlage_anlegen_http(pg_api_client)
     entwurf = pg_api_client.post(
         "/katalog/entwuerfe",
         json={
@@ -63,7 +65,7 @@ def test_prueflauf_happy_path_over_postgresql(pg_api_client: TestClient):
             "prozedur_schritte": [
                 {
                     "schritt_id": "schritt-a",
-                    "vorlage_id": "vorlage-a",
+                    "vorlage_id": vorlage_id,
                     "ist_pflicht": True,
                     "reihenfolge": 1,
                     "sollvorgaben": {"spannung": {"min": 220, "max": 240}},

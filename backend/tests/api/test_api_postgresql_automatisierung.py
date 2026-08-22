@@ -24,6 +24,7 @@ from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
 from domain.pruefausfuehrung.prueflauf import NachweisArt
+from helpers import registriere_standard_vorlagen
 
 KOMMANDOCODE = "READ_VOLTAGE"
 
@@ -40,6 +41,7 @@ def test_api_automatisierung_postgresql_happy_path():
     katalog = PostgresKatalogRepository(session)
     bibliothek = PostgresBibliothekRepository(session)
     prueflauf_repo = PostgresPrueflaufRepository(session)
+    registriere_standard_vorlagen(bibliothek, "vorlage-a")
 
     kodierung = str(10_000_000_000 + uuid.uuid4().int % 9_000_000_000)
     kommando = ExternesKommandoAnlegen(bibliothek).execute(

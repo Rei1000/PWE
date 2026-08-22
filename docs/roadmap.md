@@ -190,10 +190,10 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 |---|---------|--------|------|--------------|
 | 8.2 | Katalog-Administration (Bibliothek, Vorlagen, Routinen — HTTP + UI, gesliced) | ⏳ | P2 | 6.3, 7.5 |
 | 8.2a | Bibliothek-HTTP CRUD (Kommandos, Routinen, Listen) | ✅ | P2 | PR [#32](https://github.com/Rei1000/PWE/pull/32) — Merge `3956914`, [ADR-0019](adr/0019-bibliothek-http-crud.md) | 6.3a |
-| 8.2b | Vorlagen und erweiterte Entwurfsbearbeitung (gesliced) | ⏳ | P3 | 8.2a |
+| 8.2b | Vorlagen und erweiterte Entwurfsbearbeitung (gesliced) | ✅ | P3 | 8.2b1, 8.2b2 |
 | 8.2b1 | PrüfschrittVorlage: Bibliothek, Materialisierung und HTTP | ✅ | P3 | PR [#34](https://github.com/Rei1000/PWE/pull/34) — Merge `64f4735` (Feature `7905ad7`, PG-Fix `29151d1`), [ADR-0020](adr/0020-pruefschritt-vorlage-materialisierung.md) | 8.2a |
-| 8.2b2 | Erweiterte Entwurfsbearbeitung HTTP | ✅ | P3 | 8.2b1, ADR-0021 |
-| 8.2c | Katalog-Admin-UI | ⏳ | P3 | 8.2b1 |
+| 8.2b2 | Erweiterte Entwurfsbearbeitung HTTP | ✅ | P3 | PR [#36](https://github.com/Rei1000/PWE/pull/36) — Merge `61da712` (Feature `41aa6d4`), [ADR-0021](adr/0021-entwurfsbearbeitung-http.md) | 8.2b1 |
+| 8.2c | Katalog-Admin-UI | ⏳ | P3 | 8.2b1, 8.2b2 |
 | 8.3 | Foto / Storage (`DateiSpeicherPort`) | ⏳ | P2 | 6.3, Ports offen |
 | 8.3a | Storage-Port und Nachweis-Integration | ⏳ | P2 | 8.3 |
 | 8.3b | Frontend Foto-Upload | ⏳ | P3 | 8.3a |
@@ -206,13 +206,13 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 **Entscheidung:** Gate 8.2b → **8.2b1** (Vorlage + Materialisierung + HTTP) und **8.2b2** (Entwurfsbearbeitung HTTP). Offener P1-E2E-Test (Routine-HTTP) wird in **8.2b1** als Regressionstest ergänzt.
 
-### Offene Punkte nach Gate 8.2b1
+### Offene Punkte nach Gate 8.2b2
 
 | Prio | Thema | Status |
 |------|-------|--------|
-| ~~**P1**~~ | ~~Vollständiger HTTP-E2E-Pfad Routine → zuweisen → veröffentlichen → Prüflauf → ausführen~~ | ✅ erledigt in Gate 8.2b1 (`test_api_katalog_routine_http_e2e.py`) |
 | P2 | Storage Exit (`externes_kommando` physisch entfernen) | separater Slice (siehe Gate 7.4) |
 | P2 | Pagination, Suche, Bulk-Operationen Bibliothek-HTTP | bewusst nicht in 8.2a (ADR-0019) |
+| P2 | Optionale `detail`-Texte für `schritt_id_bereits_vorhanden` / `ungueltige_schritt_reihenfolge` in `api/fehler.py` | kosmetisch; Codes funktionieren generisch |
 
 ---
 
@@ -242,6 +242,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-22 | Gate 8.2b2 abgeschlossen — PR #36, Merge `61da712` (Feature `41aa6d4`); Entwurfsbearbeitung HTTP GET/Schritt-CRUD/Reihenfolge (ADR-0021); CI 350/350 | Nach-Merge-Pflege |
 | 2026-08-22 | Gate 8.2b1 abgeschlossen — PR #34, Merge `64f4735` (Feature `7905ad7`, PG-Fix `29151d1`); PrüfschrittVorlage Bibliothek/Materialisierung/HTTP (ADR-0020); Routine-HTTP-E2E-Regression ✅ | Nach-Merge-Pflege |
 | 2026-08-22 | Gate 8.2b zerlegt — 8.2b1 (Vorlage) + 8.2b2 (Entwurfsbearbeitung) | Zwei Aggregate, Alembic, Materialisierung — ein Slice zu groß |
 | 2026-08-22 | Gate 8.2a Doku abgeschlossen — PR #33, Merge `db11326` | Roadmap + Datenbankmodell §8 |
@@ -290,4 +291,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.2b2 — Erweiterte Entwurfsbearbeitung HTTP** (✅, P3): GET Entwurf; Schritt hinzufügen/bearbeiten/löschen; Reihenfolge; Pflichtstatus; Sollvorgaben — bewusst **ohne** Admin-UI (8.2c), Auth, Storage. Siehe [ADR-0021](adr/0021-entwurfsbearbeitung-http.md).
+**Gate 8.2c — Katalog-Admin-UI** (⏳, P3): Entwurfseditor, Vorlagenverwaltung, Routineverwaltung — baut auf den HTTP-Contracts aus Gate 8.2a, 8.2b1 und 8.2b2 auf. Bewusst **ohne** Auth, Storage, Aktivierungsregeln, Eingabefelder.

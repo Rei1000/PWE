@@ -82,6 +82,7 @@ class PostgresBibliothekRepository:
         row = self._session.get(ExternesKommandoRow, kommando_id)
         if row is not None:
             self._session.delete(row)
+            self._session.flush()
         if commit:
             self._session.commit()
 
@@ -89,5 +90,6 @@ class PostgresBibliothekRepository:
         row = self._session.get(RoutineRow, routine_id)
         if row is not None:
             self._session.delete(row)
+            self._session.flush()
         if commit:
             self._session.commit()

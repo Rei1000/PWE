@@ -6,3 +6,5 @@ export const katalogRoutineKey = (id: string) => ["katalog", "routinen", id] as 
 
 export const katalogVorlagenKey = ["katalog", "vorlagen"] as const;
 export const katalogVorlageKey = (id: string) => ["katalog", "vorlagen", id] as const;
+
+export const katalogEntwurfKey = (id: string) => ["katalog", "entwuerfe", id] as const;

@@ -7,6 +7,7 @@ const links = [
   { to: "/katalog/kommandos", label: "Kommandos" },
   { to: "/katalog/routinen", label: "Routinen" },
   { to: "/katalog/vorlagen", label: "Vorlagen" },
+  { to: "/katalog/entwuerfe/neu", label: "Entwürfe" },
 ] as const;
 
 export function KatalogSubNav() {

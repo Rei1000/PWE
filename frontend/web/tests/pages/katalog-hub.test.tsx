@@ -13,7 +13,8 @@ describe("KatalogHubPage", () => {
     );
 
     const links = screen.getAllByRole("link", { name: /Verwalten/i });
-    expect(links).toHaveLength(3);
+    expect(links).toHaveLength(4);
     expect(links[0]?.getAttribute("href")).toBe("/katalog/kommandos");
+    expect(links[3]?.getAttribute("href")).toBe("/katalog/entwuerfe/neu");
   });
 });

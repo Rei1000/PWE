@@ -113,4 +113,4 @@ Optional für isolierte Testschemas: Umgebungsvariable `ALEMBIC_SCHEMA` (setzt `
 
 ## 8. Nächster Schritt
 
-Gate **7.5** abgeschlossen: Alembic ist der einzige PostgreSQL-Schema-Pfad (Docker/CI/Runtime). **Storage Exit** für Legacy-`externes_kommando` (physische Feldentfernung, Datenstrategie) bleibt offen — separater Slice nach Gate 7, siehe [ADR-0018](adr/0018-legacy-automatisierung-exit.md). Nächster Roadmap-Slice: Gate **8.2a**.
+Gate **7.5** abgeschlossen: Alembic ist der einzige PostgreSQL-Schema-Pfad (Docker/CI/Runtime). Gate **8.2a** abgeschlossen (PR [#32](https://github.com/Rei1000/PWE/pull/32), Merge `3956914`) — kein Schema-Impact; Bibliothek-HTTP CRUD über bestehende Tabellen. **Storage Exit** für Legacy-`externes_kommando` (physische Feldentfernung, Datenstrategie) bleibt offen — separater Slice nach Gate 7, siehe [ADR-0018](adr/0018-legacy-automatisierung-exit.md). Nächster Roadmap-Slice: Gate **8.2b**.

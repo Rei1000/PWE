@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** **Gate 7 ✅** (7.0–7.5b) — **Gate 8.2a 🔄** (Bibliothek-HTTP CRUD) — **Gate 6.3 ✅**
+**▶ Aktueller Stand:** **Gate 8.2a ✅** (Bibliothek-HTTP CRUD, PR [#32](https://github.com/Rei1000/PWE/pull/32)) — **nächster Slice 8.2b ⏳** — Gate 7 ✅, Gate 6.3 ✅
 
 ---
 
@@ -189,7 +189,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | # | Schritt | Status | Prio | Abhängigkeit |
 |---|---------|--------|------|--------------|
 | 8.2 | Katalog-Administration (Bibliothek, Vorlagen, Routinen — HTTP + UI, gesliced) | ⏳ | P2 | 6.3, 7.5 |
-| 8.2a | Bibliothek-HTTP CRUD (Kommandos, Routinen, Listen) | 🔄 | P2 | 6.3a |
+| 8.2a | Bibliothek-HTTP CRUD (Kommandos, Routinen, Listen) | ✅ | P2 | PR [#32](https://github.com/Rei1000/PWE/pull/32) — Merge `3956914`, [ADR-0019](adr/0019-bibliothek-http-crud.md) | 6.3a |
 | 8.2b | Vorlagen und erweiterte Entwurfsbearbeitung | ⏳ | P3 | 8.2a |
 | 8.2c | Katalog-Admin-UI | ⏳ | P3 | 8.2a |
 | 8.3 | Foto / Storage (`DateiSpeicherPort`) | ⏳ | P2 | 6.3, Ports offen |
@@ -197,6 +197,14 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 8.3b | Frontend Foto-Upload | ⏳ | P3 | 8.3a |
 | 8.4 | Druck-Adapter (`DruckPort`) | ⏳ | P3 | PDF vorhanden (Gate 5.5) |
 | 8.1 | Identity / Auth (Middleware, Rollen) | ⏸ | P2 | Vor echtem Mehrbenutzerbetrieb; nach 8.2a empfohlen |
+
+### Offene Punkte nach Gate 8.2a
+
+| Prio | Thema | Status |
+|------|-------|--------|
+| **P1** | Vollständiger HTTP-E2E-Pfad: Routine anlegen → Routine Entwurfsschritt zuweisen → Produktdefinition veröffentlichen → Prüflauf starten → Automatisierung ausführen — noch **nicht** als einzelner E2E-Test abgedeckt (Teilpfade in Application- und API-Tests vorhanden) | dokumentiert, nicht implementiert |
+| P2 | Storage Exit (`externes_kommando` physisch entfernen) | separater Slice (siehe Gate 7.4) |
+| P2 | Pagination, Suche, Bulk-Operationen Bibliothek-HTTP | bewusst nicht in 8.2a (ADR-0019) |
 
 ---
 
@@ -226,6 +234,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-22 | Gate 8.2a abgeschlossen — PR #32, Merge `3956914` (Feature `7e0c4b0`, PG-Fix `2c4afd9`) | Bibliothek-HTTP CRUD (ADR-0019); Kommandos/Routinen LIST/GET/PUT/DELETE; Routine-Zuweisung; Automatisierung entfernen; DELETE-Referenzschutz |
 | 2026-08-22 | Gate 8.2a in Umsetzung — Bibliothek-HTTP CRUD (ADR-0019) | Kommandos/Routinen LIST/GET/PUT/DELETE; Routine-Zuweisung; Automatisierung entfernen |
 | 2026-08-22 | Gate 7 vollständig ✅ — Doku PR #31, Merge `9fd7ac7` | Roadmap-Sync nach 7.5b |
 | 2026-08-22 | Gate 7.5b in Umsetzung — Alembic als einziger Schema-Pfad | Runtime-/Docker-/CI-Exit von `create_all`; Migration außerhalb FastAPI |
@@ -270,4 +279,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.2a — Bibliothek-HTTP CRUD** (🔄, P2): ADR-0019; Kommandos/Routinen CRUD; Routine-Zuweisung und Automatisierung entfernen per HTTP.
+**Gate 8.2b — Vorlagen und erweiterte Entwurfsbearbeitung** (⏳, P3): `PrüfschrittVorlage` in Bibliothek; erweiterte Entwurfsbearbeitung — bewusst **ohne** Admin-UI (8.2c), Auth (8.1), Storage (8.3).

@@ -1,5 +1,6 @@
-PWE Alembic-Migrationen (Gate 7.5a).
+PWE Alembic-Migrationen (Gate 7.5a/b).
 
-- Quelle der Wahrheit für die Initialmigration: `adapters.persistence.postgresql.schema.Base`
+- Quelle der Wahrheit für Migrationen: `adapters.persistence.postgresql.schema.Base`
 - Ausführung: `cd backend && DATABASE_URL=… alembic upgrade head`
-- API-Runtime nutzt bis Gate 7.5b weiterhin `init_schema()` / `create_all`
+- Docker: Entrypoint führt `alembic upgrade head` vor uvicorn aus
+- FastAPI-Runtime erzeugt oder verändert kein Datenbankschema

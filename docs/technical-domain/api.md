@@ -187,7 +187,7 @@ Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruef
 
 **Startfehler:** Ungültige oder nicht erreichbare `DATABASE_URL` → Anwendung startet nicht (`PersistenceConfigurationError`). Ungültige Kommando-Adapter-Konfiguration → `KommandoAdapterConfigurationError` ([ADR-0013](../adr/0013-com-adapter-wiring-fehlerabbildung.md)).
 
-**Schema (Gate 7.5a):** Beim Start weiterhin `init_schema`/`create_all`. Alembic-CLI parallel verfügbar (`backend/alembic/`); CI/Docker-Umschaltung = Gate 7.5b — siehe [`datenbankmodell.md`](../datenbankmodell.md) §4.
+**Schema (Gate 7.5b):** PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen. Die FastAPI-Runtime erzeugt oder verändert kein Datenbankschema. Siehe [`datenbankmodell.md`](../datenbankmodell.md) §4.
 
 **Dev-Stack:** `docker compose up --build` startet API + PostgreSQL — siehe [`README-docker.md`](../../README-docker.md).
 

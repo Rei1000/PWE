@@ -2,7 +2,7 @@
 
 ## Status
 
-Angenommen (Gate 7.4a API Exit; Gate 7.4b Write Exit)
+Angenommen — Gate 7.4a API Exit ✅, Gate 7.4b Write Exit ✅, Gate 7.4c Monitoring ✅. Storage Exit offen (nach Gate 7.5).
 
 ## Kontext
 
@@ -13,8 +13,8 @@ Gate 7.3f führte den schrittzentrierten Endpunkt ([ADR-0016](0016-automatisieru
 ### Exit-Reihenfolge (verbindlich)
 
 1. **Gate 7.4a — API Exit** ✅: Legacy-HTTP + Use Case `ExternesKommandoAusfuehren`
-2. **Gate 7.4b — Write Exit** (dieser Slice): neue Versionen schreiben kein `externes_kommando` mehr
-3. **Gate 7.4c — Monitoring**: fachliche Beobachtung über `fehlgeschlagen` ([ADR-0016](0016-automatisierung-http-api.md)); keine APM-Plattform
+2. **Gate 7.4b — Write Exit** ✅: neue Versionen schreiben kein `externes_kommando` mehr
+3. **Gate 7.4c — Monitoring** ✅: fachliche Beobachtung über `fehlgeschlagen` ([ADR-0016](0016-automatisierung-http-api.md)); keine APM-Plattform
 4. **Storage Exit**: physische Entfernung aus Persistenz/Mapping **erst nach Gate 7.5 / Alembic** und bewusster Datenstrategie
 
 ### Gate 7.4a — API Exit

@@ -52,22 +52,22 @@ Gate 7.3a–7.3c haben `ExternesKommando` als Bibliotheksobjekt und die API-Ausf
 - `bibliothek` — aus Bibliotheksroutine; `routine_id` vorhanden
 - `einzelkommando` — synthetisch aus direkter `kommando_id`; **keine** künstliche Bibliotheks-`routine_id`
 
-### Rückwärtskompatibilität Gate 7.3b
+### Rückwärtskompatibilität (Stand nach Gate 7.4b)
 
 | Feld | Status |
 |------|--------|
 | `materialisierte_routine` | **Führend** — einheitlicher Automatisierungs-Snapshot |
-| `externes_kommando` | **Deprecated** — wird bei `herkunft=einzelkommando` weiterhin gesetzt, damit Gate 7.3b unverändert funktioniert |
+| `externes_kommando` | **Legacy-Lesen nur** — seit Gate **7.4b** schreiben neue Veröffentlichungen kein `externes_kommando` mehr (`None`); Altbestände bleiben deserialisierbar |
 
-Keine dauerhafte doppelte Wahrheit: `externes_kommando` ist abgeleiteter Kompatibilitäts-Snapshot aus der ersten Kommando-Aktion bei Einzelkommando-Pfad. Laufzeit Gate 7.3e+ arbeitet gegen `materialisierte_routine`.
+Laufzeit arbeitet gegen `materialisierte_routine` (ggf. via `aufgeloeste_materialisierte_routine()` für Altbestände).
 
 ### Kompatibilitätsinvariante (materialisierter Schritt)
 
 | Situation | Regel |
 |-----------|-------|
-| Neu (Einzelkommando) | `materialisierte_routine` führend; `externes_kommando` abgeleitet aus erster Aktion — muss identisch sein |
+| Neu (Einzelkommando, ab Gate 7.4b) | nur `materialisierte_routine`; `externes_kommando=None` |
 | Neu (Bibliotheksroutine) | nur `materialisierte_routine`; `externes_kommando=None` |
-| Legacy (pre-7.3d) | nur `externes_kommando`, `materialisierte_routine=None` — lesbar |
+| Legacy (pre-7.3d / Altbestand) | nur `externes_kommando`, `materialisierte_routine=None` — lesbar |
 | Beide gesetzt, abweichend | `MaterialisierteAutomatisierungInkonsistent` — nie still akzeptiert |
 | Beide gesetzt bei Bibliotheksroutine | `MaterialisierteAutomatisierungInkonsistent` |
 
@@ -85,7 +85,7 @@ Validierung: `validiere_materialisierter_schritt_automatisierung()` bei Material
 
 - Kein Run-Time-Aggregate `Routine`
 - Orchestrierung in Application Layer (Gate 7.3e)
-- API langfristig schrittzentriert (Gate 7.3f); Gate 7.3b-Endpunkt bleibt vorerst
+- API schrittzentriert (Gate 7.3f / ADR-0016); Gate-7.3b-HTTP-Endpunkt **entfernt** in Gate 7.4a ([ADR-0018](0018-legacy-automatisierung-exit.md))
 
 ## Begründung
 

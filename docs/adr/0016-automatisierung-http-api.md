@@ -74,22 +74,18 @@ Zulässige `fehlerart`: `keine_geraeteantwort`, `geraetefehlschlag`, `ungueltige
 - Kein Idempotency-Key in Gate 7.3f
 - Clients dürfen bei unklarem Netzwerkfehler nicht blind wiederholen
 
-### Legacy-Endpunkt (Gate 7.3b)
+### Legacy-Endpunkt (historisch Gate 7.3b — **entfernt** Gate 7.4a)
 
 ```
 POST /prueflaeufe/{id}/schritte/{id}/kommandos/{kommando_id}/ausfuehren
 ```
 
-| Aspekt | Regel |
-|--------|-------|
-| OpenAPI | `deprecated: true` |
-| Verhalten | **unverändert** — kein Redirect, keine Delegation auf `RoutineAusfuehren` |
-| Entfernung | **Gate 7.4a** — siehe [ADR-0018](0018-legacy-automatisierung-exit.md) |
+**Status:** existiert nicht mehr im HTTP-Contract. Entfernung: Gate **7.4a** — [ADR-0018](0018-legacy-automatisierung-exit.md). Alleiniger Run-Time-Contract: `…/automatisierung/ausfuehren` (oben).
 
-#### Semantikdifferenz Legacy vs. Ziel
+Historische Semantikdifferenz (nur Dokumentation, kein Live-Verhalten):
 
-| Situation | Legacy 7.3b | Ziel 7.3f |
-|-----------|-------------|-----------|
+| Situation | Legacy 7.3b (entfernt) | Ziel 7.3f (gültig) |
+|-----------|------------------------|---------------------|
 | Erfolg | 201, `{nachweise}` | 200, volles Ergebnis |
 | Transport ohne Rohantwort | 409 `{detail,code}`, Rollback | 200, `fehlgeschlagen=true`, Commit |
 | Gerätefehler mit Rohantwort | 409 `{detail,code,nachweise}` | 200, volles Ergebnis |

@@ -7,7 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -16,13 +16,15 @@ from adapters.persistence.postgresql.abschluss_persistenz import PostgresPruefla
 from adapters.persistence.postgresql.katalog_repository import PostgresKatalogRepository
 from adapters.persistence.postgresql.protokoll_repository import PostgresProtokollRepository
 from adapters.persistence.postgresql.prueflauf_repository import PostgresPrueflaufRepository
-from adapters.persistence.postgresql.schema import init_schema
 from adapters.pdf.protokoll_erzeugung import PdfProtokollErzeugungAdapter
 from api.deps import ApiDeps
 from api.kommando_wiring import create_kommando_port
 
 PersistenceMode = Literal["in-memory", "postgresql"]
 PostgresDepsFactory = Callable[[Session], ApiDeps]
+
+# Erwartete Kern-Tabelle nach `alembic upgrade head` (Gate 7.5b).
+_REQUIRED_TABLE = "produktdefinitions_version"
 
 
 class PersistenceConfigurationError(RuntimeError):
@@ -49,18 +51,35 @@ def create_sqlalchemy_engine(database_url: str) -> Engine:
     return create_engine(database_url, future=True)
 
 
+def assert_postgresql_schema_ready(engine: Engine) -> None:
+    """Prüft, dass Alembic-Migrationen angewendet wurden — erzeugt kein Schema."""
+    tables = set(inspect(engine).get_table_names())
+    if _REQUIRED_TABLE not in tables:
+        raise PersistenceConfigurationError(
+            "PostgreSQL ist erreichbar, aber das erwartete Schema fehlt "
+            f"(Tabelle '{_REQUIRED_TABLE}' nicht gefunden). "
+            "Bitte zuerst `alembic upgrade head` ausführen."
+        )
+
+
 def initialize_postgresql_engine(database_url: str) -> Engine:
-    """Engine erzeugen, Schema sicherstellen und Verbindung prüfen."""
+    """Engine erzeugen, Verbindung prüfen und erwartetes Schema verifizieren.
+
+    Erzeugt oder verändert kein Schema (Gate 7.5b). Voraussetzung: `alembic upgrade head`.
+    """
     engine = create_sqlalchemy_engine(database_url)
     try:
-        init_schema(engine)
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
+        assert_postgresql_schema_ready(engine)
+    except PersistenceConfigurationError:
+        engine.dispose()
+        raise
     except Exception as exc:
         engine.dispose()
         raise PersistenceConfigurationError(
             "PostgreSQL ist über DATABASE_URL konfiguriert, aber nicht erreichbar "
-            "oder das Schema konnte nicht initialisiert werden."
+            "oder das Schema konnte nicht geprüft werden."
         ) from exc
     return engine
 

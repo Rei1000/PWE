@@ -62,19 +62,24 @@ Persistenz folgt der Fachdomäne — nicht umgekehrt. Das Domänenmodell beschre
 - Schemaänderungen versioniert und nachvollziehbar.
 - Veröffentlichte ProduktdefinitionsVersionen werden **nicht** nachträglich geändert — nur neue Versionen angelegt.
 
-### Alembic (Gate 7.5a)
+### Alembic (Gate 7.5b)
+
+PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen. Die FastAPI-Runtime erzeugt oder verändert kein Datenbankschema.
 
 | Aspekt | Stand |
 |--------|-------|
 | Ort | `backend/alembic.ini`, `backend/alembic/` |
 | Quelle | `adapters.persistence.postgresql.schema.Base` |
-| Initialmigration | `alembic/versions/0001_initial_schema.py` — Ist-Zustand, keine fachlichen Änderungen |
-| CLI | `cd backend && DATABASE_URL=… alembic upgrade head` |
-| Runtime bis 7.5b | App-Start weiterhin `init_schema()` / `create_all` ([ADR-0011](adr/0011-api-postgresql-unit-of-work.md)) |
-| Tests | `tests/adapters/test_alembic_bootstrap.py` (Upgrade/Downgrade, Parität zu `create_all`) |
-| Bewusst später (7.5b) | CI/Docker auf Migrationen umstellen; `create_all` ersetzen |
+| Initialmigration | `alembic/versions/0001_initial_schema.py` |
+| CLI / lokal | `cd backend && DATABASE_URL=… alembic upgrade head` |
+| Docker | Entrypoint: `alembic upgrade head` → uvicorn |
+| CI | Step `alembic upgrade head` vor pytest |
+| Runtime | erwartet migriertes Schema; Startfehler wenn Kern-Tabelle fehlt |
+| Tests | Upgrade/Downgrade/Re-Upgrade; Runtime ohne Migration schlägt fehl |
 
 Optional für isolierte Testschemas: Umgebungsvariable `ALEMBIC_SCHEMA` (setzt `search_path` in `alembic/env.py`).
+
+**Hinweis Naming-Conventions:** `Base.metadata` hat derzeit keine `naming_convention` — bewusst nicht in Gate 7.5b; vor komplexeren Autogenerate-Migrationen separat bewerten.
 
 ---
 
@@ -108,4 +113,4 @@ Optional für isolierte Testschemas: Umgebungsvariable `ALEMBIC_SCHEMA` (setzt `
 
 ## 8. Nächster Schritt
 
-PostgreSQL-Persistenz und API-Wiring sind produktiv (Gate 7.1+, ADR-0011). **Gate 7.5a** liefert Alembic-Bootstrap und Initialmigration; Runtime bleibt bis **Gate 7.5b** bei `init_schema`/`create_all` (CI/Docker-Umschaltung).
+PostgreSQL-Persistenz und API-Wiring sind produktiv (Gate 7.1+, ADR-0011). **Gate 7.5b:** Alembic ist der einzige Schema-Pfad (Docker/CI/Runtime-Exit von `create_all`). Storage Exit für Legacy-`externes_kommando` folgt nach Gate 7.5 mit eigener Datenstrategie.

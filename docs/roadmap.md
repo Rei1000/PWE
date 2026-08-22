@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3 ✅** — **Gate 7.4 ✅** — **Nächster Slice: Gate 7.5a** (Alembic Bootstrap)
+**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3 ✅** — **Gate 7.4 ✅** — **Gate 7.5a ✅** — **Nächster Slice: Gate 7.5b** (Alembic Runtime-Exit)
 
 ---
 
@@ -143,9 +143,9 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 7.4a | **API Exit** — deprecated Einzelkommando-HTTP + Use Case entfernen | ✅ | **P1** | PR [#26](https://github.com/Rei1000/PWE/pull/26) — Merge `0d24663`, [ADR-0018](adr/0018-legacy-automatisierung-exit.md) | 7.4 |
 | 7.4b | **Write Exit** — neue Versionen schreiben kein Legacy-`externes_kommando` | ✅ | **P1** | PR [#27](https://github.com/Rei1000/PWE/pull/27) — Merge `d0dcf4f`, [ADR-0018](adr/0018-legacy-automatisierung-exit.md) | 7.4a |
 | 7.4c | Minimale fachliche Monitoring-Baseline | ✅ | P2 | PR [#28](https://github.com/Rei1000/PWE/pull/28) — Merge `f8642aa`, [ADR-0016](adr/0016-automatisierung-http-api.md) | 6.3b, 7.4b |
-| 7.5 | **Datenbankmigrationen** (Gesamtfeature) | 🔄 | P1 | — | — |
-| 7.5a | Alembic-Bootstrap und Initialmigration | 🔄 | P1 | Aus `schema.py`; Runtime weiter `create_all` bis 7.5b | 7.5 |
-| 7.5b | CI und Docker auf Migrationen umstellen | ⏳ | P1 | Ersetzt `create_all`-Only | 7.5a |
+| 7.5 | **Datenbankmigrationen** (Gesamtfeature) | 🔄 | P1 | 7.5a ✅; 7.5b Runtime/Docker/CI | — |
+| 7.5a | Alembic-Bootstrap und Initialmigration | ✅ | P1 | PR [#29](https://github.com/Rei1000/PWE/pull/29) — Merge `305401f` | 7.5 |
+| 7.5b | Alembic führend — Runtime-/Docker-/CI-Exit von `create_all` | 🔄 | P1 | Migration außerhalb FastAPI; kein `create_all` | 7.5a |
 
 ### Roadmap-Anpassung (2026-07-12) — Gate 7.3 Zerlegung
 
@@ -227,6 +227,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-22 | Gate 7.5b in Umsetzung — Alembic als einziger Schema-Pfad | Runtime-/Docker-/CI-Exit von `create_all`; Migration außerhalb FastAPI |
+| 2026-08-16 | Gate 7.5a abgeschlossen — PR #29, Merge `305401f` | Alembic-Bootstrap + Initialmigration; Runtime noch `create_all` bis 7.5b |
 | 2026-08-16 | Gate 7.5a in Umsetzung — Alembic-Bootstrap + Initialmigration | Ist-Schema aus `schema.py`; Runtime weiter `create_all` bis 7.5b |
 | 2026-08-16 | Gate 7.4 vollständig ✅ — 7.4c PR #28 Merge `f8642aa` | Monitoring-Baseline; Übergangsabbau API/Write/Monitoring abgeschlossen |
 | 2026-08-16 | Gate 7.4c in Umsetzung — fachliche Monitoring-Baseline (ADR-0016) | Beobachtung über `fehlgeschlagen`; keine APM-Infrastruktur |
@@ -267,4 +269,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 7.5a — Alembic Bootstrap** (🔄, P1): Initialmigration = Ist-Zustand aus `schema.py`. Kein CI/Docker-Umbau (Gate 7.5b). Runtime weiterhin `init_schema`/`create_all` bis 7.5b.
+**Gate 7.5b — Alembic Runtime-Exit** (🔄, P1): Alembic einziger Schema-Pfad; `create_all` aus Runtime/Docker/CI/PG-Tests entfernen; Migration außerhalb FastAPI.

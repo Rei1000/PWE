@@ -1,8 +1,12 @@
-"""SQLAlchemy-ORM-Schema — nur im Adapter, nicht in der Domain."""
+"""SQLAlchemy-ORM-Schema — nur im Adapter, nicht in der Domain.
+
+PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen.
+Die FastAPI-Runtime erzeugt oder verändert kein Datenbankschema (Gate 7.5b).
+"""
 
 from __future__ import annotations
 
-from sqlalchemy import ForeignKey, String, Text, engine
+from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -69,7 +73,3 @@ class ProtokollSnapshotRow(Base):
     snapshot_id: Mapped[str] = mapped_column(String(36), primary_key=True)
     prueflauf_id: Mapped[str] = mapped_column(String(36), nullable=False, unique=True, index=True)
     payload: Mapped[str] = mapped_column(Text, nullable=False)
-
-
-def init_schema(db_engine: engine.Engine) -> None:
-    Base.metadata.create_all(db_engine)

@@ -48,18 +48,17 @@ docker compose up --build
 
 Details: [`README-docker.md`](README-docker.md)
 
-### Datenbankschema / Alembic (Gate 7.5a)
+### Datenbankschema / Alembic (Gate 7.5b)
 
-PostgreSQL-Schema-Definition: `backend/src/adapters/persistence/postgresql/schema.py`.
-
-Alembic-Bootstrap (Initialmigration = Ist-Zustand):
+PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen. Die FastAPI-Runtime erzeugt oder verändert kein Datenbankschema.
 
 ```bash
 cd backend && pip install ".[dev,persistence]"
 DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/app alembic upgrade head
+# danach Backend starten (uvicorn) — oder docker compose up (migriert im Entrypoint)
 ```
 
-Die API nutzt bis Gate 7.5b weiterhin `init_schema()` beim Start — Alembic ist optional für CLI/Dev.
+In-Memory ohne `DATABASE_URL` braucht kein Alembic.
 
 ### Demo-/Labor-Automatisierung (Gate 6.3c)
 

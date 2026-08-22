@@ -137,6 +137,12 @@ jobs:
           pip install ".[dev,persistence,pdf,api]"
           pip install httpx
 
+      - name: Migrate PostgreSQL schema (Alembic)
+        if: hashFiles('backend/pyproject.toml') != ''
+        run: |
+          cd backend
+          alembic upgrade head
+
       - name: Run backend tests
         if: hashFiles('backend/requirements.txt') != '' || hashFiles('backend/pyproject.toml') != ''
         run: |

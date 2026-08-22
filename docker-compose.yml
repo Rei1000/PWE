@@ -15,6 +15,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  # Backend: Entrypoint migriert (alembic upgrade head), dann uvicorn — kein create_all.
   backend:
     build:
       context: .

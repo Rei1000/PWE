@@ -38,7 +38,7 @@ Leitprinzipien:
 | Prüfer (Smartphone) | Parallele Prüfungsbegleitung |
 | Externes Prüfobjekt | Über Adapter angebunden (erste Anwendung: COM) |
 | Drucker | Ausgabe von ProtokollSnapshots (PDF) |
-| PostgreSQL | Persistenz |
+| PostgreSQL | Persistenz; Schema ausschließlich über Alembic (Gate 7.5b) |
 | Produktlaufkarte | Externe Eingangsinformation (Produktion) |
 
 **Systemgrenze:** Konfigurierbare Prüfworkflows, Protokollierung, Auswertung — keine Fertigungssteuerung.

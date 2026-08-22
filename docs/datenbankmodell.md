@@ -62,7 +62,7 @@ Persistenz folgt der Fachdomäne — nicht umgekehrt. Das Domänenmodell beschre
 - Schemaänderungen versioniert und nachvollziehbar.
 - Veröffentlichte ProduktdefinitionsVersionen werden **nicht** nachträglich geändert — nur neue Versionen angelegt.
 
-### Alembic (Gate 7.5b)
+### Alembic (Gate 7.5 ✅)
 
 PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen. Die FastAPI-Runtime erzeugt oder verändert kein Datenbankschema.
 
@@ -79,7 +79,7 @@ PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen.
 
 Optional für isolierte Testschemas: Umgebungsvariable `ALEMBIC_SCHEMA` (setzt `search_path` in `alembic/env.py`).
 
-**Hinweis Naming-Conventions:** `Base.metadata` hat derzeit keine `naming_convention` — bewusst nicht in Gate 7.5b; vor komplexeren Autogenerate-Migrationen separat bewerten.
+**Hinweis Naming-Conventions:** `Base.metadata` hat derzeit keine `naming_convention` — bewusst deferred; vor komplexeren Autogenerate-Migrationen separat bewerten.
 
 ---
 
@@ -113,4 +113,4 @@ Optional für isolierte Testschemas: Umgebungsvariable `ALEMBIC_SCHEMA` (setzt `
 
 ## 8. Nächster Schritt
 
-PostgreSQL-Persistenz und API-Wiring sind produktiv (Gate 7.1+, ADR-0011). **Gate 7.5b:** Alembic ist der einzige Schema-Pfad (Docker/CI/Runtime-Exit von `create_all`). Storage Exit für Legacy-`externes_kommando` folgt nach Gate 7.5 mit eigener Datenstrategie.
+Gate **7.5** abgeschlossen: Alembic ist der einzige PostgreSQL-Schema-Pfad (Docker/CI/Runtime). **Storage Exit** für Legacy-`externes_kommando` (physische Feldentfernung, Datenstrategie) bleibt offen — separater Slice nach Gate 7, siehe [ADR-0018](adr/0018-legacy-automatisierung-exit.md). Nächster Roadmap-Slice: Gate **8.2a**.

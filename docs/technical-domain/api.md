@@ -120,7 +120,7 @@ Route: nur Validierung, `RoutineAusfuehren`, Mapping — keine Fachlogik ([ADR-0
 
 **Fachliche Beobachtung (Gate 7.4c):** Nach begonnener Ausführung wird ein strukturiertes Log-Event `automatisierung_ausgefuehrt` geschrieben (`fehlgeschlagen`, `fachlicher_erfolg`, `ausfuehrung_id`, Nachweisanzahl, …). Vorbedingungsfehler vor Beginn: Event `automatisierung_nicht_begonnen`. Ableitung nur aus bestehendem Ergebnis bzw. Fehlerabbildung — keine Infrastruktur-Metriken, keine Änderung des HTTP-Contracts. Implementierung: `api/automatisierung_beobachtung.py`.
 
-**Legacy-Exit ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)):** Einzelkommando-HTTP entfernt (Gate 7.4a). Write Exit (Gate 7.4b): neue Versionen schreiben kein `externes_kommando`. Alte Versionen mit ausschließlich `externes_kommando` bleiben über ADR-0016 ausführbar. Storage Exit nach Gate 7.5.
+**Legacy-Exit ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)):** Einzelkommando-HTTP entfernt (Gate 7.4a). Write Exit (Gate 7.4b): neue Versionen schreiben kein `externes_kommando`. Alte Versionen mit ausschließlich `externes_kommando` bleiben über ADR-0016 ausführbar. **Storage Exit** (physische Feldentfernung) offen — separater Slice; Alembic-Basis Gate 7.5 ✅.
 
 ### Kommando-Adapter (Gate 7.3c)
 
@@ -187,7 +187,7 @@ Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruef
 
 **Startfehler:** Ungültige oder nicht erreichbare `DATABASE_URL` → Anwendung startet nicht (`PersistenceConfigurationError`). Ungültige Kommando-Adapter-Konfiguration → `KommandoAdapterConfigurationError` ([ADR-0013](../adr/0013-com-adapter-wiring-fehlerabbildung.md)).
 
-**Schema (Gate 7.5b):** PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen. Die FastAPI-Runtime erzeugt oder verändert kein Datenbankschema. Siehe [`datenbankmodell.md`](../datenbankmodell.md) §4.
+**Schema (Gate 7.5 ✅):** PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen. Die FastAPI-Runtime erzeugt oder verändert kein Datenbankschema. Siehe [`datenbankmodell.md`](../datenbankmodell.md) §4.
 
 **Dev-Stack:** `docker compose up --build` startet API + PostgreSQL — siehe [`README-docker.md`](../../README-docker.md).
 

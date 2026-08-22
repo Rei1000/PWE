@@ -1,4 +1,4 @@
-# Docker Dev-Stack — PWE (Gate 7.2)
+# Docker Dev-Stack — PWE (Gate 7.2 / 7.5)
 
 Reproduzierbarer lokaler Start von **FastAPI + PostgreSQL** mit persistenter Datenbank.
 
@@ -42,7 +42,7 @@ EXTERNES_KOMMANDO_ADAPTER: simulation
 
 Default bleibt **ohne** Demo-Antworten (`PWE_DEMO_MODE=false`). Siehe Root-README Demo-Ablauf und `scripts/seed_demo_automatisierung.py`.
 
-Schema: ausschließlich über Alembic (Gate 7.5b). `docker compose up` migriert vor dem Backend-Start (`alembic upgrade head` im Entrypoint). Die FastAPI-Runtime erzeugt kein Schema.
+Schema: ausschließlich über Alembic (Gate 7.5 ✅). `docker compose up` migriert vor dem Backend-Start (`alembic upgrade head` im Entrypoint). Die FastAPI-Runtime erzeugt kein Schema.
 
 **Bestehende Volumes vor 7.5b:** Wenn die DB noch per `create_all` ohne `alembic_version` angelegt wurde, einmalig neu aufsetzen (`docker compose down -v`) oder manuell `alembic stamp head` setzen — sonst schlägt `upgrade` mit „already exists“ fehl.
 
@@ -74,4 +74,4 @@ docker compose down -v     # inkl. PostgreSQL-Daten (pgdata)
 - Auth / Identity
 - Automatische Migration *innerhalb* der FastAPI-Runtime (Migration nur Entrypoint/CLI)
 
-Siehe `docs/roadmap.md` Gate 7.5b und folgende Gates.
+Siehe `docs/roadmap.md` — Gate 7 ✅; nächster Slice Gate 8.2a.

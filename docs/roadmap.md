@@ -29,7 +29,7 @@ flowchart LR
   G6 --> G7[Gate 7 Betriebsreife]
   G7 --> G63[6.3 E2E Automatisierung]
   G63 --> G74[7.4 Übergangsabbau]
-  G74 --> G75[7.5 Alembic]
+  G74 --> G75[7.5 Alembic ✅]
   G75 --> G8[Gate 8 V1-Erweiterung]
   G8 --> G9[Gate 9 V2+]
 
@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 7 ✅ — **Gate 6.3 ✅** — **Gate 7.4 ✅** — **Gate 7.5a ✅** — **Nächster Slice: Gate 7.5b** (Alembic Runtime-Exit)
+**▶ Aktueller Stand:** **Gate 7 ✅** (7.0–7.5b) — **Gate 6.3 ✅** — **Nächster Slice: Gate 8.2a** (Katalog-Admin HTTP)
 
 ---
 
@@ -139,13 +139,13 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 7.3d | Routine: Katalogmodell + Materialisierung | ✅ | P2 | PR [#19](https://github.com/Rei1000/PWE/pull/19) — Merge `914b23e`, [ADR-0014](adr/0014-routine-katalog-materialisierung.md) | 7.3c |
 | 7.3e | Routine: minimaler Runner (nur Kommando-Aktion) | ✅ | P2 | PR [#20](https://github.com/Rei1000/PWE/pull/20) — Merge `bb436a5`, [ADR-0015](adr/0015-routine-ausfuehren-application-runner.md) | 7.3d |
 | 7.3f | Routine: API-Ausführung (schrittzentriert) | ✅ | P2 | PR [#21](https://github.com/Rei1000/PWE/pull/21) — Merge `c7beda3`, [ADR-0016](adr/0016-automatisierung-http-api.md) | 7.3e |
-| 7.4 | **Abbau der Übergangsarchitektur** (Gesamtfeature) | ✅ | **P1** | 7.4a–c ✅; Storage Exit nach 7.5 | 6.3 ✅, ADR-0014/0016/0018 |
+| 7.4 | **Abbau der Übergangsarchitektur** (Gesamtfeature) | ✅ | **P1** | 7.4a–c ✅; Storage Exit offen (separater Slice) | 6.3 ✅, ADR-0014/0016/0018 |
 | 7.4a | **API Exit** — deprecated Einzelkommando-HTTP + Use Case entfernen | ✅ | **P1** | PR [#26](https://github.com/Rei1000/PWE/pull/26) — Merge `0d24663`, [ADR-0018](adr/0018-legacy-automatisierung-exit.md) | 7.4 |
 | 7.4b | **Write Exit** — neue Versionen schreiben kein Legacy-`externes_kommando` | ✅ | **P1** | PR [#27](https://github.com/Rei1000/PWE/pull/27) — Merge `d0dcf4f`, [ADR-0018](adr/0018-legacy-automatisierung-exit.md) | 7.4a |
 | 7.4c | Minimale fachliche Monitoring-Baseline | ✅ | P2 | PR [#28](https://github.com/Rei1000/PWE/pull/28) — Merge `f8642aa`, [ADR-0016](adr/0016-automatisierung-http-api.md) | 6.3b, 7.4b |
-| 7.5 | **Datenbankmigrationen** (Gesamtfeature) | 🔄 | P1 | 7.5a ✅; 7.5b Runtime/Docker/CI | — |
+| 7.5 | **Datenbankmigrationen** (Gesamtfeature) | ✅ | P1 | 7.5a PR [#29](https://github.com/Rei1000/PWE/pull/29) — Merge `305401f`; 7.5b PR [#30](https://github.com/Rei1000/PWE/pull/30) — Merge `cef92ec` | — |
 | 7.5a | Alembic-Bootstrap und Initialmigration | ✅ | P1 | PR [#29](https://github.com/Rei1000/PWE/pull/29) — Merge `305401f` | 7.5 |
-| 7.5b | Alembic führend — Runtime-/Docker-/CI-Exit von `create_all` | 🔄 | P1 | Migration außerhalb FastAPI; kein `create_all` | 7.5a |
+| 7.5b | Alembic führend — Runtime-/Docker-/CI-Exit von `create_all` | ✅ | P1 | PR [#30](https://github.com/Rei1000/PWE/pull/30) — Merge `cef92ec`; Migration außerhalb FastAPI | 7.5a |
 
 ### Roadmap-Anpassung (2026-07-12) — Gate 7.3 Zerlegung
 
@@ -166,7 +166,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | Gate | Zweck | Reihenfolge |
 |------|-------|-------------|
 | **7.4** | Übergangsabbau — API Exit → Write Exit → später Storage Exit; Monitoring-Baseline | Nach 6.3 ✅ |
-| **7.5** | Alembic — reproduzierbare Schema-Evolution | Nach 6.3; vor Prod-Deploy; **Storage Exit** für Legacy-Feld frühestens hier |
+| **7.5** | Alembic — reproduzierbare Schema-Evolution | ✅ (7.5a/b); **Storage Exit** für Legacy-Feld offen (separater Slice) |
 
 ### Roadmap-Anpassung (2026-08-16) — Gate 7.4 Reihenfolge korrigiert
 
@@ -215,8 +215,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 |-------|------|------------|
 | Auth / Identity-Context | 8.1 | V1 PC-only, ein Prüfer; ADR-0001 — vor Mehrbenutzerbetrieb |
 | Vollständige Katalogverwaltung | 8.2 | 6.3a liefert Minimal-Setup; vollständige Admin-UI später |
-| Gate 7.3 Nacharbeiten | 7.4 | Legacy-Exit, deprecated HTTP — nach 6.3b |
-| Schema-Migrationen | 7.5 | Alembic statt `create_all`-Only |
+| Legacy-Storage-Exit (`externes_kommando`) | 7.4+ | Alembic-Basis ✅ (Gate 7.5); physische Feldentfernung + Datenstrategie offen |
 | API In-Memory-Default | 7.1 | Dev/Test ohne `DATABASE_URL`; docker-compose setzt PostgreSQL (Gate 7.2) |
 | OpenAPI-Codegen / erweiterte 422-Details | 6.1+ | Optional mit Frontend Bootstrap |
 | Auswertung / Smartphone | 9.x | ADR-0001, eigener Context / höchstes Risiko |
@@ -227,6 +226,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-22 | **Gate 7 vollständig ✅** — 7.5b PR #30, Merge `cef92ec` (Feature `6bd89fb`) | Alembic einziger Schema-Pfad; Runtime/Docker/CI ohne `create_all` |
 | 2026-08-22 | Gate 7.5b in Umsetzung — Alembic als einziger Schema-Pfad | Runtime-/Docker-/CI-Exit von `create_all`; Migration außerhalb FastAPI |
 | 2026-08-16 | Gate 7.5a abgeschlossen — PR #29, Merge `305401f` | Alembic-Bootstrap + Initialmigration; Runtime noch `create_all` bis 7.5b |
 | 2026-08-16 | Gate 7.5a in Umsetzung — Alembic-Bootstrap + Initialmigration | Ist-Schema aus `schema.py`; Runtime weiter `create_all` bis 7.5b |
@@ -269,4 +269,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 7.5b — Alembic Runtime-Exit** (🔄, P1): Alembic einziger Schema-Pfad; `create_all` aus Runtime/Docker/CI/PG-Tests entfernen; Migration außerhalb FastAPI.
+**Gate 8.2a — Bibliothek-HTTP CRUD** (⏳, P2): Erster Gate-8-Slice nach abgeschlossenem Gate 7 — Katalog-Administration HTTP (Kommandos, Routinen, Listen). Siehe [ADR-0001](adr/0001-v1-scope-deferrals.md) (Katalog-Admin vor Auth).

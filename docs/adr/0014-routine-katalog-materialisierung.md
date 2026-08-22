@@ -78,7 +78,7 @@ Validierung: `validiere_materialisierter_schritt_automatisierung()` bei Material
 - Gate 6.3a: Minimaler Katalog-Setup-HTTP ([ADR-0017](0017-katalog-setup-http-automatisierung.md)) — Einzelkommando-Zuweisung vor Ausführung
 - Gate 7.3f: Schrittzentrierte HTTP-API ([ADR-0016](0016-automatisierung-http-api.md))
 - **Gate 7.4a:** Legacy-HTTP + Use Case entfernt ([ADR-0018](0018-legacy-automatisierung-exit.md))
-- **Gate 7.4b:** Write Exit — neue Versionen schreiben kein `externes_kommando` ([ADR-0018](0018-legacy-automatisierung-exit.md)); Storage Exit nach 7.5
+- **Gate 7.4b:** Write Exit — neue Versionen schreiben kein `externes_kommando` ([ADR-0018](0018-legacy-automatisierung-exit.md)); **Storage Exit** offen (Alembic-Basis Gate 7.5 ✅)
 - Gate 7.3b-Endpunkt: historisch deprecated; **entfernt** in Gate 7.4a
 
 ### Laufzeit (bewusst nicht in 7.3d)

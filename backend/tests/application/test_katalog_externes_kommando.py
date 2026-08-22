@@ -15,10 +15,14 @@ from domain.katalog.errors import (
 from domain.katalog.routine import MaterialisierteRoutineHerkunft
 from domain.katalog.externes_kommando import ExternesKommando
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
+from helpers import registriere_standard_vorlagen
 
 
 def _setup():
-    return InMemoryKatalogRepository(), InMemoryBibliothekRepository()
+    katalog = InMemoryKatalogRepository()
+    bibliothek = InMemoryBibliothekRepository()
+    registriere_standard_vorlagen(bibliothek, "vorlage-a")
+    return katalog, bibliothek
 
 
 def test_externes_kommando_anlegen():

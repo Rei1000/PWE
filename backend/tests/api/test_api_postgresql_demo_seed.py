@@ -15,6 +15,7 @@ from api.kommando_wiring import (
     reset_kommando_adapter_cache_for_tests,
 )
 from api.persistence import postgres_deps
+from helpers import vorlage_anlegen_http
 
 SCHRITT_ID = "demo-schritt-1"
 KODIERUNG = "9000000001"
@@ -39,6 +40,8 @@ def test_postgresql_http_demo_seed_und_automatisierung(monkeypatch):
         assert kommando.status_code == 201
         kommando_id = kommando.json()["kommando_id"]
 
+        vorlage_id = vorlage_anlegen_http(client, bezeichnung="Demo Vorlage")
+
         entwurf = client.post(
             "/katalog/entwuerfe",
             json={
@@ -46,7 +49,7 @@ def test_postgresql_http_demo_seed_und_automatisierung(monkeypatch):
                 "prozedur_schritte": [
                     {
                         "schritt_id": SCHRITT_ID,
-                        "vorlage_id": "demo-vorlage-1",
+                        "vorlage_id": vorlage_id,
                         "ist_pflicht": True,
                         "reihenfolge": 1,
                         "sollvorgaben": {"messwert": {"min": 1, "max": 100}},

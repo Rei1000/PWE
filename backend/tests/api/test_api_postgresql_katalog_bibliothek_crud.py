@@ -46,6 +46,13 @@ def test_postgresql_kommando_und_routine_crud(pg_api_client: TestClient):
     assert routine.status_code == 201
     routine_id = routine.json()["routine_id"]
 
+    vorlage = pg_api_client.post(
+        "/katalog/bibliothek/vorlagen",
+        json={"bezeichnung": "PG-V"},
+    )
+    assert vorlage.status_code == 201
+    vorlage_id = vorlage.json()["vorlage_id"]
+
     pd_id = pg_api_client.post(
         "/katalog/entwuerfe",
         json={
@@ -53,7 +60,7 @@ def test_postgresql_kommando_und_routine_crud(pg_api_client: TestClient):
             "prozedur_schritte": [
                 {
                     "schritt_id": SCHRIITT_ID,
-                    "vorlage_id": "v",
+                    "vorlage_id": vorlage_id,
                     "ist_pflicht": True,
                     "reihenfolge": 1,
                 }

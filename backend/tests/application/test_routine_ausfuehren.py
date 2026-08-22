@@ -34,7 +34,7 @@ from domain.pruefausfuehrung.errors import KeineAutomatisierungAmSchritt
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
 from domain.pruefausfuehrung.prueflauf import NachweisArt, Prueflauf
 from domain.shared.errors import InvariantViolation
-from helpers import CountingPrueflaufRepository, in_memory_abschluss_persistenz
+from helpers import CountingPrueflaufRepository, in_memory_abschluss_persistenz, registriere_standard_vorlagen
 from adapters.persistence.in_memory import InMemoryProtokollRepository
 
 
@@ -71,6 +71,7 @@ def _setup_zweistufige_routine() -> tuple[
 ]:
     katalog = InMemoryKatalogRepository()
     bibliothek = InMemoryBibliothekRepository()
+    registriere_standard_vorlagen(bibliothek, "vorlage-a")
     k1 = ExternesKommandoAnlegen(bibliothek).execute(bezeichnung="A", kommandocode="CMD1")
     k2 = ExternesKommandoAnlegen(bibliothek).execute(bezeichnung="B", kommandocode="CMD2")
     routine = RoutineAnlegen(bibliothek).execute(

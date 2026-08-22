@@ -18,6 +18,7 @@ from api.app import create_app
 from api.persistence import postgres_deps
 from domain.katalog.routine import MaterialisierteRoutineHerkunft
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
+from helpers import vorlage_anlegen_http
 
 KOMMANDOCODE = "READ_VOLTAGE_PG"
 SCHRIITT_ID = "schritt-a"
@@ -53,6 +54,8 @@ def test_postgresql_http_katalog_setup_und_automatisierung():
         assert kommando.status_code == 201
         kommando_id = kommando.json()["kommando_id"]
 
+        vorlage_id = vorlage_anlegen_http(client)
+
         entwurf = client.post(
             "/katalog/entwuerfe",
             json={
@@ -60,7 +63,7 @@ def test_postgresql_http_katalog_setup_und_automatisierung():
                 "prozedur_schritte": [
                     {
                         "schritt_id": SCHRIITT_ID,
-                        "vorlage_id": "vorlage-a",
+                        "vorlage_id": vorlage_id,
                         "ist_pflicht": True,
                         "reihenfolge": 1,
                     }

@@ -28,6 +28,11 @@ Brücke Application → HTTP. Fachliche Referenz: `docs/architecture.md` §6–�
 | GET | `/katalog/bibliothek/routinen/{routine_id}` | `RoutineLesen` (Gate 8.2a) |
 | PUT | `/katalog/bibliothek/routinen/{routine_id}` | `RoutineAktualisieren` (Gate 8.2a) |
 | DELETE | `/katalog/bibliothek/routinen/{routine_id}` | `RoutineLoeschen` (Gate 8.2a) |
+| POST | `/katalog/bibliothek/vorlagen` | `PruefschrittVorlageAnlegen` (Gate 8.2b1) |
+| GET | `/katalog/bibliothek/vorlagen` | `PruefschrittVorlagenListen` (Gate 8.2b1) |
+| GET | `/katalog/bibliothek/vorlagen/{vorlage_id}` | `PruefschrittVorlageLesen` (Gate 8.2b1) |
+| PUT | `/katalog/bibliothek/vorlagen/{vorlage_id}` | `PruefschrittVorlageAktualisieren` (Gate 8.2b1) |
+| DELETE | `/katalog/bibliothek/vorlagen/{vorlage_id}` | `PruefschrittVorlageLoeschen` (Gate 8.2b1) |
 | PUT | `/katalog/entwuerfe/{id}/schritte/{schritt_id}/automatisierung` | `KommandoProzedurSchrittZuweisen` / `RoutineProzedurSchrittZuweisen` / `AutomatisierungEntfernen` (6.3a + 8.2a) |
 | POST | `/prueflaeufe` | `PruefungStarten` |
 | POST | `/prueflaeufe/{id}/schritte/{schritt_id}/automatisierung/ausfuehren` | `RoutineAusfuehren` ([ADR-0016](../adr/0016-automatisierung-http-api.md) — alleiniger Run-Time-Contract) |
@@ -90,6 +95,28 @@ E2E-Flow: Kommando anlegen → Entwurf → Zuweisen → Veröffentlichen → Pr�
 ## Bibliothek-HTTP CRUD (Gate 8.2a, ADR-0019)
 
 Vollständige Design-Time-Verwaltung der Bibliothek. Listen ohne `kommandocode`; Detail-GET mit `kommandocode`. DELETE mit Referenzschutz (409) — nur offene Entwürfe und Routinen, nicht veröffentlichte Versionen. Siehe [ADR-0019](../adr/0019-bibliothek-http-crud.md).
+
+## PrüfschrittVorlage-HTTP CRUD (Gate 8.2b1, ADR-0020)
+
+Vollständige Design-Time-Verwaltung von `PruefschrittVorlage` in der Bibliothek. Minimalfelder V1: `bezeichnung`, optionale `beschreibung`. Keine Eingabefelder, keine Sollvorgaben, keine Automatisierung in der Vorlage.
+
+| Methode | Pfad | Use Case |
+|---------|------|----------|
+| POST | `/katalog/bibliothek/vorlagen` | `PruefschrittVorlageAnlegen` |
+| GET | `/katalog/bibliothek/vorlagen` | `PruefschrittVorlagenListen` |
+| GET | `/katalog/bibliothek/vorlagen/{vorlage_id}` | `PruefschrittVorlageLesen` |
+| PUT | `/katalog/bibliothek/vorlagen/{vorlage_id}` | `PruefschrittVorlageAktualisieren` |
+| DELETE | `/katalog/bibliothek/vorlagen/{vorlage_id}` | `PruefschrittVorlageLoeschen` |
+
+| Aspekt | Regel |
+|--------|-------|
+| Write-Schemas | `extra="forbid"` |
+| DELETE-Referenzschutz | 409 `vorlage_in_verwendung` — nur offene Entwürfe mit `vorlage_id`; veröffentlichte Versionen blockieren nicht |
+| Publish | unbekannte `vorlage_id` → 409 `vorlage_nicht_gefunden` — keine stille Korrektur |
+| Materialisierung | neue Versionen erhalten `MaterialisiertePruefschrittVorlage`-Snapshot; Run Time liest nie mutable Bibliothek |
+| Legacy-Versionen | ohne Snapshot weiterhin lesbar/ausführbar — keine Rückmigration |
+
+Regressionstest: vollständiger Routine-HTTP-E2E-Pfad in `tests/api/test_api_katalog_routine_http_e2e.py`.
 
 ## Automatisierung ausführen (Gate 7.3f, ADR-0016)
 

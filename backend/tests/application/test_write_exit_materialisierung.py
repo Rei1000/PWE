@@ -20,11 +20,13 @@ from domain.katalog.routine import MaterialisierteRoutineHerkunft
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
 from adapters.persistence.in_memory import InMemoryPrueflaufRepository
+from helpers import registriere_standard_vorlagen
 
 
 def test_veroeffentlichen_schreibt_kein_legacy_externes_kommando():
     katalog = InMemoryKatalogRepository()
     bibliothek = InMemoryBibliothekRepository()
+    registriere_standard_vorlagen(bibliothek, "vorlage-a")
     kommando = ExternesKommandoAnlegen(bibliothek).execute(
         bezeichnung="Spannung",
         kommandocode="READ_V",
@@ -64,6 +66,7 @@ def test_veroeffentlichen_schreibt_kein_legacy_externes_kommando():
 def test_neue_version_ohne_legacy_ausfuehrbar_via_routine():
     katalog = InMemoryKatalogRepository()
     bibliothek = InMemoryBibliothekRepository()
+    registriere_standard_vorlagen(bibliothek, "vorlage-a")
     kommando = ExternesKommandoAnlegen(bibliothek).execute(
         bezeichnung="Spannung",
         kommandocode="READ_V",

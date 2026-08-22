@@ -19,6 +19,7 @@ from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlich
 from domain.katalog.errors import MaterialisierteAutomatisierungInkonsistent
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
 from domain.katalog.routine import MaterialisierteRoutineHerkunft
+from helpers import registriere_standard_vorlagen
 
 pytestmark = pytest.mark.postgresql
 
@@ -59,6 +60,7 @@ def test_postgresql_entwurf_roundtrip_mit_routine_id(pg_repos):
 
 def test_postgresql_version_roundtrip_materialisierte_routine(pg_repos, pg_session):
     katalog, bibliothek, _, _ = pg_repos
+    registriere_standard_vorlagen(bibliothek, "vorlage-a")
     k1 = ExternesKommandoAnlegen(bibliothek).execute(bezeichnung="A", kommandocode="CMD1")
     k2 = ExternesKommandoAnlegen(bibliothek).execute(bezeichnung="B", kommandocode="CMD2")
     routine = RoutineAnlegen(bibliothek).execute(
@@ -176,6 +178,7 @@ def test_postgresql_inkonsistente_automatisierung_wird_abgelehnt():
 
 def test_postgresql_materialisierung_einzelkommando_und_routine(pg_repos, pg_session):
     katalog, bibliothek, _, _ = pg_repos
+    registriere_standard_vorlagen(bibliothek, "vorlage-a")
     kommando = ExternesKommandoAnlegen(bibliothek).execute(
         bezeichnung="Einzel",
         kommandocode="ONE",

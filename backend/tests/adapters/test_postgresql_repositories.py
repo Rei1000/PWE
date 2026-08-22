@@ -12,12 +12,14 @@ from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
+from helpers import registriere_standard_vorlagen
 
 pytestmark = pytest.mark.postgresql
 
 
 def test_postgresql_katalog_version_immutability(pg_repos):
     katalog, bibliothek, _, _ = pg_repos
+    registriere_standard_vorlagen(bibliothek, "vorlage-a")
 
     entwurf = EntwurfAnlegen(katalog).execute(
         produktkodierung="5555555555",
@@ -51,6 +53,7 @@ def test_postgresql_katalog_version_immutability(pg_repos):
 
 def test_postgresql_end_to_end_prueflauf(pg_repos, pg_session):
     katalog, bibliothek, prueflauf_repo, protokoll_repo = pg_repos
+    registriere_standard_vorlagen(bibliothek, "vorlage-a")
     abschluss_persistenz = PostgresPrueflaufAbschlussPersistenz(pg_session)
 
     entwurf = EntwurfAnlegen(katalog).execute(

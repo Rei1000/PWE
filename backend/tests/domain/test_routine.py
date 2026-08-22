@@ -21,6 +21,7 @@ from domain.katalog.routine import (
     RoutineAktionsart,
 )
 from domain.shared.errors import InvariantViolation
+from helpers import vorlage_map
 
 
 def _kommando(bezeichnung: str = "Test", code: str = "CMD") -> ExternesKommando:
@@ -128,7 +129,10 @@ def test_direkte_kommando_zuweisung_materialisiert_ein_aktions_routine():
             ),
         ],
     )
-    version = entwurf.veroeffentlichen(externe_kommandos={kommando.kommando_id: kommando})
+    version = entwurf.veroeffentlichen(
+        externe_kommandos={kommando.kommando_id: kommando},
+        vorlagen=vorlage_map("v1"),
+    )
     schritt = version.schritt_by_id("s1")
     assert schritt is not None
     mr = schritt.materialisierte_routine
@@ -168,6 +172,7 @@ def test_bibliotheksroutine_wird_vollstaendig_materialisiert():
             k2.kommando_id: k2,
         },
         routinen={routine.routine_id: routine},
+        vorlagen=vorlage_map("v1"),
     )
     schritt = version.schritt_by_id("s1")
     assert schritt is not None
@@ -196,7 +201,7 @@ def test_unbekannte_routine_schlaegt_fachlich_fehl():
         ],
     )
     with pytest.raises(RoutineNichtGefunden):
-        entwurf.veroeffentlichen(routinen={})
+        entwurf.veroeffentlichen(routinen={}, vorlagen=vorlage_map("v1"))
 
 
 def test_unbekanntes_kommando_in_routine_schlaegt_fachlich_fehl():
@@ -222,6 +227,7 @@ def test_unbekanntes_kommando_in_routine_schlaegt_fachlich_fehl():
         entwurf.veroeffentlichen(
             externe_kommandos={kommando.kommando_id: kommando},
             routinen={routine.routine_id: routine},
+            vorlagen=vorlage_map("v1"),
         )
 
 
@@ -247,6 +253,7 @@ def test_bibliotheksaenderung_aendert_veroeffentlichte_version_nicht():
     version = entwurf.veroeffentlichen(
         externe_kommandos={kommando.kommando_id: kommando},
         routinen={routine.routine_id: routine},
+        vorlagen=vorlage_map("v1"),
     )
 
     geaendertes_kommando = ExternesKommando(
@@ -285,7 +292,7 @@ def test_veroeffentlichen_mit_unbekannter_kommando_id_schlaegt_fehl():
         ],
     )
     with pytest.raises(ExternesKommandoNichtGefunden):
-        entwurf.veroeffentlichen(externe_kommandos={})
+        entwurf.veroeffentlichen(externe_kommandos={}, vorlagen=vorlage_map("v1"))
 
 
 def test_materialisierte_routine_aus_einzelkommando_hat_keine_routine_id():

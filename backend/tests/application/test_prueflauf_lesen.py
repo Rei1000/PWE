@@ -26,12 +26,13 @@ from domain.katalog.routine import (
     MaterialisierteRoutineHerkunft,
 )
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
-from helpers import in_memory_abschluss_persistenz
+from helpers import in_memory_abschluss_persistenz, registriere_standard_vorlagen
 
 
 def test_prueflauf_lesen_liefert_materialisierte_schritte():
     katalog = InMemoryKatalogRepository()
     bibliothek = InMemoryBibliothekRepository()
+    registriere_standard_vorlagen(bibliothek, "v1")
     prueflauf_repo = InMemoryPrueflaufRepository()
 
     entwurf = EntwurfAnlegen(katalog).execute(
@@ -71,6 +72,7 @@ def test_lesen_einzelkommando_hat_automatisierung_fehlende_komponenten_ux():
     """Variante B: fehlende Komponenten → UI-Flag false, Use Case bleibt aufrufbar."""
     katalog = InMemoryKatalogRepository()
     bibliothek = InMemoryBibliothekRepository()
+    registriere_standard_vorlagen(bibliothek, "v1")
     prueflauf_repo = InMemoryPrueflaufRepository()
 
     kommando = ExternesKommandoAnlegen(bibliothek).execute(
@@ -120,6 +122,7 @@ def test_lesen_einzelkommando_hat_automatisierung_fehlende_komponenten_ux():
 def test_lesen_bibliotheksroutine_hat_automatisierung():
     katalog = InMemoryKatalogRepository()
     bibliothek = InMemoryBibliothekRepository()
+    registriere_standard_vorlagen(bibliothek, "v1")
     prueflauf_repo = InMemoryPrueflaufRepository()
 
     k1 = ExternesKommandoAnlegen(bibliothek).execute(bezeichnung="A", kommandocode="A1")
@@ -198,6 +201,7 @@ def test_lesen_legacy_externes_kommando_erkannt():
 def test_lesen_abgeschlossen_nicht_ausfuehrbar():
     katalog = InMemoryKatalogRepository()
     bibliothek = InMemoryBibliothekRepository()
+    registriere_standard_vorlagen(bibliothek, "v1")
     prueflauf_repo = InMemoryPrueflaufRepository()
     protokoll_repo = InMemoryProtokollRepository()
 

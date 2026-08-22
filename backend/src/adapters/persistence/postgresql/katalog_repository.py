@@ -89,3 +89,7 @@ class PostgresKatalogRepository:
             row.payload = payload
         if commit:
             self._session.commit()
+
+    def list_entwuerfe(self) -> list[Produktdefinition]:
+        rows = self._session.query(ProduktdefinitionEntwurfRow).all()
+        return [entwurf_from_payload(row.payload) for row in rows]

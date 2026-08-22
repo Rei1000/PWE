@@ -62,3 +62,32 @@ class PostgresBibliothekRepository:
         if row is None:
             return None
         return routine_from_payload(row.routine_id, row.bezeichnung, row.payload)
+
+    def list_externe_kommandos(self) -> list[ExternesKommando]:
+        rows = self._session.query(ExternesKommandoRow).all()
+        return [
+            ExternesKommando(
+                kommando_id=row.kommando_id,
+                bezeichnung=row.bezeichnung,
+                kommandocode=row.kommandocode,
+            )
+            for row in rows
+        ]
+
+    def list_routinen(self) -> list[Routine]:
+        rows = self._session.query(RoutineRow).all()
+        return [routine_from_payload(row.routine_id, row.bezeichnung, row.payload) for row in rows]
+
+    def delete_externes_kommando(self, kommando_id: str, *, commit: bool = False) -> None:
+        row = self._session.get(ExternesKommandoRow, kommando_id)
+        if row is not None:
+            self._session.delete(row)
+        if commit:
+            self._session.commit()
+
+    def delete_routine(self, routine_id: str, *, commit: bool = False) -> None:
+        row = self._session.get(RoutineRow, routine_id)
+        if row is not None:
+            self._session.delete(row)
+        if commit:
+            self._session.commit()

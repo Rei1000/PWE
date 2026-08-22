@@ -288,7 +288,7 @@ def test_zuweisung_bei_vorhandener_routine_409():
     assert response.json()["code"] == "automatisierung_doppelt_zugewiesen"
 
 
-def test_zuweisung_routine_id_im_request_422(client: TestClient):
+def test_zuweisung_beide_ids_422(client: TestClient):
     kodierung = _unique_kodierung()
     pd_id = _entwurf_anlegen(client, kodierung)
     response = client.put(
@@ -296,6 +296,25 @@ def test_zuweisung_routine_id_im_request_422(client: TestClient):
         json={"kommando_id": "x", "routine_id": "y"},
     )
     assert response.status_code == 422
+
+
+def test_zuweisung_routine_id_happy_path(client: TestClient):
+    kodierung = _unique_kodierung()
+    k1 = client.post(
+        "/katalog/bibliothek/kommandos",
+        json={"bezeichnung": "K1", "kommandocode": "K1"},
+    ).json()["kommando_id"]
+    routine_id = client.post(
+        "/katalog/bibliothek/routinen",
+        json={"bezeichnung": "R", "kommando_ids": [k1]},
+    ).json()["routine_id"]
+    pd_id = _entwurf_anlegen(client, kodierung)
+    response = client.put(
+        f"/katalog/entwuerfe/{pd_id}/schritte/{SCHRIITT_ID}/automatisierung",
+        json={"routine_id": routine_id},
+    )
+    assert response.status_code == 200
+    assert response.json()["routine_id"] == routine_id
 
 
 def test_zuweisung_kommandocode_im_request_422(client: TestClient):

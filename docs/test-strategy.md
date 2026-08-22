@@ -25,6 +25,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 - **Katalog-Setup-API-Tests** (Gate 6.3a): HTTP-E2E Setup + Automatisierung, OpenAPI — `tests/api/test_api_katalog_automatisierung_setup.py`, `test_api_openapi_katalog_automatisierung_setup.py`, PostgreSQL in `test_api_postgresql_katalog_automatisierung_setup.py`.
 - **Frontend-Automatisierung** (Gate 6.3b): Zod-Response inkl. `fehlgeschlagen=true`, Adapter-Zielendpoint, Mutation `retry: false`, Komponenten — `frontend/web/tests/api/automatisierung.test.ts`, `tests/hooks/`, `tests/components/`.
 - **Demo-Seed** (Gate 6.3c): `PWE_DEMO_MODE`-Wiring, HTTP-E2E Demo-Flow, Script-Client-Tests — `tests/api/test_demo_mode_wiring.py`, `test_api_demo_seed_e2e.py`, `tests/scripts/test_seed_demo_automatisierung.py`; PostgreSQL in `test_api_postgresql_demo_seed.py`.
+- **Bibliothek-HTTP CRUD** (Gate 8.2a): Application `test_katalog_bibliothek_crud.py`; API `test_api_katalog_bibliothek_crud.py`; OpenAPI `test_api_openapi_katalog_bibliothek_crud.py`; PostgreSQL `test_api_postgresql_katalog_bibliothek_crud.py`; Contract-Tests erweitert in `test_bibliothek_repository_contract.py`.
 
 ## V1-Pflicht vor Merge
 

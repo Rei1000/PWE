@@ -39,3 +39,11 @@ class LeereRoutine(DomainError):
 
 class UngueltigeAktionsreihenfolge(DomainError):
     pass
+
+
+class KommandoInVerwendung(DomainError):
+    pass
+
+
+class RoutineInVerwendung(DomainError):
+    pass

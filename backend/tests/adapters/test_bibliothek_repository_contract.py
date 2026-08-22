@@ -60,6 +60,17 @@ def _run_bibliothek_contract(repo_factory):
     reloaded_routine = repo.get_routine(routine.routine_id)
     assert reloaded_routine == updated_routine
 
+    listed_kommandos = repo.list_externe_kommandos()
+    assert len(listed_kommandos) == 1
+    listed_routinen = repo.list_routinen()
+    assert len(listed_routinen) == 1
+
+    repo.delete_routine(routine.routine_id)
+    assert repo.get_routine(routine.routine_id) is None
+
+    repo.delete_externes_kommando(kommando.kommando_id)
+    assert repo.get_externes_kommando(kommando.kommando_id) is None
+
 
 def test_in_memory_bibliothek_contract():
     _run_bibliothek_contract(InMemoryBibliothekRepository)

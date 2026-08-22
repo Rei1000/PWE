@@ -7,7 +7,7 @@ from typing import Any
 
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class PrueflaufStartenRequest(BaseModel):
@@ -137,11 +137,25 @@ class ExternesKommandoAnlegenResponse(BaseModel):
 
 
 class AutomatisierungZuweisenRequest(BaseModel):
-    """Einzelkommando an Entwurfsschritt — Gate 6.3a (kein routine_id)."""
+    """Automatisierung an Entwurfsschritt — Gate 6.3a + 8.2a."""
 
-    kommando_id: str
+    kommando_id: str | None = None
+    routine_id: str | None = None
 
     model_config = ConfigDict(extra="forbid")
+
+    @model_validator(mode="after")
+    def validate_zuweisung(self) -> AutomatisierungZuweisenRequest:
+        if self.kommando_id is not None and self.routine_id is not None:
+            raise ValueError("kommando_id und routine_id sind gegenseitig exklusiv")
+        fields_set = self.model_fields_set
+        if self.kommando_id is None and self.routine_id is None:
+            if "kommando_id" in fields_set and "routine_id" in fields_set:
+                return self
+            raise ValueError(
+                "Entweder kommando_id, routine_id oder beide null für Entfernen angeben"
+            )
+        return self
 
 
 class AutomatisierungZuweisenResponse(BaseModel):
@@ -196,3 +210,66 @@ class PrueflaufDetailResponse(BaseModel):
     fehlende_komponenten: list[str] = Field(default_factory=list)
     kann_komponente_erfassen: bool = False
     kann_abgeschlossen_werden: bool = False
+
+
+class ExternesKommandoListenEintragResponse(BaseModel):
+    kommando_id: str
+    bezeichnung: str
+
+
+class ExternesKommandoListeResponse(BaseModel):
+    kommandos: list[ExternesKommandoListenEintragResponse]
+
+
+class ExternesKommandoDetailResponse(BaseModel):
+    kommando_id: str
+    bezeichnung: str
+    kommandocode: str
+
+
+class ExternesKommandoAktualisierenRequest(BaseModel):
+    bezeichnung: str
+    kommandocode: str
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class RoutineAnlegenRequest(BaseModel):
+    bezeichnung: str
+    kommando_ids: list[str]
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class RoutineAktionResponse(BaseModel):
+    position: int
+    kommando_id: str
+
+
+class RoutineListenEintragResponse(BaseModel):
+    routine_id: str
+    bezeichnung: str
+    anzahl_aktionen: int
+
+
+class RoutineListeResponse(BaseModel):
+    routinen: list[RoutineListenEintragResponse]
+
+
+class RoutineDetailResponse(BaseModel):
+    routine_id: str
+    bezeichnung: str
+    aktionen: list[RoutineAktionResponse]
+
+
+class RoutineAnlegenResponse(BaseModel):
+    routine_id: str
+    bezeichnung: str
+    aktionen: list[RoutineAktionResponse]
+
+
+class RoutineAktualisierenRequest(BaseModel):
+    bezeichnung: str
+    kommando_ids: list[str]
+
+    model_config = ConfigDict(extra="forbid")

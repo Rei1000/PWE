@@ -44,8 +44,8 @@ def test_openapi_automatisierung_zuweisen_schemas():
     req_ref = put["requestBody"]["content"]["application/json"]["schema"]["$ref"]
     req_name = req_ref.split("/")[-1]
     req_schema = spec["components"]["schemas"][req_name]
-    assert set(req_schema["required"]) == {"kommando_id"}
-    assert "routine_id" not in req_schema.get("properties", {})
+    assert "kommando_id" in req_schema.get("properties", {})
+    assert "routine_id" in req_schema.get("properties", {})
     assert req_schema.get("additionalProperties") is False
     assert put["responses"]["200"]["content"]["application/json"]["schema"][
         "$ref"

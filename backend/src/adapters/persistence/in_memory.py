@@ -42,6 +42,9 @@ class InMemoryKatalogRepository:
     def save_entwurf(self, entwurf: Produktdefinition) -> None:
         self._entwuerfe[entwurf.produktdefinition_id] = entwurf
 
+    def list_entwuerfe(self) -> list[Produktdefinition]:
+        return list(self._entwuerfe.values())
+
 
 class InMemoryBibliothekRepository:
     def __init__(self) -> None:
@@ -59,6 +62,18 @@ class InMemoryBibliothekRepository:
 
     def get_routine(self, routine_id: str) -> Routine | None:
         return self._routinen.get(routine_id)
+
+    def list_externe_kommandos(self) -> list[ExternesKommando]:
+        return list(self._kommandos.values())
+
+    def list_routinen(self) -> list[Routine]:
+        return list(self._routinen.values())
+
+    def delete_externes_kommando(self, kommando_id: str) -> None:
+        self._kommandos.pop(kommando_id, None)
+
+    def delete_routine(self, routine_id: str) -> None:
+        self._routinen.pop(routine_id, None)
 
 
 class InMemoryPrueflaufRepository:

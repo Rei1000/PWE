@@ -22,3 +22,4 @@ Langfristig relevante Architekturentscheidungen. Fachdomäne: `docs/domain-model
 | [0016](0016-automatisierung-http-api.md) | Automatisierung am ProzedurSchritt — HTTP-API (Gate 7.3f) |
 | [0017](0017-katalog-setup-http-automatisierung.md) | Katalog-Setup-HTTP für Automatisierung (Gate 6.3a) |
 | [0018](0018-legacy-automatisierung-exit.md) | Legacy-Automatisierung Exit — API Exit (7.4a) / Write Exit (7.4b) |
+| [0019](0019-bibliothek-http-crud.md) | Bibliothek-HTTP CRUD — Kommandos, Routinen, Automatisierung (Gate 8.2a) |

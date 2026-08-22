@@ -151,9 +151,9 @@ Entwurfs-Wechsel: andere `kommando_id` bei gesetztem Kommando → `Automatisieru
 
 Keine — erst bei Persistenz/Event-Integration.
 
-## Offen (nach Gate 8.2b2)
+## Offen (nach Gate 8.2c1)
 
-- Entwurfseditor-UI (Gate 8.2c2)
+- Entwurfseditor-UI (Gate 8.2c2) — Bibliothek-Admin-UI abgeschlossen (Gate 8.2c1)
 - Eingabefelder an PrüfschrittVorlage
 - Aktivierungsregeln-Auswertung zur Laufzeit
 - Version deaktivieren (V1: neue Version ersetzt aktive)

@@ -19,7 +19,16 @@ Brücke Application → HTTP. Fachliche Referenz: `docs/architecture.md` §6–�
 | POST | `/katalog/entwuerfe` | `EntwurfAnlegen` |
 | POST | `/katalog/entwuerfe/{id}/veroeffentlichen` | `ProduktdefinitionVeroeffentlichen` |
 | POST | `/katalog/bibliothek/kommandos` | `ExternesKommandoAnlegen` (Gate 6.3a) |
-| PUT | `/katalog/entwuerfe/{id}/schritte/{schritt_id}/automatisierung` | `KommandoProzedurSchrittZuweisen` (Gate 6.3a) |
+| GET | `/katalog/bibliothek/kommandos` | `ExterneKommandosListen` (Gate 8.2a) |
+| GET | `/katalog/bibliothek/kommandos/{kommando_id}` | `ExternesKommandoLesen` (Gate 8.2a) |
+| PUT | `/katalog/bibliothek/kommandos/{kommando_id}` | `ExternesKommandoAktualisieren` (Gate 8.2a) |
+| DELETE | `/katalog/bibliothek/kommandos/{kommando_id}` | `ExternesKommandoLoeschen` (Gate 8.2a) |
+| POST | `/katalog/bibliothek/routinen` | `RoutineAnlegen` (Gate 8.2a) |
+| GET | `/katalog/bibliothek/routinen` | `RoutinenListen` (Gate 8.2a) |
+| GET | `/katalog/bibliothek/routinen/{routine_id}` | `RoutineLesen` (Gate 8.2a) |
+| PUT | `/katalog/bibliothek/routinen/{routine_id}` | `RoutineAktualisieren` (Gate 8.2a) |
+| DELETE | `/katalog/bibliothek/routinen/{routine_id}` | `RoutineLoeschen` (Gate 8.2a) |
+| PUT | `/katalog/entwuerfe/{id}/schritte/{schritt_id}/automatisierung` | `KommandoProzedurSchrittZuweisen` / `RoutineProzedurSchrittZuweisen` / `AutomatisierungEntfernen` (6.3a + 8.2a) |
 | POST | `/prueflaeufe` | `PruefungStarten` |
 | POST | `/prueflaeufe/{id}/schritte/{schritt_id}/automatisierung/ausfuehren` | `RoutineAusfuehren` ([ADR-0016](../adr/0016-automatisierung-http-api.md) — alleiniger Run-Time-Contract) |
 | POST | `/prueflaeufe/{id}/komponenten` | `KomponenteErfassen` |
@@ -39,7 +48,7 @@ Alle API-Fehler (Domain und Validierung) liefern ein einheitliches JSON-Objekt:
 | HTTP | `code` (Beispiele) | Auslöser |
 |------|---------------------|----------|
 | 404 | `version_nicht_gefunden`, `prueflauf_nicht_gefunden`, … | `DomainError`-Subklassen mit Suffix `NichtGefunden` |
-| 409 | `invariant_verletzt`, … | `InvariantViolation` und übrige fachliche Konflikte |
+| 409 | `invariant_verletzt`, `kommando_in_verwendung`, `routine_in_verwendung`, … | `InvariantViolation` und übrige fachliche Konflikte |
 | 422 | `validation`, `ungueltiger_wert` | Pydantic / ungültige Enum-Werte |
 
 Öffentliche `detail`-Texte sind generisch; technische Exception-Texte werden nicht ausgegeben.
@@ -61,21 +70,26 @@ Minimaler Setup-Contract für PC-/Laborbetrieb ([ADR-0001](../adr/0001-v1-scope-
 | Idempotenz | **Nein** — jeder POST = neue `kommando_id` |
 | Fehler | 422 `validation` |
 
-### Automatisierung an Entwurfsschritt zuweisen
+### Automatisierung an Entwurfsschritt zuweisen (Gate 6.3a + 8.2a, ADR-0019)
 
 `PUT /katalog/entwuerfe/{produktdefinition_id}/schritte/{schritt_id}/automatisierung`
 
 | Aspekt | Regel |
 |--------|-------|
-| Request | `{ "kommando_id" }` — ausschließlich; **kein** `routine_id`, kein `kommandocode`; `extra=forbid` |
-| Response 200 | `{ "produktdefinition_id", "schritt_id", "kommando_id", "routine_id": null }` |
-| Gleiche Zuweisung erneut | Idempotent — HTTP 200 |
-| Anderes Kommando bei gesetztem Kommando | 409 `automatisierung_doppelt_zugewiesen` — kein stiller Wechsel |
-| Routine am Schritt gesetzt | 409 `automatisierung_doppelt_zugewiesen` |
-| Entfernen | **Nicht** in 6.3a |
-| Fehler | 404 `entwurf_nicht_gefunden`, `prozedur_schritt_nicht_gefunden`, `externes_kommando_nicht_gefunden`; 409; 422 |
+| Kommando zuweisen | `{ "kommando_id": "…" }` — Gate 6.3a unverändert |
+| Routine zuweisen | `{ "routine_id": "…" }` — Gate 8.2a |
+| Entfernen | `{ "kommando_id": null, "routine_id": null }` — beide Keys explizit |
+| XOR | `kommando_id` und `routine_id` nicht gleichzeitig gesetzt |
+| Leerer Body `{}` | 422 |
+| Response 200 | `{ "produktdefinition_id", "schritt_id", "kommando_id", "routine_id" }` |
+| Wechsel ohne Entfernen | 409 `automatisierung_doppelt_zugewiesen` |
+| Fehler | 404, 409, 422 |
 
 E2E-Flow: Kommando anlegen → Entwurf → Zuweisen → Veröffentlichen → Prüflauf → `POST .../automatisierung/ausfuehren` (ADR-0016).
+
+## Bibliothek-HTTP CRUD (Gate 8.2a, ADR-0019)
+
+Vollständige Design-Time-Verwaltung der Bibliothek. Listen ohne `kommandocode`; Detail-GET mit `kommandocode`. DELETE mit Referenzschutz (409) — nur offene Entwürfe und Routinen, nicht veröffentlichte Versionen. Siehe [ADR-0019](../adr/0019-bibliothek-http-crud.md).
 
 ## Automatisierung ausführen (Gate 7.3f, ADR-0016)
 

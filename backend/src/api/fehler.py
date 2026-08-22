@@ -35,6 +35,10 @@ def oeffentliche_fehlermeldung(exc: DomainError) -> str:
         return "Die referenzierte Produktdefinitionsversion wurde nicht gefunden."
     if name == "VersionNichtAufloesbar":
         return "Die Produktdefinitionsversion des Prüflaufs ist nicht verfügbar."
+    if name == "KommandoInVerwendung":
+        return "Das externe Kommando wird noch referenziert und kann nicht gelöscht werden."
+    if name == "RoutineInVerwendung":
+        return "Die Routine wird noch referenziert und kann nicht gelöscht werden."
     if name.endswith("NichtGefunden"):
         return "Die angeforderte Ressource wurde nicht gefunden."
     return "Die Anfrage konnte aus fachlichen Gründen nicht verarbeitet werden."

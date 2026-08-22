@@ -81,8 +81,8 @@ Keine stille Ersetzung (projektrules §6). Bei gesetzter Gegenreferenz schlägt 
 
 | Port | Methode (V1) |
 |------|--------------|
-| `KatalogRepository` | `get_aktive_version_fuer_kodierung`, `get_version`, `save_version`, `get_entwurf`, `save_entwurf` |
-| `BibliothekRepository` | `save_externes_kommando`, `get_externes_kommando`, `save_routine`, `get_routine` |
+| `KatalogRepository` | `get_aktive_version_fuer_kodierung`, `get_version`, `save_version`, `get_entwurf`, `save_entwurf`, `list_entwuerfe` |
+| `BibliothekRepository` | `save_externes_kommando`, `get_externes_kommando`, `save_routine`, `get_routine`, `list_externe_kommandos`, `list_routinen`, `delete_externes_kommando`, `delete_routine` |
 
 `BibliothekRepository` ist fachliche Facade des **Bibliotheks-Moduls** innerhalb des Katalog-Bounded-Contexts — kein eigener Context, kein Mega-Aggregat, kein separates Repository pro Typ (ADR-0012, ADR-0014).
 
@@ -107,15 +107,28 @@ Adapter dürfen mutable save technisch per INSERT/UPDATE oder SQL-Upsert umsetze
 | Kommando an ProzedurSchritt zuweisen | `application/katalog/kommando_zuweisen.py` |
 | Routine anlegen | `application/katalog/routine_anlegen.py` |
 | Routine an ProzedurSchritt zuweisen | `application/katalog/routine_zuweisen.py` |
+| Automatisierung entfernen | `application/katalog/automatisierung_entfernen.py` |
+| Externe Kommandos listen | `application/katalog/externe_kommandos_listen.py` |
+| Externes Kommando lesen/aktualisieren/löschen | `externes_kommando_lesen.py`, `externes_kommando_aktualisieren.py`, `externes_kommando_loeschen.py` |
+| Routinen listen/lesen/aktualisieren/löschen | `routinen_listen.py`, `routine_lesen.py`, `routine_aktualisieren.py`, `routine_loeschen.py` |
 
-## HTTP (Gate 6.3a, ADR-0017)
+## HTTP (Gate 6.3a + 8.2a, ADR-0017, ADR-0019)
 
 | Endpunkt | Use Case |
 |----------|----------|
-| `POST /katalog/bibliothek/kommandos` | `ExternesKommandoAnlegen` |
-| `PUT /katalog/entwuerfe/{id}/schritte/{schritt_id}/automatisierung` | `KommandoProzedurSchrittZuweisen` |
+| `POST /katalog/bibliothek/kommandos` | `ExternesKommandoAnlegen` (6.3a) |
+| `GET /katalog/bibliothek/kommandos` | `ExterneKommandosListen` |
+| `GET /katalog/bibliothek/kommandos/{id}` | `ExternesKommandoLesen` |
+| `PUT /katalog/bibliothek/kommandos/{id}` | `ExternesKommandoAktualisieren` |
+| `DELETE /katalog/bibliothek/kommandos/{id}` | `ExternesKommandoLoeschen` |
+| `POST /katalog/bibliothek/routinen` | `RoutineAnlegen` |
+| `GET /katalog/bibliothek/routinen` | `RoutinenListen` |
+| `GET /katalog/bibliothek/routinen/{id}` | `RoutineLesen` |
+| `PUT /katalog/bibliothek/routinen/{id}` | `RoutineAktualisieren` |
+| `DELETE /katalog/bibliothek/routinen/{id}` | `RoutineLoeschen` |
+| `PUT /katalog/entwuerfe/{id}/schritte/{schritt_id}/automatisierung` | `KommandoProzedurSchrittZuweisen` / `RoutineProzedurSchrittZuweisen` / `AutomatisierungEntfernen` |
 
-Nur Einzelkommando-Zuweisung — **kein** `routine_id` im Request (Gate 8.2a). Keine Ausführung, keine Adapterfelder. Laborbetrieb ohne Auth ([ADR-0001](../adr/0001-v1-scope-deferrals.md)).
+Kommando- oder Routine-Zuweisung XOR; Entfernen mit `{ "kommando_id": null, "routine_id": null }`. Keine Ausführung, keine Adapterfelder. Laborbetrieb ohne Auth ([ADR-0001](../adr/0001-v1-scope-deferrals.md)).
 
 Entwurfs-Wechsel: andere `kommando_id` bei gesetztem Kommando → `AutomatisierungDoppeltZugewiesen` (409) — kein stiller Ersatz (projektrules §6).
 
@@ -123,10 +136,9 @@ Entwurfs-Wechsel: andere `kommando_id` bei gesetztem Kommando → `Automatisieru
 
 Keine — erst bei Persistenz/Event-Integration.
 
-## Offen (nach Gate 6.3a)
+## Offen (nach Gate 8.2a)
 
-- Frontend Automatisierung (Gate 6.3b), Demo-Seed (6.3c)
-- Vollständige Bibliothek-HTTP-CRUD (Gate 8.2a)
-- `PrüfschrittVorlage` in Bibliothek (Gate 8.2)
+- Katalog-Admin-UI (Gate 8.2c)
+- `PrüfschrittVorlage` in Bibliothek (Gate 8.2b)
 - Aktivierungsregeln-Auswertung zur Laufzeit
 - Version deaktivieren (V1: neue Version ersetzt aktive)

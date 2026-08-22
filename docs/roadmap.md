@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** **Gate 7 ✅** (7.0–7.5b) — **Gate 6.3 ✅** — **Nächster Slice: Gate 8.2a** (Katalog-Admin HTTP)
+**▶ Aktueller Stand:** **Gate 7 ✅** (7.0–7.5b) — **Gate 8.2a 🔄** (Bibliothek-HTTP CRUD) — **Gate 6.3 ✅**
 
 ---
 
@@ -189,7 +189,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | # | Schritt | Status | Prio | Abhängigkeit |
 |---|---------|--------|------|--------------|
 | 8.2 | Katalog-Administration (Bibliothek, Vorlagen, Routinen — HTTP + UI, gesliced) | ⏳ | P2 | 6.3, 7.5 |
-| 8.2a | Bibliothek-HTTP CRUD (Kommandos, Routinen, Listen) | ⏳ | P2 | 6.3a |
+| 8.2a | Bibliothek-HTTP CRUD (Kommandos, Routinen, Listen) | 🔄 | P2 | 6.3a |
 | 8.2b | Vorlagen und erweiterte Entwurfsbearbeitung | ⏳ | P3 | 8.2a |
 | 8.2c | Katalog-Admin-UI | ⏳ | P3 | 8.2a |
 | 8.3 | Foto / Storage (`DateiSpeicherPort`) | ⏳ | P2 | 6.3, Ports offen |
@@ -226,7 +226,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
-| 2026-08-22 | **Gate 7 vollständig ✅** — 7.5b PR #30, Merge `cef92ec` (Feature `6bd89fb`) | Alembic einziger Schema-Pfad; Runtime/Docker/CI ohne `create_all` |
+| 2026-08-22 | Gate 8.2a in Umsetzung — Bibliothek-HTTP CRUD (ADR-0019) | Kommandos/Routinen LIST/GET/PUT/DELETE; Routine-Zuweisung; Automatisierung entfernen |
+| 2026-08-22 | Gate 7 vollständig ✅ — Doku PR #31, Merge `9fd7ac7` | Roadmap-Sync nach 7.5b |
 | 2026-08-22 | Gate 7.5b in Umsetzung — Alembic als einziger Schema-Pfad | Runtime-/Docker-/CI-Exit von `create_all`; Migration außerhalb FastAPI |
 | 2026-08-16 | Gate 7.5a abgeschlossen — PR #29, Merge `305401f` | Alembic-Bootstrap + Initialmigration; Runtime noch `create_all` bis 7.5b |
 | 2026-08-16 | Gate 7.5a in Umsetzung — Alembic-Bootstrap + Initialmigration | Ist-Schema aus `schema.py`; Runtime weiter `create_all` bis 7.5b |
@@ -269,4 +270,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.2a — Bibliothek-HTTP CRUD** (⏳, P2): Erster Gate-8-Slice nach abgeschlossenem Gate 7 — Katalog-Administration HTTP (Kommandos, Routinen, Listen). Siehe [ADR-0001](adr/0001-v1-scope-deferrals.md) (Katalog-Admin vor Auth).
+**Gate 8.2a — Bibliothek-HTTP CRUD** (🔄, P2): ADR-0019; Kommandos/Routinen CRUD; Routine-Zuweisung und Automatisierung entfernen per HTTP.

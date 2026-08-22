@@ -7,7 +7,6 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 
-from adapters.persistence.postgresql.schema import init_schema
 from api.app import create_app
 from api.kommando_wiring import (
     DEMO_KOMMANDOCODE,
@@ -16,7 +15,6 @@ from api.kommando_wiring import (
     reset_kommando_adapter_cache_for_tests,
 )
 from api.persistence import postgres_deps
-from sqlalchemy import create_engine
 
 SCHRITT_ID = "demo-schritt-1"
 KODIERUNG = "9000000001"
@@ -32,9 +30,6 @@ def test_postgresql_http_demo_seed_und_automatisierung(monkeypatch):
     monkeypatch.setenv("EXTERNES_KOMMANDO_ADAPTER", "simulation")
     reset_kommando_adapter_cache_for_tests()
     configure_kommando_adapter(KommandoAdapterSettings.from_env())
-
-    engine = create_engine(url, future=True)
-    init_schema(engine)
 
     with TestClient(create_app(postgres_deps_factory=postgres_deps)) as client:
         kommando = client.post(

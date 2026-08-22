@@ -13,7 +13,6 @@ from sqlalchemy.orm import sessionmaker
 from adapters.persistence.postgresql.bibliothek_repository import PostgresBibliothekRepository
 from adapters.persistence.postgresql.katalog_repository import PostgresKatalogRepository
 from adapters.persistence.postgresql.prueflauf_repository import PostgresPrueflaufRepository
-from adapters.persistence.postgresql.schema import init_schema
 from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
 from api.app import create_app
 from api.persistence import postgres_deps
@@ -36,7 +35,6 @@ def test_api_automatisierung_postgresql_happy_path():
         pytest.skip("DATABASE_URL nicht gesetzt — PostgreSQL-API-Test übersprungen")
 
     engine = create_engine(url, future=True)
-    init_schema(engine)
     session = sessionmaker(bind=engine, expire_on_commit=False)()
 
     katalog = PostgresKatalogRepository(session)

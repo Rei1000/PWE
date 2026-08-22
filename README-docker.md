@@ -42,12 +42,9 @@ EXTERNES_KOMMANDO_ADAPTER: simulation
 
 Default bleibt **ohne** Demo-Antworten (`PWE_DEMO_MODE=false`). Siehe Root-README Demo-Ablauf und `scripts/seed_demo_automatisierung.py`.
 
-Schema wird beim API-Start via `init_schema` / `create_all` angelegt (Gate 7.5a: Alembic-Bootstrap vorhanden; CI/Docker-Umschaltung = Gate 7.5b). Manuell:
+Schema: ausschließlich über Alembic (Gate 7.5b). `docker compose up` migriert vor dem Backend-Start (`alembic upgrade head` im Entrypoint). Die FastAPI-Runtime erzeugt kein Schema.
 
-```bash
-cd backend && pip install ".[persistence]"
-DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/app alembic upgrade head
-```
+**Bestehende Volumes vor 7.5b:** Wenn die DB noch per `create_all` ohne `alembic_version` angelegt wurde, einmalig neu aufsetzen (`docker compose down -v`) oder manuell `alembic stamp head` setzen — sonst schlägt `upgrade` mit „already exists“ fehl.
 
 Details: `docs/datenbankmodell.md` §4, `backend/alembic/README`.
 
@@ -73,8 +70,8 @@ docker compose down -v     # inkl. PostgreSQL-Daten (pgdata)
 ## Bewusst nicht enthalten
 
 - Frontend-Container
-- Alembic / Migrations
 - Produktions-Härtung (Secrets, TLS, Resource Limits)
 - Auth / Identity
+- Automatische Migration *innerhalb* der FastAPI-Runtime (Migration nur Entrypoint/CLI)
 
-Siehe `docs/roadmap.md` Gate 7.2 und folgende Gates.
+Siehe `docs/roadmap.md` Gate 7.5b und folgende Gates.

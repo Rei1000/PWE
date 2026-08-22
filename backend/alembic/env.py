@@ -1,7 +1,7 @@
-"""Alembic environment — Schema aus adapters.persistence.postgresql.schema (Gate 7.5a).
+"""Alembic environment — Schema aus adapters.persistence.postgresql.schema (Gate 7.5a/b).
 
-Runtime der API bleibt unverändert: App-Start nutzt weiterhin init_schema/create_all
-bis Gate 7.5b. Dieses Modul dient nur CLI-Migrationen.
+PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen.
+Die FastAPI-Runtime erzeugt oder verändert kein Datenbankschema.
 
 Optional: ALEMBIC_SCHEMA setzt search_path (Tests mit isoliertem Schema).
 """

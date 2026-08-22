@@ -13,7 +13,6 @@ from sqlalchemy.orm import sessionmaker
 from adapters.persistence.postgresql.bibliothek_repository import PostgresBibliothekRepository
 from adapters.persistence.postgresql.katalog_repository import PostgresKatalogRepository
 from adapters.persistence.postgresql.prueflauf_repository import PostgresPrueflaufRepository
-from adapters.persistence.postgresql.schema import init_schema
 from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
 from api.app import create_app
 from api.persistence import postgres_deps
@@ -31,7 +30,6 @@ def test_postgresql_http_katalog_setup_und_automatisierung():
         pytest.skip("DATABASE_URL nicht gesetzt")
 
     engine = create_engine(url, future=True)
-    init_schema(engine)
 
     kodierung = str(10_000_000_000 + uuid.uuid4().int % 9_000_000_000)
 

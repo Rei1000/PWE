@@ -9,6 +9,7 @@ from api.schemas import (
     AutomatisierungZuweisenRequest,
     AutomatisierungZuweisenResponse,
     EntwurfAnlegenRequest,
+    EntwurfDetailResponse,
     EntwurfResponse,
     ErrorResponse,
     ExternesKommandoAktualisierenRequest,
@@ -17,6 +18,10 @@ from api.schemas import (
     ExternesKommandoDetailResponse,
     ExternesKommandoListeResponse,
     ExternesKommandoListenEintragResponse,
+    ProzedurSchrittAnlegenRequest,
+    ProzedurSchrittAktualisierenRequest,
+    ProzedurSchrittEntwurfResponse,
+    ProzedurSchrittReihenfolgeRequest,
     PruefschrittVorlageAktualisierenRequest,
     PruefschrittVorlageAnlegenRequest,
     PruefschrittVorlageAnlegenResponse,
@@ -34,12 +39,17 @@ from api.schemas import (
 )
 from application.katalog.automatisierung_entfernen import AutomatisierungEntfernen
 from application.katalog.entwurf_anlegen import EntwurfAnlegen
+from application.katalog.entwurf_lesen import EntwurfLesen
 from application.katalog.externe_kommandos_listen import ExterneKommandosListen
 from application.katalog.externes_kommando_aktualisieren import ExternesKommandoAktualisieren
 from application.katalog.externes_kommando_anlegen import ExternesKommandoAnlegen
 from application.katalog.externes_kommando_lesen import ExternesKommandoLesen
 from application.katalog.externes_kommando_loeschen import ExternesKommandoLoeschen
 from application.katalog.kommando_zuweisen import KommandoProzedurSchrittZuweisen
+from application.katalog.prozedur_schritt_anlegen import ProzedurSchrittAnlegen
+from application.katalog.prozedur_schritt_aktualisieren import ProzedurSchrittAktualisieren
+from application.katalog.prozedur_schritt_loeschen import ProzedurSchrittLoeschen
+from application.katalog.prozedur_schritt_reihenfolge_aendern import ProzedurSchrittReihenfolgeAendern
 from application.katalog.pruefschritt_vorlage_aktualisieren import PruefschrittVorlageAktualisieren
 from application.katalog.pruefschritt_vorlage_anlegen import PruefschrittVorlageAnlegen
 from application.katalog.pruefschritt_vorlage_lesen import PruefschrittVorlageLesen
@@ -52,7 +62,7 @@ from application.katalog.routine_loeschen import RoutineLoeschen
 from application.katalog.routine_zuweisen import RoutineProzedurSchrittZuweisen
 from application.katalog.routinen_listen import RoutinenListen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
-from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
+from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittEntwurf
 from domain.katalog.routine import Routine
 
 router = APIRouter(prefix="/katalog", tags=["Katalog"])
@@ -390,6 +400,116 @@ def automatisierung_zuweisen(
         schritt.kommando_id,
         schritt.routine_id,
     )
+
+
+def _schritt_response(schritt: ProzedurSchrittEntwurf) -> ProzedurSchrittEntwurfResponse:
+    return ProzedurSchrittEntwurfResponse(
+        schritt_id=schritt.schritt_id,
+        vorlage_id=schritt.vorlage_id,
+        ist_pflicht=schritt.ist_pflicht,
+        reihenfolge=schritt.reihenfolge,
+        sollvorgaben=schritt.sollvorgaben,
+        kommando_id=schritt.kommando_id,
+        routine_id=schritt.routine_id,
+    )
+
+
+def _entwurf_detail_response(entwurf: Produktdefinition) -> EntwurfDetailResponse:
+    schritte = sorted(entwurf.prozedur_schritte, key=lambda s: s.reihenfolge)
+    return EntwurfDetailResponse(
+        produktdefinition_id=entwurf.produktdefinition_id,
+        produktkodierung=entwurf.produktkodierung,
+        sollbestueckung=list(entwurf.sollbestueckung),
+        prozedur_schritte=[_schritt_response(s) for s in schritte],
+    )
+
+
+@router.get(
+    "/entwuerfe/{produktdefinition_id}",
+    response_model=EntwurfDetailResponse,
+    responses={404: {"model": ErrorResponse}},
+)
+def entwurf_lesen(produktdefinition_id: str, request: Request) -> EntwurfDetailResponse:
+    deps = get_request_deps(request)
+    entwurf = EntwurfLesen(deps.katalog).execute(produktdefinition_id)
+    return _entwurf_detail_response(entwurf)
+
+
+@router.post(
+    "/entwuerfe/{produktdefinition_id}/schritte",
+    status_code=201,
+    response_model=ProzedurSchrittEntwurfResponse,
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}, 422: {"model": ErrorResponse}},
+)
+def prozedur_schritt_anlegen(
+    produktdefinition_id: str,
+    body: ProzedurSchrittAnlegenRequest,
+    request: Request,
+) -> ProzedurSchrittEntwurfResponse:
+    deps = get_request_deps(request)
+    schritt = ProzedurSchrittAnlegen(deps.katalog, deps.bibliothek).execute(
+        produktdefinition_id,
+        schritt_id=body.schritt_id,
+        vorlage_id=body.vorlage_id,
+        ist_pflicht=body.ist_pflicht,
+        sollvorgaben=body.sollvorgaben,
+    )
+    return _schritt_response(schritt)
+
+
+@router.put(
+    "/entwuerfe/{produktdefinition_id}/schritte/reihenfolge",
+    response_model=EntwurfDetailResponse,
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}, 422: {"model": ErrorResponse}},
+)
+def prozedur_schritt_reihenfolge_aendern(
+    produktdefinition_id: str,
+    body: ProzedurSchrittReihenfolgeRequest,
+    request: Request,
+) -> EntwurfDetailResponse:
+    deps = get_request_deps(request)
+    entwurf = ProzedurSchrittReihenfolgeAendern(deps.katalog).execute(
+        produktdefinition_id,
+        body.schritt_ids,
+    )
+    return _entwurf_detail_response(entwurf)
+
+
+@router.put(
+    "/entwuerfe/{produktdefinition_id}/schritte/{schritt_id}",
+    response_model=ProzedurSchrittEntwurfResponse,
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}, 422: {"model": ErrorResponse}},
+)
+def prozedur_schritt_aktualisieren(
+    produktdefinition_id: str,
+    schritt_id: str,
+    body: ProzedurSchrittAktualisierenRequest,
+    request: Request,
+) -> ProzedurSchrittEntwurfResponse:
+    deps = get_request_deps(request)
+    schritt = ProzedurSchrittAktualisieren(deps.katalog, deps.bibliothek).execute(
+        produktdefinition_id,
+        schritt_id,
+        vorlage_id=body.vorlage_id,
+        ist_pflicht=body.ist_pflicht,
+        sollvorgaben=body.sollvorgaben,
+    )
+    return _schritt_response(schritt)
+
+
+@router.delete(
+    "/entwuerfe/{produktdefinition_id}/schritte/{schritt_id}",
+    status_code=204,
+    responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
+)
+def prozedur_schritt_loeschen(
+    produktdefinition_id: str,
+    schritt_id: str,
+    request: Request,
+) -> Response:
+    deps = get_request_deps(request)
+    ProzedurSchrittLoeschen(deps.katalog).execute(produktdefinition_id, schritt_id)
+    return Response(status_code=204)
 
 
 @router.post("/entwuerfe", status_code=201, response_model=EntwurfResponse)

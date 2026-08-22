@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** **Gate 8.2b1 ✅** — **Gate 8.2b2 ⏳** (Entwurfsbearbeitung HTTP) — Gate 8.2a ✅, Gate 7 ✅, Gate 6.3 ✅
+**▶ Aktueller Stand:** **Gate 8.2b2 ✅** — **Gate 8.2c ⏳** (Katalog-Admin-UI) — Gate 8.2b1 ✅, Gate 8.2a ✅, Gate 7 ✅, Gate 6.3 ✅
 
 ---
 
@@ -192,7 +192,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 8.2a | Bibliothek-HTTP CRUD (Kommandos, Routinen, Listen) | ✅ | P2 | PR [#32](https://github.com/Rei1000/PWE/pull/32) — Merge `3956914`, [ADR-0019](adr/0019-bibliothek-http-crud.md) | 6.3a |
 | 8.2b | Vorlagen und erweiterte Entwurfsbearbeitung (gesliced) | ⏳ | P3 | 8.2a |
 | 8.2b1 | PrüfschrittVorlage: Bibliothek, Materialisierung und HTTP | ✅ | P3 | PR [#34](https://github.com/Rei1000/PWE/pull/34) — Merge `64f4735` (Feature `7905ad7`, PG-Fix `29151d1`), [ADR-0020](adr/0020-pruefschritt-vorlage-materialisierung.md) | 8.2a |
-| 8.2b2 | Erweiterte Entwurfsbearbeitung HTTP | ⏳ | P3 | 8.2b1 |
+| 8.2b2 | Erweiterte Entwurfsbearbeitung HTTP | ✅ | P3 | 8.2b1, ADR-0021 |
 | 8.2c | Katalog-Admin-UI | ⏳ | P3 | 8.2b1 |
 | 8.3 | Foto / Storage (`DateiSpeicherPort`) | ⏳ | P2 | 6.3, Ports offen |
 | 8.3a | Storage-Port und Nachweis-Integration | ⏳ | P2 | 8.3 |
@@ -290,4 +290,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.2b2 — Erweiterte Entwurfsbearbeitung HTTP** (⏳, P3): GET Entwurf; Schritt hinzufügen/bearbeiten/löschen; Reihenfolge; Pflichtstatus; Sollvorgaben — bewusst **ohne** Admin-UI (8.2c), Auth, Storage.
+**Gate 8.2b2 — Erweiterte Entwurfsbearbeitung HTTP** (✅, P3): GET Entwurf; Schritt hinzufügen/bearbeiten/löschen; Reihenfolge; Pflichtstatus; Sollvorgaben — bewusst **ohne** Admin-UI (8.2c), Auth, Storage. Siehe [ADR-0021](adr/0021-entwurfsbearbeitung-http.md).

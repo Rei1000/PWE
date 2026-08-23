@@ -108,7 +108,7 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 | `ExternesKommandoPort` | Ausführung externer Kommandos an Prüfobjekte (Run Time — nicht Katalog-Bibliothek) |
 | `ProtokollErzeugungPort` | PDF-Erzeugung aus ProtokollSnapshot |
 | `DruckPort` | Druck |
-| `DateiSpeicherPort` | Fotos, Dateien |
+| `DateiSpeicherPort` | Fotos, Dateien — Gate 8.3a ✅ ([ADR-0022](adr/0022-foto-nachweis-dateispeicher.md)) |
 
 ### Adapter
 
@@ -152,7 +152,7 @@ Technologie benennen (`com/`, `postgresql/`, `pdf/`), nicht Port-Namen.
 ## 10. Offene Architekturfragen
 
 - Synchronisation PC/Smartphone
-- Speicherstrategie für Fotos/Nachweise
+- Speicherstrategie für Fotos/Nachweise — Gate 8.3a ✅ ([ADR-0022](adr/0022-foto-nachweis-dateispeicher.md)); S3-Adapter offen
 - Mehrsprachigkeit Protokoll vs. UI
 
 Siehe auch offene Punkte in `docs/domain-model.md`.

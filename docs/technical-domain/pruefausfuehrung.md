@@ -89,9 +89,23 @@ Keine.
 
 ## Nicht im Domain-Kern (noch offen)
 
-- Fotospeicher
-
 **Schrittzentrierte Automatisierungs-API** ist der alleinige Run-Time-HTTP-Contract (Gate 7.3f / ADR-0016). Legacy-Einzelkommando-HTTP entfernt in Gate 7.4a ([ADR-0018](../adr/0018-legacy-automatisierung-exit.md)). Write Exit Gate 7.4b: neue Versionen schreiben kein `externes_kommando`; Altbestände bleiben über `aufgeloeste_materialisierte_routine()` les- und ausführbar.
+
+## Gate 8.3a — Foto-Nachweis und DateiSpeicherPort (ADR-0022)
+
+| Aspekt | Entscheidung |
+|--------|--------------|
+| Fachmodell | Foto = `NachweisArt.FOTO` mit `DateiVerweis` im Payload — kein Datei-Aggregate |
+| Port | `DateiSpeicherPort` — `speichern`, `lesen`, `loeschen` |
+| Adapter V1 | `adapters/storage/lokal.py` (Filesystem); In-Memory für Tests |
+| Konfiguration | `PWE_DATEI_STORAGE_PFAD` (absoluter Pfad; Docker-Volume) |
+| Upload-API | `POST .../schritte/{schritt_id}/nachweise/foto` (multipart) |
+| Download-API | `GET .../nachweise/{nachweis_id}/datei` — fachliche Kontextvalidierung |
+| JSON-Nachweis | `art: foto` am generischen Endpunkt **verboten** (`foto_nur_per_multipart`) |
+| Use Cases | `FotoNachweisErfassen`, `NachweisDateiLesen` |
+| Transaktion | Keine ACID FS+DB; Best-Effort-Compensation bei Persistenzfehler |
+| Persistenz | Metadaten im Prüflauf-JSON — **keine** Alembic-Migration |
+| Nicht enthalten | Auth, PDF-Fotos, HEIC, Foto-Löschen, S3, Storage Exit `externes_kommando` |
 
 **Monitoring-Baseline (Gate 7.4c):** Fachliche Beobachtung der Automatisierung über strukturierte Logs (`automatisierung_ausgefuehrt` / `automatisierung_nicht_begonnen`). Kennzahl ist `fehlgeschlagen`, nicht der HTTP-Status. Keine APM-/Metrik-Infrastruktur.
 

@@ -19,9 +19,9 @@ def test_postgres_deps_factory_wird_pro_request_aufgerufen():
 
     session_ids: list[int] = []
 
-    def tracking_factory(session):
+    def tracking_factory(session, datei_speicher):
         session_ids.append(id(session))
-        return postgres_deps(session)
+        return postgres_deps(session, datei_speicher)
 
     with TestClient(create_app(postgres_deps_factory=tracking_factory)) as client:
         assert client.get("/health").status_code == 200
@@ -37,8 +37,8 @@ def test_simulation_port_ist_pro_request_neu():
 
     port_ids: list[int] = []
 
-    def tracking_factory(session):
-        deps = postgres_deps(session)
+    def tracking_factory(session, datei_speicher):
+        deps = postgres_deps(session, datei_speicher)
         port_ids.append(id(deps.kommando_port))
         return deps
 

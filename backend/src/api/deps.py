@@ -14,8 +14,10 @@ from adapters.persistence.in_memory import (
 )
 from adapters.persistence.in_memory_abschluss import InMemoryPrueflaufAbschlussPersistenz
 from adapters.pdf.protokoll_erzeugung import PdfProtokollErzeugungAdapter
+from adapters.storage.in_memory import InMemoryDateiSpeicher
 from api.kommando_wiring import create_kommando_port
 from ports.bibliothek_repository import BibliothekRepository
+from ports.datei_speicher_port import DateiSpeicherPort
 from ports.externes_kommando_port import ExternesKommandoPort
 from ports.katalog_repository import KatalogRepository
 from ports.prueflauf_abschluss_persistenz import PrueflaufAbschlussPersistenz
@@ -33,14 +35,19 @@ class ApiDeps:
     abschluss_persistenz: PrueflaufAbschlussPersistenz
     erzeugung_port: ProtokollErzeugungPort
     kommando_port: ExternesKommandoPort
+    datei_speicher: DateiSpeicherPort
 
 
-def in_memory_deps() -> ApiDeps:
+def in_memory_deps(
+    *,
+    datei_speicher: InMemoryDateiSpeicher | None = None,
+) -> ApiDeps:
     """Explizites In-Memory-Wiring für Entwicklung, Tests und CI ohne PostgreSQL."""
     katalog = InMemoryKatalogRepository()
     bibliothek = InMemoryBibliothekRepository()
     prueflauf_repo = InMemoryPrueflaufRepository()
     protokoll_repo = InMemoryProtokollRepository()
+    storage = datei_speicher or InMemoryDateiSpeicher()
     return ApiDeps(
         katalog=katalog,
         bibliothek=bibliothek,
@@ -52,6 +59,7 @@ def in_memory_deps() -> ApiDeps:
         ),
         erzeugung_port=PdfProtokollErzeugungAdapter(),
         kommando_port=create_kommando_port(),
+        datei_speicher=storage,
     )
 
 

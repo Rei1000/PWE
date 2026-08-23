@@ -25,3 +25,4 @@ Langfristig relevante Architekturentscheidungen. Fachdomäne: `docs/domain-model
 | [0019](0019-bibliothek-http-crud.md) | Bibliothek-HTTP CRUD — Kommandos, Routinen, Automatisierung (Gate 8.2a) |
 | [0020](0020-pruefschritt-vorlage-materialisierung.md) | PrüfschrittVorlage — Bibliothek und Materialisierung (Gate 8.2b1) |
 | [0021](0021-entwurfsbearbeitung-http.md) | Erweiterte Entwurfsbearbeitung HTTP (Gate 8.2b2) |
+| [0022](0022-foto-nachweis-dateispeicher.md) | Foto-Nachweis und DateiSpeicherPort (Gate 8.3a) |

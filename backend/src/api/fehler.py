@@ -20,7 +20,14 @@ def domain_error_code(exc: DomainError) -> str:
 def http_status_for_domain_error(exc: DomainError) -> int:
     if isinstance(exc, InvariantViolation):
         return 409
-    if type(exc).__name__.endswith("NichtGefunden"):
+    name = type(exc).__name__
+    if name == "UngueltigerDateityp":
+        return 415
+    if name == "DateiZuGross":
+        return 413
+    if name == "DateiSpeicherungFehlgeschlagen":
+        return 503
+    if name.endswith("NichtGefunden") or name == "NachweisKeinFoto":
         return 404
     return 409
 
@@ -41,6 +48,16 @@ def oeffentliche_fehlermeldung(exc: DomainError) -> str:
         return "Die Routine wird noch referenziert und kann nicht gelöscht werden."
     if name == "VorlageInVerwendung":
         return "Die PrüfschrittVorlage wird noch referenziert und kann nicht gelöscht werden."
+    if name == "FotoNurPerMultipart":
+        return "Foto-Nachweise werden ausschließlich über den Multipart-Endpunkt erfasst."
+    if name == "UngueltigerDateityp":
+        return "Der Dateityp wird nicht unterstützt."
+    if name == "DateiZuGross":
+        return "Die Datei ist zu groß."
+    if name == "DateiSpeicherungFehlgeschlagen":
+        return "Die Datei konnte nicht gespeichert werden."
+    if name == "NachweisKeinFoto":
+        return "Der Nachweis ist kein Foto-Nachweis."
     if name.endswith("NichtGefunden"):
         return "Die angeforderte Ressource wurde nicht gefunden."
     return "Die Anfrage konnte aus fachlichen Gründen nicht verarbeitet werden."

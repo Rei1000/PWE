@@ -34,8 +34,9 @@ Leitprinzipien:
 
 | Akteur / System | Rolle |
 |-----------------|-------|
-| Prüfer (PC) | Prüfungsdurchführung und Konfiguration (Admin) |
-| Prüfer (Smartphone) | Parallele Prüfungsbegleitung |
+| Prüfer (PC) | Prüfungsdurchführung (Rollenmodell Identity; Qualifikation erforderlich) |
+| Administrator / QM / Abteilungsleiter | Katalog- und/oder Benutzerverwaltung gemäß Systemrollen ([ADR-0025](adr/0025-authorization.md)) |
+| Prüfer (Smartphone) | Parallele Prüfungsbegleitung (V2+) |
 | Externes Prüfobjekt | Über Adapter angebunden (erste Anwendung: COM) |
 | Drucker | Ausgabe von ProtokollSnapshots (PDF) |
 | PostgreSQL | Persistenz; Schema ausschließlich über Alembic (Gate 7.5 ✅) |
@@ -52,7 +53,7 @@ Leitprinzipien:
 | **Katalog** | Design Time | Produktdefinition, ProduktdefinitionsVersion, Bibliothek, Sollvorgaben, Sollbestückung, Aktivierungsregeln |
 | **Prüfausführung** | Run Time | Prüflauf, PrüfschrittDurchführung, Nachweise, Beurteilungen, Routine-Orchestrierung |
 | **Protokoll** | Post-Run Time | ProtokollSnapshot, Archiv |
-| **Identity** | Querschnitt | Benutzer, Rollen, Prüferpräferenzen |
+| **Identity** | Querschnitt | Benutzer, Systemrollen, Berechtigungsprofile, Einweisungsnachweise, Prüferpräferenzen ([ADR-0023](adr/0023-identity-bounded-context.md)) |
 | **Auswertung** | Read Model | Dashboard, Statistiken |
 
 **Kein eigener Context:** Gerätekommunikation — erfolgt über `ExternesKommandoPort` und Adapter (z. B. `com/`).
@@ -70,7 +71,9 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 | **Katalog** | Produktdefinition, ProduktdefinitionsVersion, Prüfprozedur, ProzedurSchritt, PrüfschrittVorlage, Routine, Externes Kommando | Entwurf änderbar; Version unveränderlich |
 | **Prüfausführung** | Prüflauf | Referenz auf ProduktdefinitionsVersion; enthält PrüfschrittDurchführungen und Nachweise |
 | **Protokoll** | ProtokollSnapshot | Unveränderlich nach Erstellung |
-| **Identity** | Benutzer | Rollen und Präferenzen |
+| **Identity** | Benutzer, Berechtigungsprofil, Einweisungsnachweis | Rollen, Profile↔Produktdefinition-IDs, Einweisung↔Versions-IDs; nur ID-Referenzen zu Katalog |
+
+**Context-Grenzen Identity:** Identity besitzt die Zuordnung **Profil ↔ Produktdefinition**. Zwischen Identity, Katalog, Prüfausführung und Protokoll nur **IDs** — **keine Domain-Imports** zwischen den Contexts ([ADR-0023](adr/0023-identity-bounded-context.md)). Authentifizierung V1: Session-Cookie ([ADR-0024](adr/0024-authentication-v1.md)); Qualifikation: [ADR-0026](adr/0026-qualification-model.md).
 
 **Keine eigenständigen Wurzeln:** Einzelne Nachweise, Beurteilungen — Teil von PrüfschrittDurchführung bzw. Prüflauf.
 
@@ -96,19 +99,20 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 - **Katalog:** Produktdefinition, ProduktdefinitionsVersion, Basisprodukt, Option, Kundenprofil, Prüfprozedur, ProzedurSchritt, PrüfschrittVorlage, Routine, Sollvorgabe, Sollbestückung, Aktivierungsregel, ExternesKommando.
 - **Prüfausführung:** Prüflauf, PrüfschrittDurchführung, Nachweis, Beurteilung, Pflichtschritt-Regeln, Routine-Ausführung.
 - **Protokoll:** ProtokollSnapshot, Archiv-Invarianten.
-- **Identity:** Rollen, Berechtigungen, Prüferpräferenzen.
+- **Identity:** Benutzer, Systemrollen, Berechtigungsprofile, Einweisungsnachweise, Prüferpräferenzen.
 
 ### Ports
 
 | Port | Verantwortung |
 |------|---------------|
 | `KatalogRepository` | Persistenz Katalog (Entwurf, Version) |
-| `BibliothekRepository` | Facade für Bibliotheksobjekte im Katalog (Gate 7.3a: `ExternesKommando`; später Routine, PrüfschrittVorlage) |
+| `BibliothekRepository` | Facade für Bibliotheksobjekte im Katalog (`ExternesKommando`, Routine, PrüfschrittVorlage) |
 | `PrueflaufRepository` | Persistenz Prüfläufe |
 | `ExternesKommandoPort` | Ausführung externer Kommandos an Prüfobjekte (Run Time — nicht Katalog-Bibliothek) |
 | `ProtokollErzeugungPort` | PDF-Erzeugung aus ProtokollSnapshot |
-| `DruckPort` | Druck |
+| `DruckPort` | Druck (zukünftig; Gate 8.4 nutzt Browser-PDF-Viewer, kein DruckPort) |
 | `DateiSpeicherPort` | Fotos, Dateien — Gate 8.3a ✅ ([ADR-0022](adr/0022-foto-nachweis-dateispeicher.md)) |
+| Identity-Repositories / Session-Ports | Benutzer, Profile, Einweisungen, Session — Gate 8.1 ([ADR-0023](adr/0023-identity-bounded-context.md), [ADR-0024](adr/0024-authentication-v1.md)); Implementierung ab 8.1a |
 
 ### Adapter
 

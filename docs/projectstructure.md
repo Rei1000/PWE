@@ -2,7 +2,7 @@
 
 Ordnerstruktur orientiert sich an **`docs/architecture.md`**; Fachbegriffe gemäß **`docs/domain-model.md`**.
 
-**Stand:** Gate 7 ✅ — Domain, Application, Ports, Adapter, API; PostgreSQL-Schema ausschließlich via Alembic; Identity und Auswertung sind Platzhalter.
+**Stand:** Gate 8.2–8.4 ✅ (Katalog-Admin, Foto/Storage, Browser-PDF); Gate **8.1 Identity & Qualification** geplant — ADRs [0023](adr/0023-identity-bounded-context.md)–[0027](adr/0027-authenticated-pruefer-id.md) angenommen, Implementierung ab **8.1a**. PostgreSQL-Schema ausschließlich via Alembic. Auswertung bleibt Platzhalter.
 
 ---
 
@@ -25,6 +25,8 @@ Ordnerstruktur orientiert sich an **`docs/architecture.md`**; Fachbegriffe gemä
 Fachliche Objekte im Katalog (Orientierung): Produktdefinition, ProduktdefinitionsVersion, Basisprodukt, Option, Kundenprofil, Prüfprozedur, ProzedurSchritt, PrüfschrittVorlage, Routine, Externes Kommando.
 
 Fachliche Objekte in der Prüfausführung: Prüflauf, PrüfschrittDurchführung, Nachweis, Beurteilung.
+
+Fachliche Objekte in Identity (Orientierung, ADR-0023): Benutzer, Systemrollen, Berechtigungsprofil, Einweisungsnachweis; Profil↔Produktdefinition und Einweisung↔Version nur über IDs.
 
 ---
 
@@ -56,8 +58,13 @@ backend/
 │   │   ├── katalog/              # Produktdefinition, Version, Bibliothek
 │   │   ├── pruefausfuehrung/     # Prüflauf, PrüfschrittDurchführung, Nachweis
 │   │   ├── protokoll/            # ProtokollSnapshot
-│   │   └── identity/
+│   │   └── identity/             # Benutzer, Profile, Einweisungen (Gate 8.1; ADRs 0023–0027)
 │   ├── application/
+│   │   ├── katalog/
+│   │   ├── pruefausfuehrung/
+│   │   ├── protokoll/
+│   │   ├── identity/             # Login, Qualifikation, Verwaltung (ab 8.1a–c)
+│   │   └── auswertung/           # Platzhalter Gate 9
 │   ├── ports/
 │   ├── adapters/
 │   │   ├── persistence/postgresql/
@@ -85,6 +92,7 @@ frontend/
 
 - `domain/katalog` — Konfigurations-Fachlogik; keine Protokoll- oder DB-Details.
 - `domain/pruefausfuehrung` — Prüflauf, Nachweise, Beurteilungen; externe Kommandos nur über Ports.
+- `domain/identity` — Benutzer, Rollen, Profile, Einweisungen; keine Katalog-Fachobjekte (nur IDs).
 - `adapters/com/` — technische Implementierung von `ExternesKommandoPort`.
 - `adapters/storage/` — `DateiSpeicherPort`-Implementierungen (Gate 8.3a).
 - Ergometer-Begriffe nur in Konfigurationsdaten, nicht in Modulnamen.
@@ -95,3 +103,4 @@ frontend/
 
 - Interne Aufteilung von `domain/katalog/` bei wachsender Komplexität.
 - Mobile-Technologie (responsive Web vs. native/hybrid).
+- Konkrete Datei-/Modulaufteilung unter `domain/identity/` mit Gate 8.1a.

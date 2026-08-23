@@ -74,7 +74,7 @@ docker compose down -v     # inkl. PostgreSQL-Daten (pgdata) und Datei-Storage (
 
 - Frontend-Container
 - Produktions-Härtung (Secrets, TLS, Resource Limits)
-- Auth / Identity
 - Automatische Migration *innerhalb* der FastAPI-Runtime (Migration nur Entrypoint/CLI)
+- Identity-Runtime (Login/Session) — Architektur in ADR-0023–0027; Implementierung ab Gate **8.1a**
 
-Siehe `docs/roadmap.md` — Gate 8.3a ✅; nächster Slice Gate 8.3b.
+Siehe `docs/roadmap.md` — Gate 8.2–8.4 ✅; nächster Slice **Gate 8.1a Identity Foundation**.

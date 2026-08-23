@@ -72,6 +72,7 @@ PostgreSQL-Schemaänderungen erfolgen ausschließlich über Alembic-Migrationen.
 | Quelle | `adapters.persistence.postgresql.schema.Base` |
 | Initialmigration | `alembic/versions/0001_initial_schema.py` |
 | Gate 8.2b1 | `alembic/versions/0002_pruefschritt_vorlage.py` — Tabelle `pruefschritt_vorlage`; Version-Payload optional `materialisierte_vorlage` |
+| Gate 8.1b | `alembic/versions/0004_qualification_engine.py` — Tabellen `berechtigungsprofil`, `profil_produktdefinition`, `benutzer_profil`, `einweisungsnachweis` (Feature-Branch) |
 | CLI / lokal | `cd backend && DATABASE_URL=… alembic upgrade head` |
 | Docker | Entrypoint: `alembic upgrade head` → uvicorn |
 | CI | Step `alembic upgrade head` vor pytest |

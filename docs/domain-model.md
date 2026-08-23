@@ -368,7 +368,7 @@ PWE beginnt fachlich beim **Qualitätsprozess**. Produktionsprozesse (Kundenauft
 | **Zweck** | Fachlicher Nachweis, dass ein Benutzer eine konkrete **ProduktdefinitionsVersion** prüfen darf. |
 | **Mindestinhalt** | Benutzer, Version, eingewiesen durch, Datum, optional gültig bis, Status, Bemerkung. |
 | **Beziehungen** | Bezieht sich auf eine veröffentlichte ProduktdefinitionsVersion. Ownership: Identity. |
-| **Invarianten** | Start eines Prüflaufs nur mit gültiger Einweisung für die aktive Version (zusätzlich Profil und Prüfer-Rolle). |
+| **Invarianten** | Start eines Prüflaufs nur mit gültiger Einweisung für die aktive Version (zusätzlich Profil und Prüfer-Rolle). **Implementierungsstand:** Domain/Application/HTTP für Profile und Einweisungen in Gate **8.1b** (Feature-Branch); Verwaltungs-UI Gate **8.1c**. |
 
 ---
 

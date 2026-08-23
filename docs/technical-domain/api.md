@@ -344,6 +344,21 @@ Unter `/identity` (Session erforderlich; Rollen je Endpoint). **Keine Admin-UI**
 
 **Identity-Lesematrix:** Benutzer/Profile/Einweisungen lesen — Administrator, QM, Abteilungsleiter; **Prüfer** ❌. Audit und Login-Metadaten nur Administrator ([ADR-0025](../adr/0025-authorization.md)).
 
+### Bekannte API-Einschränkung: Benutzer ↔ Berechtigungsprofil (Gate 8.1c2, P2)
+
+Für die Zuordnung **Benutzer ↔ Berechtigungsprofil** existieren Write-Operationen (`PUT`/`DELETE` `/identity/profile/{profil_id}/benutzer/{benutzer_id}`), aber **kein dedizierter Read-Endpunkt**, über den die UI beim ersten Laden die bestehenden Profilzuordnungen eines Benutzers vollständig abrufen kann.
+
+| Aspekt | Einordnung |
+|--------|------------|
+| Backend | Bleibt fachliche Source of Truth für Zuweisen und Entfernen |
+| UI (Gate 8.1c2) | `sessionStorage` nur als **temporärer UX-Cache** für in der aktuellen Sitzung vorgenommene Zuordnungsänderungen |
+| Erstes Laden | Bestehende serverseitige Zuordnungen sind in der UI **nicht vollständig rekonstruierbar** |
+| Security | Kein Security-Problem — Zuweisung/Entfernen bleibt serverseitig autorisiert |
+| Architektur | Kein Architekturbruch |
+| Gate 8.1c2 | **Kein Merge-Blocker** — bekannte API-/UX-Einschränkung |
+
+**Mögliche spätere Verbesserung (noch kein verbindliches Design):** dedizierter Read-Contract, z. B. Benutzer-Detail inklusive `profil_ids` oder eigener Read-Endpunkt für Benutzer↔Profile.
+
 **Passwort:**
 
 | Endpoint | Zweck |

@@ -38,12 +38,14 @@ describe("LoginPage", () => {
   });
 
   it("meldet an und navigiert zur Startseite", async () => {
-    vi.mocked(authApi.login).mockResolvedValue({
+    vi.mocked(authApi.login).mockResolvedValue();
+    vi.mocked(authApi.fetchMe).mockResolvedValue({
       benutzer_id: "u1",
       login: "admin",
       anzeigename: "Administrator",
       status: "aktiv",
       rollen: ["administrator"],
+      passwortwechsel_erforderlich: false,
     });
     renderLogin();
     fireEvent.change(screen.getByLabelText("Login"), { target: { value: "admin" } });
@@ -53,6 +55,7 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Anmelden" }));
     await waitFor(() => {
       expect(authApi.login).toHaveBeenCalledWith("admin", "admin-change-me");
+      expect(authApi.fetchMe).toHaveBeenCalled();
     });
     expect(await screen.findByText("Start")).toBeTruthy();
   });

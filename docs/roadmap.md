@@ -353,6 +353,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.1c2 — Identity Administration UI** ⏳ (Frontend für Benutzer-/Profil-/Einweisungsverwaltung und Force-Change; P2). Gate **8.1a/8.1b/8.1c1** ✅.
+**Gate 8.1c2 — Identity Administration UI** ⏳ (PR [#55](https://github.com/Rei1000/PWE/pull/55); Frontend für Benutzer-/Profil-/Einweisungsverwaltung und Force-Change). Gate **8.1a/8.1b/8.1c1** ✅.
+
+**Bekannte Einschränkung (P2, kein Merge-Blocker):** Benutzer↔Berechtigungsprofil — Write-APIs vorhanden, kein Read-Endpunkt für vollständige Zuordnungsliste beim ersten UI-Laden; `sessionStorage` nur als Sitzungs-UX-Cache. Details: [`docs/technical-domain/api.md`](technical-domain/api.md) § Bekannte API-Einschränkung.
 
 Reihenfolge: **8.1a ✅ → 8.1b ✅ → 8.1c1 ✅ → 8.1c2**. Gate 8.1c (Gesamtfeature) bleibt 🔄 bis 8.1c2 abgeschlossen. Gate 8.2–8.4 bleiben ✅. Gate 9 bleibt ⏸ bis nach Gate 8.1. Offene Follow-ups (Storage Exit, PDF-Fotoeinbettung, Foto-Löschen, S3, …) bleiben P2 und sind **kein** Ersatz für 8.1c2.

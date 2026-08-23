@@ -89,11 +89,11 @@ Design-Time-Editor für Produktdefinitions-Entwürfe — **kein** Prüflaufstart
 - Publish erzeugt neue Version (`version_id`); Entwurf bleibt bearbeitbar
 - Hoch/Runter-Reihenfolge — kein Drag-and-Drop
 
-### Identity Administration (Gate 8.1c1 Backend / 8.1c2 UI)
+### Identity Administration (Gate 8.1c2)
 
-Das **Backend** für Benutzerverwaltung, Passwort/Force-Change, Profile aktiv/inaktiv, Einweisungen und Audit ist vollständig über `/identity/*` und `/auth/*` verfügbar ([`docs/technical-domain/api.md`](../../docs/technical-domain/api.md)).
+Verwaltungs-UI unter `/verwaltung` (Benutzer, Profile, Einweisungen) — nur für Administrator, QM und Abteilungsleiter sichtbar; Force-Change über `/passwort-aendern`. Details: [`docs/technical-domain/api.md`](../../docs/technical-domain/api.md).
 
-**Frontend-Administration folgt in Gate 8.1c2** — aktuell keine UI für Benutzerliste, Rollen, Status, Passwort-Reset oder Audit. Force-Change-Flow im Frontend ist ebenfalls noch nicht implementiert; das Backend erzwingt `passwortwechsel_erforderlich` serverseitig.
+**Bekannte Einschränkung (P2, kein Merge-Blocker):** Für Benutzer↔Berechtigungsprofil gibt es Write-APIs (Zuweisen/Entfernen), aber keinen Read-Endpunkt für bestehende Zuordnungen beim ersten Laden. Die UI nutzt `sessionStorage` ausschließlich als temporären UX-Cache für Änderungen in der aktuellen Sitzung. Das Backend bleibt Source of Truth; keine Security-Lücke. Mögliche spätere Verbesserung: dedizierter Read-Contract (z. B. Benutzer-Detail mit `profil_ids`).
 
 Katalog- und Prüflauf-UI erfordern eine gültige Session (Gate 8.1a); Qualifikation beim Prüflauf-Start (Gate 8.1b).
 

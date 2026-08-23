@@ -10,27 +10,16 @@ export const meSchema = z.object({
   anzeigename: z.string(),
   status: z.string(),
   rollen: z.array(z.string()),
+  passwortwechsel_erforderlich: z.boolean().default(false),
 });
 
 export type MeResponse = z.infer<typeof meSchema>;
 
-const loginResponseSchema = meSchema
-  .omit({ status: true })
-  .extend({ csrf_token: z.string() });
-
-export async function login(loginName: string, passwort: string): Promise<MeResponse> {
-  const data = await apiPost<unknown>("/auth/login", {
+export async function login(loginName: string, passwort: string): Promise<void> {
+  await apiPost<unknown>("/auth/login", {
     login: loginName,
     passwort,
   });
-  const parsed = loginResponseSchema.parse(data);
-  return {
-    benutzer_id: parsed.benutzer_id,
-    login: parsed.login,
-    anzeigename: parsed.anzeigename,
-    status: "aktiv",
-    rollen: parsed.rollen,
-  };
 }
 
 export async function logout(): Promise<void> {
@@ -40,4 +29,14 @@ export async function logout(): Promise<void> {
 export async function fetchMe(): Promise<MeResponse> {
   const data = await apiGet<unknown>("/auth/me");
   return meSchema.parse(data);
+}
+
+export async function changePassword(
+  altesPasswort: string,
+  neuesPasswort: string,
+): Promise<void> {
+  await apiPost<unknown>("/auth/passwort", {
+    altes_passwort: altesPasswort,
+    neues_passwort: neuesPasswort,
+  });
 }

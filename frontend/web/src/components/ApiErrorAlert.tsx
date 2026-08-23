@@ -1,5 +1,6 @@
 import { AlertCircle } from "lucide-react";
 
+import { identityErrorMessage } from "@/lib/identityErrors";
 import { katalogErrorMessage } from "@/lib/katalogErrors";
 import { prueflaufErrorMessage } from "@/lib/prueflaufErrors";
 
@@ -12,7 +13,9 @@ export function ApiErrorAlert({ error }: ApiErrorAlertProps) {
 
   const message =
     prueflaufErrorMessage(error) ??
-    katalogErrorMessage(error);
+    katalogErrorMessage(error) ??
+    identityErrorMessage(error) ??
+    (error instanceof Error ? error.message : "Unbekannter Fehler");
 
   return (
     <div

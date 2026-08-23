@@ -8,6 +8,6 @@ describe("KatalogSetupBanner", () => {
     render(<KatalogSetupBanner />);
     const banner = screen.getByTestId("katalog-setup-banner");
     expect(banner.textContent).toContain("Katalog-Setup / Laborbetrieb");
-    expect(screen.getByText(/ohne Authentifizierung/i)).toBeDefined();
+    expect(screen.getByText(/Anmeldung erforderlich/i)).toBeDefined();
   });
 });

@@ -6,8 +6,8 @@ export function KatalogSetupBanner() {
     >
       <p className="font-medium">Katalog-Setup / Laborbetrieb</p>
       <p className="mt-1 text-muted-foreground">
-        Design-Time-Verwaltung ohne Authentifizierung — nur für vertrauenswürdige Laborumgebungen
-        (ADR-0001).
+        Design-Time-Verwaltung — Anmeldung erforderlich; Rollen- und Qualifikationsregeln folgen in
+        Gate 8.1b (ADR-0001 / ADR-0025).
       </p>
     </div>
   );

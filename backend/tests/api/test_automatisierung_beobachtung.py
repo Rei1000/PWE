@@ -69,7 +69,6 @@ def _start_prueflauf(client: TestClient) -> str:
         json={
             "produktkodierung": "1234567890",
             "pruefobjekt_kennung": "GER-MON",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert response.status_code == 201
@@ -186,3 +185,4 @@ def test_api_vorbedingungsfehler_beobachtung_nicht_begonnen(caplog: pytest.LogCa
     assert "ausfuehrung_begonnen=false" in messages[0]
     assert "http_status=404" in messages[0]
     assert EVENT_AUSGEFUEHRT not in " ".join(r.getMessage() for r in caplog.records)
+from tests.support.auth import login_as_admin

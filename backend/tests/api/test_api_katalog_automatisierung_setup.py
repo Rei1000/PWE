@@ -110,7 +110,6 @@ def test_http_e2e_setup_und_automatisierung_ausfuehren(client: TestClient):
         json={
             "produktkodierung": kodierung,
             "pruefobjekt_kennung": "GER-E2E-63A",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert start.status_code == 201
@@ -345,3 +344,4 @@ def test_zuweisung_extra_feld_422(client: TestClient):
         json={"kommando_id": "x", "adapter": "com"},
     )
     assert response.status_code == 422
+from tests.support.auth import login_as_admin

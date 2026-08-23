@@ -15,7 +15,9 @@ Gate 8.2: Dieses Script ersetzt keine Katalog-Administration.
 from __future__ import annotations
 
 import argparse
+import http.cookiejar
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
@@ -30,8 +32,6 @@ DEMO_KOMMANDOCODE = "DEMO_MESSWERT"
 DEMO_SOLLBESTUECKUNG = ["komponente-a"]
 DEMO_SOLLVORGABEN = {"messwert": {"min": 1, "max": 100}}
 DEMO_PRUEFOBJEKT = "DEMO-OBJ-1"
-DEMO_PRUEFER = "demo-pruefer"
-
 DEFAULT_API_BASE = "http://127.0.0.1:8000"
 
 
@@ -43,20 +43,28 @@ class SeedStepError(Exception):
         self.code = code
 
 
+_COOKIE_JAR = http.cookiejar.CookieJar()
+_OPENER = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(_COOKIE_JAR))
+_CSRF_TOKEN: str | None = None
+
+
 def _request(
     method: str,
     url: str,
     *,
     body: dict[str, Any] | None = None,
 ) -> tuple[int, Any]:
+    global _CSRF_TOKEN
     data = None
     headers = {"Accept": "application/json"}
     if body is not None:
         data = json.dumps(body).encode("utf-8")
         headers["Content-Type"] = "application/json"
+    if method.upper() not in {"GET", "HEAD", "OPTIONS"} and _CSRF_TOKEN:
+        headers["X-CSRF-Token"] = _CSRF_TOKEN
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=60) as resp:
+        with _OPENER.open(req, timeout=60) as resp:
             raw = resp.read().decode("utf-8")
             payload: Any = json.loads(raw) if raw else None
             return resp.status, payload
@@ -95,7 +103,17 @@ def _step(name: str, method: str, url: str, body: dict[str, Any] | None = None) 
 
 
 def seed_demo(*, api_base: str, start_prueflauf: bool = True) -> dict[str, str]:
+    global _CSRF_TOKEN
     base = api_base.rstrip("/")
+    login = os.environ.get("PWE_SEED_ADMIN_LOGIN", "admin")
+    password = os.environ.get("PWE_SEED_ADMIN_PASSWORD", "admin-change-me")
+    login_resp = _step(
+        "Login",
+        "POST",
+        f"{base}/auth/login",
+        {"login": login, "passwort": password},
+    )
+    _CSRF_TOKEN = login_resp.get("csrf_token")
 
     kommando = _step(
         "Kommando anlegen",
@@ -155,7 +173,6 @@ def seed_demo(*, api_base: str, start_prueflauf: bool = True) -> dict[str, str]:
             {
                 "produktkodierung": DEMO_PRODUKTKODIERUNG,
                 "pruefobjekt_kennung": DEMO_PRUEFOBJEKT,
-                "pruefer_id": DEMO_PRUEFER,
             },
         )
         prueflauf_id = prueflauf["prueflauf_id"]

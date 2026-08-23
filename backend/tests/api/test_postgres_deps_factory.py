@@ -48,3 +48,4 @@ def test_simulation_port_ist_pro_request_neu():
 
     assert len(port_ids) == 2
     assert port_ids[0] != port_ids[1]
+from tests.support.auth import login_as_admin

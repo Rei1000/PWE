@@ -90,7 +90,6 @@ def test_postgresql_http_katalog_setup_und_automatisierung():
             json={
                 "produktkodierung": kodierung,
                 "pruefobjekt_kennung": "GER-PG-63A",
-                "pruefer_id": "pruefer-pg",
             },
         )
         assert start.status_code == 201
@@ -111,3 +110,4 @@ def test_postgresql_http_katalog_setup_und_automatisierung():
     assert schritt is not None
     assert schritt.materialisierte_routine is not None
     assert schritt.materialisierte_routine.herkunft == MaterialisierteRoutineHerkunft.EINZELKOMMANDO
+from tests.support.auth import login_as_admin

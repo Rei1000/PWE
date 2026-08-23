@@ -64,7 +64,6 @@ def _start_prueflauf(client: TestClient, *, produktkodierung: str = "1234567890"
         json={
             "produktkodierung": produktkodierung,
             "pruefobjekt_kennung": "GER-FOTO",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert response.status_code == 201
@@ -219,3 +218,4 @@ def test_postgresql_abschluss_mit_foto_snapshot_nur_nachweis_id(pg_client: TestC
     abschluss = pg_client.post(f"/prueflaeufe/{prueflauf_id}/abschluss")
     assert abschluss.status_code == 200
     assert "snapshot_id" in abschluss.json()
+from tests.support.auth import login_as_admin

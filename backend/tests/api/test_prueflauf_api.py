@@ -47,7 +47,6 @@ def test_api_prueflauf_happy_path_mit_pdf(client: TestClient):
         json={
             "produktkodierung": "1234567890",
             "pruefobjekt_kennung": "GER-800",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert start.status_code == 201
@@ -84,9 +83,9 @@ def test_api_start_ohne_version_404(client: TestClient):
         json={
             "produktkodierung": "UNKNOWN",
             "pruefobjekt_kennung": "GER-1",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert response.status_code == 404
     body = response.json()
     assert body["code"] == "version_nicht_gefunden"
+from tests.support.auth import login_as_admin

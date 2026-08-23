@@ -63,3 +63,4 @@ def test_postgresql_entwurf_bearbeitung_und_publish():
         get = client.get(f"/katalog/entwuerfe/{pd_id}")
         assert get.status_code == 200
         assert get.json()["prozedur_schritte"] == []
+from tests.support.auth import login_as_admin

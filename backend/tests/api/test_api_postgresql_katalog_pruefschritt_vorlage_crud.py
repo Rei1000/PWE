@@ -66,7 +66,7 @@ def test_postgresql_pruefschritt_vorlage_crud_und_version_snapshot(pg_api_client
         json={
             "produktkodierung": kodierung,
             "pruefobjekt_kennung": "PG-OBJ",
-            "pruefer_id": "pg",
         },
     )
     assert start.status_code == 201
+from tests.support.auth import login_as_admin

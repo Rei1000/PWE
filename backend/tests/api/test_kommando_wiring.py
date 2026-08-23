@@ -192,3 +192,4 @@ def test_create_app_start_fails_on_invalid_com_config(monkeypatch):
         with TestClient(create_app()):
             pass
 
+from tests.support.auth import login_as_admin

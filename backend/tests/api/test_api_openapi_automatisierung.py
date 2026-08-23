@@ -91,3 +91,4 @@ def test_openapi_ergebnis_schema_felder():
         "fehlerart",
         "nachweise",
     } <= required
+from tests.support.auth import login_as_admin

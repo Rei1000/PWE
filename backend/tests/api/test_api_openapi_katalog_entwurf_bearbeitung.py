@@ -40,3 +40,4 @@ def test_openapi_schritt_aktualisieren_ohne_automatisierung():
     props = spec["components"]["schemas"][name].get("properties", {})
     assert "kommando_id" not in props
     assert "routine_id" not in props
+from tests.support.auth import login_as_admin

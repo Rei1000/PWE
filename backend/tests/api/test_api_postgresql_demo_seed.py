@@ -75,7 +75,6 @@ def test_postgresql_http_demo_seed_und_automatisierung(monkeypatch):
             json={
                 "produktkodierung": KODIERUNG,
                 "pruefobjekt_kennung": "DEMO-OBJ-PG",
-                "pruefer_id": "demo-pruefer",
             },
         )
         assert start.status_code == 201
@@ -104,3 +103,4 @@ def test_postgresql_http_demo_seed_und_automatisierung(monkeypatch):
         assert len(nachweise) >= 1
 
     reset_kommando_adapter_cache_for_tests()
+from tests.support.auth import login_as_admin

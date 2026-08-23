@@ -9,7 +9,7 @@ dependencies = []
 dev = ["pytest>=8.0"]
 persistence = ["sqlalchemy>=2.0", "psycopg[binary]>=3.1", "alembic>=1.13"]
 pdf = ["fpdf2>=2.7"]
-api = ["fastapi>=0.115", "uvicorn[standard]>=0.30", "httpx>=0.27"]
+api = ["fastapi>=0.115", "uvicorn[standard]>=0.30", "httpx>=0.27", "python-multipart>=0.0.9"]
 com = ["pyserial>=3.5"]
 
 [tool.pytest.ini_options]

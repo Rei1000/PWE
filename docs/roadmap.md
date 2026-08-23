@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** **Gate 8.3 ✅** — **Gate 8.4 ⏳** (Druck-Adapter) — Gate 8.2 ✅, Gate 7 ✅, Gate 6.3 ✅; Gate 8.1 Auth ⏸
+**▶ Aktueller Stand:** **Gate 8 ✅** — Gate 8.1 Auth ⏸ (deferred); Gate 9 ⏸ — Gate 7 ✅, Gate 6.3 ✅
 
 ---
 
@@ -182,7 +182,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ---
 
-## Gate 8 — V1-Erweiterung ⏳
+## Gate 8 — V1-Erweiterung ✅
 
 **Neu priorisiert (2026-07-14):** Solange [ADR-0001](adr/0001-v1-scope-deferrals.md) und Einzel-PC-Laborbetrieb gelten, **Katalog-Admin vor Auth**, Foto/Storage getrennt, Auth vor echtem Mehrbenutzerbetrieb.
 
@@ -199,7 +199,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 8.3 | Foto / Storage (`DateiSpeicherPort`) | ✅ | P2 | 8.3a, 8.3b |
 | 8.3a | Storage-Port und Nachweis-Integration | ✅ | P2 | PR [#42](https://github.com/Rei1000/PWE/pull/42) — Merge `f6cb6a0` (Feature `ba1ed79`, Fix `a61235c`, `e6f1f27`), [ADR-0022](adr/0022-foto-nachweis-dateispeicher.md) | 8.3 |
 | 8.3b | Frontend Foto-Upload | ✅ | P3 | PR [#44](https://github.com/Rei1000/PWE/pull/44) — Merge `2f874c0` (Feature `4df576f`, Fix `9d80632`) | 8.3a |
-| 8.4 | Druck-Adapter (`DruckPort`) | ⏳ | P3 | PDF vorhanden (Gate 5.5) |
+| 8.4 | Protokoll öffnen / Browserdruck (PDF-Viewer) | ✅ | P3 | PR [#46](https://github.com/Rei1000/PWE/pull/46) — Merge `3f5b0e8` (Feature `d2c02d4`, Fix `ce78f1e`) | PDF vorhanden (Gate 5.5) |
 | 8.1 | Identity / Auth (Middleware, Rollen) | ⏸ | P2 | Vor echtem Mehrbenutzerbetrieb; nach 8.2a empfohlen |
 
 ### Roadmap-Anpassung (2026-08-22) — Gate 8.2b Zerlegung
@@ -264,6 +264,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-23 | Gate 8.4 abgeschlossen — PR #46, Merge `3f5b0e8` (Feature `d2c02d4`, Fix `ce78f1e`); Protokoll im Browser-PDF-Viewer öffnen (Frontend-only, kein DruckPort); Gate 8 gesamt ✅ (8.1 Auth bleibt ⏸); kein weiterer ⏳-Slice in Gate 8; CI 110 Frontend / 398 Backend | Nach-Merge-Pflege |
 | 2026-08-23 | Gate 8.3b abgeschlossen — PR #44, Merge `2f874c0` (Feature `4df576f`, Fix `9d80632`); Frontend Foto-Upload/-Anzeige; Gate 8.3 gesamt ✅; nächster Slice Gate 8.4 (Druck); Gate 8.1 Auth bleibt ⏸; CI 105 Frontend / 398 Backend | Nach-Merge-Pflege |
 | 2026-08-23 | Gate 8.3a abgeschlossen — PR #42, Merge `f6cb6a0` (Feature `ba1ed79`, Fix `a61235c`, `e6f1f27`); `DateiSpeicherPort`, Multipart-Upload, kontextgebundener Download (ADR-0022); Gate 8.3 gesamt noch ⏳ (8.3b offen); CI 398 Backend | Nach-Merge-Pflege |
 | 2026-08-23 | Gate 8.2c2 abgeschlossen — PR #40, Merge `b1dbc56` (Feature `2955ca6`, Fix `8568c5e`); Entwurfseditor-UI Frontend-only; Gate 8.2c und Gate 8.2 gesamt ✅; CI 86 Frontend / 350 Backend | Nach-Merge-Pflege |
@@ -317,4 +318,4 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.4 — Druck-Adapter (`DruckPort`)** (⏳, P3): Druck über Port/Adapter auf Basis des vorhandenen PDF-Protokolls (Gate 5.5). Reihenfolge gemäß Roadmap: **8.3 vor 8.4**; Gate 8.1 (Auth) bleibt **⏸** bis echtem Mehrbenutzerbetrieb (ADR-0001). Bewusst **kein** Vorziehen von Storage Exit, PDF-Fotoeinbettung oder Foto-Löschen.
+**Kein weiterer regulärer Gate-8-Slice (⏳).** Gate 8.2–8.4 sind ✅; **Gate 8.1 Auth bleibt ⏸** bis echtem Mehrbenutzerbetrieb (ADR-0001). Nächster Roadmap-Block ist **Gate 9 — V2+** (⏸). Offene Follow-ups (Storage Exit, PDF-Fotoeinbettung, Foto-Löschen, S3, …) bleiben P2 und sind **kein** automatischer nächster Gate-Slice.

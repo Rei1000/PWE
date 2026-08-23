@@ -143,7 +143,7 @@ Adapter dürfen mutable save technisch per INSERT/UPDATE oder SQL-Upsert umsetze
 | `DELETE /katalog/entwuerfe/{id}/schritte/{schritt_id}` | `ProzedurSchrittLoeschen` (Gate 8.2b2) |
 | `PUT /katalog/entwuerfe/{id}/schritte/reihenfolge` | `ProzedurSchrittReihenfolgeAendern` (Gate 8.2b2) |
 
-Kommando- oder Routine-Zuweisung XOR; Entfernen mit `{ "kommando_id": null, "routine_id": null }`. Keine Ausführung, keine Adapterfelder. Laborbetrieb ohne Auth ([ADR-0001](../adr/0001-v1-scope-deferrals.md)).
+Kommando- oder Routine-Zuweisung XOR; Entfernen mit `{ "kommando_id": null, "routine_id": null }`. Keine Ausführung, keine Adapterfelder. Session-Authentifizierung und Rollenmatrix ab Gate **8.1** ([ADR-0024](../adr/0024-authentication-v1.md), [ADR-0025](../adr/0025-authorization.md)).
 
 Entwurfs-Wechsel: andere `kommando_id` bei gesetztem Kommando → `AutomatisierungDoppeltZugewiesen` (409) — kein stiller Ersatz (projektrules §6).
 

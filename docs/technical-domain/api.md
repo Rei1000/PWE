@@ -49,13 +49,29 @@ Brücke Application → HTTP. Fachliche Referenz: `docs/architecture.md` §6–�
 | POST | `/prueflaeufe/{id}/abschluss` | `PruefungAbschliessen` |
 | GET | `/prueflaeufe/{id}/protokoll/pdf` | `ProtokollErzeugen` |
 | POST | `/identity/profile` | `ProfilAnlegen` (Gate 8.1b) |
+| GET | `/identity/profile` | `ProfileListen` (Gate 8.1b) |
 | GET | `/identity/profile/{profil_id}` | `ProfilLesen` (Gate 8.1b) |
 | PUT | `/identity/profile/{profil_id}` | `ProfilAktualisieren` (Gate 8.1b) |
+| POST | `/identity/profile/{profil_id}/deaktivieren` | `ProfilDeaktivieren` (Gate 8.1c1) |
+| POST | `/identity/profile/{profil_id}/aktivieren` | `ProfilAktivieren` (Gate 8.1c1) |
 | PUT | `/identity/profile/{profil_id}/benutzer/{benutzer_id}` | `ProfilBenutzerZuordnen` (Gate 8.1b) |
 | DELETE | `/identity/profile/{profil_id}/benutzer/{benutzer_id}` | `ProfilBenutzerEntfernen` (Gate 8.1b) |
 | POST | `/identity/einweisungen` | `EinweisungAnlegen` (Gate 8.1b) |
+| GET | `/identity/einweisungen` | `EinweisungenFuerBenutzerListen` (Gate 8.1b) |
 | GET | `/identity/einweisungen/{einweisung_id}` | `EinweisungLesen` (Gate 8.1b) |
 | POST | `/identity/einweisungen/{einweisung_id}/widerrufen` | `EinweisungWiderrufen` (Gate 8.1b) |
+| GET | `/identity/benutzer` | `BenutzerListen` (Gate 8.1c1) |
+| GET | `/identity/benutzer/{benutzer_id}` | `BenutzerLesen` (Gate 8.1c1) |
+| POST | `/identity/benutzer` | `BenutzerAnlegen` (Gate 8.1c1) |
+| POST | `/identity/benutzer/{id}/aktivieren` | `BenutzerAktivieren` (Gate 8.1c1) |
+| POST | `/identity/benutzer/{id}/sperren` | `BenutzerSperren` (Gate 8.1c1) |
+| POST | `/identity/benutzer/{id}/entsperren` | `BenutzerEntsperren` (Gate 8.1c1) |
+| POST | `/identity/benutzer/{id}/archivieren` | `BenutzerArchivieren` (Gate 8.1c1) |
+| POST | `/identity/benutzer/{id}/wiederherstellen` | `BenutzerWiederherstellen` (Gate 8.1c1) |
+| PUT | `/identity/benutzer/{benutzer_id}/rollen` | `BenutzerRollenSetzen` (Gate 8.1c1) |
+| POST | `/identity/benutzer/{benutzer_id}/passwort` | `PasswortZuruecksetzen` (Admin, Gate 8.1c1) |
+| GET | `/identity/audit` | Identity-Audit lesen (Gate 8.1c1, Admin only) |
+| POST | `/auth/passwort` | `PasswortAendern` (Self-Change, Gate 8.1c1) |
 
 ## Fehlerformat
 
@@ -68,9 +84,9 @@ Alle API-Fehler (Domain und Validierung) liefern ein einheitliches JSON-Objekt:
 | HTTP | `code` (Beispiele) | Auslöser |
 |------|---------------------|----------|
 | 401 | `ungueltige_anmeldedaten`, `nicht_authentifiziert`, `session_abgelaufen`, … | AuthN (Gate 8.1a) |
-| 403 | `qualifikation_unzureichend`, `nicht_berechtigt`, `prueflauf_nicht_eigentuemer` | Qualifikation / Ownership / Rollen (Gate 8.1b) |
+| 403 | `qualifikation_unzureichend`, `nicht_berechtigt`, `prueflauf_nicht_eigentuemer`, `passwort_wechsel_erforderlich`, … | Qualifikation / Ownership / Rollen / Force-Change (Gate 8.1b/8.1c1) |
 | 404 | `version_nicht_gefunden`, `prueflauf_nicht_gefunden`, `nachweis_nicht_gefunden`, `datei_nicht_gefunden`, `nachweis_kein_foto`, … | `DomainError`-Subklassen mit Suffix `NichtGefunden` bzw. `NachweisKeinFoto` |
-| 409 | `invariant_verletzt`, `foto_nur_per_multipart`, `kommando_in_verwendung`, `routine_in_verwendung`, `einweisung_bereits_gueltig`, … | `InvariantViolation` und übrige fachliche Konflikte |
+| 409 | `invariant_verletzt`, `letzter_administrator_verletzt`, `foto_nur_per_multipart`, `kommando_in_verwendung`, `routine_in_verwendung`, `einweisung_bereits_gueltig`, … | `InvariantViolation` und übrige fachliche Konflikte |
 | 413 | `datei_zu_gross` | `DateiZuGross` |
 | 415 | `ungueltiger_dateityp` | `UngueltigerDateityp` |
 | 503 | `datei_speicherung_fehlgeschlagen` | Storage-Infrastrukturfehler |
@@ -303,26 +319,39 @@ Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruef
 
 ## Authentifizierung / Identity
 
-Gate **8.1** ([ADR-0023](../adr/0023-identity-bounded-context.md)–[0027](../adr/0027-authenticated-pruefer-id.md)). **Stand:** **8.1a** ✅ (AuthN, Session, `pruefer_id`-Binding); **8.1b** Qualification Engine 🔄 auf Feature-Branch (Startregel, Profile/Einweisungen-HTTP, Publish-Übernahme).
+Gate **8.1** ([ADR-0023](../adr/0023-identity-bounded-context.md)–[0027](../adr/0027-authenticated-pruefer-id.md)). **Stand:** **8.1a** ✅ · **8.1b** ✅ · **8.1c1** ✅ (Admin-Backend); Verwaltungs-**UI** folgt **8.1c2**.
 
 | Thema | Stand | Slice |
 |-------|-------|-------|
 | Authentifizierung | Serverseitige **Session** + Cookie (**HttpOnly**, **Secure**, **SameSite**); **kein** JWT / LocalStorage-Token in V1 ([ADR-0024](../adr/0024-authentication-v1.md)); `/auth/login`, `/auth/logout`, `/auth/me` | 8.1a ✅ |
-| Authentifizierter Benutzer | Request-Kontext aus Session; Status muss **Aktiv** sein | 8.1a ✅ |
+| Authentifizierter Benutzer | Request-Kontext aus Session; Login nur bei Status **Aktiv** | 8.1a ✅ |
 | `pruefer_id` | Bei **neuen** Prüfläufen aus dem Session-Benutzer abgeleitet — **kein** Trust in clientgelieferte freie Strings ([ADR-0027](../adr/0027-authenticated-pruefer-id.md)); historische freie Werte bleiben lesbar | 8.1a ✅ |
-| Systemrollen | Administrator, QM, Abteilungsleiter, Prüfer (Mehrfachrollen); API erzwingt Policies, Frontend-Guards nur UX ([ADR-0025](../adr/0025-authorization.md)) | 8.1a ✅ (Rollen); feine Katalog-Matrix weiter ausbaubar |
-| Qualification | Profil ↔ Produktdefinition; Einweisung ↔ ProduktdefinitionsVersion; Startregel ([ADR-0026](../adr/0026-qualification-model.md)) | **8.1b** 🔄 |
+| Systemrollen | Administrator, QM, Abteilungsleiter, Prüfer (Mehrfachrollen); API erzwingt Policies, Frontend-Guards nur UX ([ADR-0025](../adr/0025-authorization.md)) | 8.1a ✅ |
+| Qualification | Profil ↔ Produktdefinition; Einweisung ↔ ProduktdefinitionsVersion; Startregel ([ADR-0026](../adr/0026-qualification-model.md)) | **8.1b** ✅ |
+| Force-Change | `passwortwechsel_erforderlich` — Middleware blockiert alle Pfade außer `/auth/me`, `/auth/logout`, `/auth/passwort` | **8.1c1** ✅ |
+| Identity Administration (Backend) | Benutzer-Lifecycle, Rollen, Passwort-Reset, Profil aktiv/inaktiv, append-only Audit | **8.1c1** ✅ |
 
-### Identity-HTTP (Gate 8.1b)
+### Identity-HTTP (Gate 8.1b / 8.1c1)
 
-Unter `/identity` (Session erforderlich; Rollen je Endpoint):
+Unter `/identity` (Session erforderlich; Rollen je Endpoint). **Keine Admin-UI** — nur HTTP-API (UI: Gate **8.1c2**).
 
-| Ressource | Operationen |
-|-----------|-------------|
-| Profile | Anlegen / Lesen / Aktualisieren; Benutzer zuordnen / entfernen |
-| Einweisungen | Anlegen / Lesen; **Widerrufen** (`POST …/widerrufen`) |
+| Ressource | Operationen | Lesen (Admin/QM/Abt.) | Schreiben |
+|-----------|-------------|------------------------|-----------|
+| Profile | LIST/Anlegen/Lesen/Aktualisieren; Benutzer zuordnen/entfernen; **aktivieren/deaktivieren** | ✅ | Admin, QM (Profil); Admin, Abt. (Zuordnung) |
+| Einweisungen | Anlegen/Lesen/Liste; **Widerrufen** | ✅ | Admin, Abt. (Anlegen/Widerruf) |
+| Benutzer | LIST/Lesen; Anlegen; Status (aktivieren/sperren/entsperren/archivieren/wiederherstellen); Rollen; Admin-Passwort-Reset | ✅ | **Administrator** only |
+| Audit | LIST | **Administrator** only | — (append-only via Mutationen) |
 
-Verwaltungs-UI folgt Gate **8.1c**.
+**Identity-Lesematrix:** Benutzer/Profile/Einweisungen lesen — Administrator, QM, Abteilungsleiter; **Prüfer** ❌. Audit und Login-Metadaten nur Administrator ([ADR-0025](../adr/0025-authorization.md)).
+
+**Passwort:**
+
+| Endpoint | Zweck |
+|----------|-------|
+| `POST /auth/passwort` | Self-Change (aktiver Benutzer, altes Passwort); setzt `passwortwechsel_erforderlich=false`; invalidiert alle Sessions |
+| `POST /identity/benutzer/{id}/passwort` | Admin-Reset; setzt Force-Change; invalidiert alle Sessions des Zielbenutzers |
+
+Neu angelegte Benutzer: Status **Neu**, `passwortwechsel_erforderlich=true`; Login erst nach Aktivierung.
 
 ### Prüflauf: Qualifikation, Ownership und Lesen (Gate 8.1b)
 
@@ -342,4 +371,4 @@ Ohne veröffentlichte Produktdefinition schlägt `POST /prueflaeufe` mit `versio
 ## Bewusst offen (nach Merge)
 
 - OpenAPI-Versionierung / erweiterte Validierungsdetails (`errors[]` bei 422)
-- Identity-Administrations-UI und Audit (Gate 8.1c)
+- Identity-Administrations-**UI** und Audit-Dashboard (Gate **8.1c2**; Backend 8.1c1 ✅)

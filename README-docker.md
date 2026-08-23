@@ -43,6 +43,8 @@ EXTERNES_KOMMANDO_ADAPTER: simulation
 
 Default bleibt **ohne** Demo-Antworten (`PWE_DEMO_MODE=false`). Siehe Root-README Demo-Ablauf und `scripts/seed_demo_automatisierung.py`.
 
+**Identity (Gate 8.1a–8.1c1):** Login/Session aktiv; Seed-Administrator optional (`PWE_SEED_ADMIN`, Default aktiv in Dev). Neu angelegte Benutzer erhalten `passwortwechsel_erforderlich=true` — Force-Change erzwingt Passwortänderung vor weiteren API-Aufrufen (Middleware). Identity-Administration nur als **Backend-API** (`/identity/*`); **keine** Admin-UI im Frontend (Gate 8.1c2). Siehe `docs/technical-domain/api.md` § Authentifizierung / Identity.
+
 Schema: ausschließlich über Alembic (Gate 7.5 ✅). `docker compose up` migriert vor dem Backend-Start (`alembic upgrade head` im Entrypoint). Die FastAPI-Runtime erzeugt kein Schema.
 
 **Bestehende Volumes vor 7.5b:** Wenn die DB noch per `create_all` ohne `alembic_version` angelegt wurde, einmalig neu aufsetzen (`docker compose down -v`) oder manuell `alembic stamp head` setzen — sonst schlägt `upgrade` mit „already exists“ fehl.
@@ -75,6 +77,6 @@ docker compose down -v     # inkl. PostgreSQL-Daten (pgdata) und Datei-Storage (
 - Frontend-Container
 - Produktions-Härtung (Secrets, TLS, Resource Limits)
 - Automatische Migration *innerhalb* der FastAPI-Runtime (Migration nur Entrypoint/CLI)
-- Identity-Runtime (Login/Session) — Architektur in ADR-0023–0027; Implementierung ab Gate **8.1a**
+- Identity-Administrations-**UI** (Backend API ab Gate 8.1c1 ✅; UI folgt Gate **8.1c2**)
 
-Siehe `docs/roadmap.md` — Gate 8.2–8.4 ✅; nächster Slice **Gate 8.1a Identity Foundation**.
+Siehe `docs/roadmap.md` — Gate 8.2–8.4 ✅; Gate 8.1a/8.1b/8.1c1 ✅; nächster Slice **Gate 8.1c2** Identity Administration UI.

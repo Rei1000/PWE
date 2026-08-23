@@ -74,10 +74,10 @@ def test_api_automatisierung_postgresql_happy_path():
     prueflauf_id = prueflauf.prueflauf_id
     session.close()
 
-    def simulation_postgres_deps(pg_session):
+    def simulation_postgres_deps(pg_session, datei_speicher):
         from adapters.storage.in_memory import InMemoryDateiSpeicher
 
-        deps = postgres_deps(pg_session, InMemoryDateiSpeicher())
+        deps = postgres_deps(pg_session, datei_speicher)
         assert isinstance(deps.kommando_port, SimuliertesExternesKommandoPort)
         deps.kommando_port.registriere_antwort(
             KOMMANDOCODE,

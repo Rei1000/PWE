@@ -13,10 +13,15 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from adapters.persistence.postgresql.bibliothek_repository import PostgresBibliothekRepository
 from adapters.persistence.postgresql.abschluss_persistenz import PostgresPrueflaufAbschlussPersistenz
+from adapters.persistence.postgresql.identity_repository import (
+    PostgresBenutzerRepository,
+    PostgresSessionStore,
+)
 from adapters.persistence.postgresql.katalog_repository import PostgresKatalogRepository
 from adapters.persistence.postgresql.protokoll_repository import PostgresProtokollRepository
 from adapters.persistence.postgresql.prueflauf_repository import PostgresPrueflaufRepository
 from adapters.pdf.protokoll_erzeugung import PdfProtokollErzeugungAdapter
+from adapters.security.argon2_hasher import Argon2PasswortHasher
 from api.deps import ApiDeps
 from api.kommando_wiring import create_kommando_port
 from ports.datei_speicher_port import DateiSpeicherPort
@@ -89,6 +94,7 @@ def postgres_deps(session: Session, datei_speicher: DateiSpeicherPort) -> ApiDep
     """Request-scoped ApiDeps mit allen PostgreSQL-Repositories."""
     prueflauf_repo = PostgresPrueflaufRepository(session)
     protokoll_repo = PostgresProtokollRepository(session)
+    hasher = Argon2PasswortHasher()
     return ApiDeps(
         katalog=PostgresKatalogRepository(session),
         bibliothek=PostgresBibliothekRepository(session),
@@ -98,6 +104,9 @@ def postgres_deps(session: Session, datei_speicher: DateiSpeicherPort) -> ApiDep
         erzeugung_port=PdfProtokollErzeugungAdapter(),
         kommando_port=create_kommando_port(),
         datei_speicher=datei_speicher,
+        benutzer_repo=PostgresBenutzerRepository(session),
+        passwort_hasher=hasher,
+        session_store=PostgresSessionStore(session),
     )
 
 

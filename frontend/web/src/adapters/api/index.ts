@@ -1,3 +1,4 @@
+export { login, logout, fetchMe, meSchema, type MeResponse } from "@/adapters/api/auth";
 export { ApiError, apiDelete, apiFetch, apiFetchBlob, apiGet, apiPost, apiPostMultipart, apiPut, getApiBaseUrl } from "@/adapters/api/client";
 export {
   createKommando,

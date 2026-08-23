@@ -124,7 +124,7 @@ def test_veroeffentlichen_mit_vorlage_snapshot(client: TestClient):
         json={
             "produktkodierung": version.json()["produktkodierung"],
             "pruefobjekt_kennung": "GER-V",
-            "pruefer_id": "p1",
         },
     )
     assert start.status_code == 201
+from tests.support.auth import login_as_admin

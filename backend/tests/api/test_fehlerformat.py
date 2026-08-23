@@ -20,7 +20,6 @@ def test_domain_fehler_hat_code(client: TestClient):
         json={
             "produktkodierung": "UNKNOWN",
             "pruefobjekt_kennung": "GER-1",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert response.status_code == 404
@@ -35,3 +34,4 @@ def test_validierungsfehler_hat_code(client: TestClient):
     body = response.json()
     assert body["code"] == "validation"
     assert body["detail"] == "Validierungsfehler"
+from tests.support.auth import login_as_admin

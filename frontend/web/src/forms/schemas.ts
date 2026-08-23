@@ -11,7 +11,6 @@ export type RefreshIntervalForm = z.infer<typeof refreshIntervalSchema>;
 export const startPrueflaufFormSchema = z.object({
   produktkodierung: z.string().min(1, "Produktkodierung erforderlich"),
   pruefobjekt_kennung: z.string().min(1, "Prüfobjekt-Kennung erforderlich"),
-  pruefer_id: z.string().min(1, "Prüfer-ID erforderlich"),
 });
 
 export type StartPrueflaufForm = z.infer<typeof startPrueflaufFormSchema>;

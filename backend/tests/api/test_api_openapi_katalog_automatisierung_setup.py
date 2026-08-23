@@ -53,3 +53,4 @@ def test_openapi_automatisierung_zuweisen_schemas():
     for status in ("404", "409", "422"):
         ref = put["responses"][status]["content"]["application/json"]["schema"]["$ref"]
         assert ref.endswith("ErrorResponse")
+from tests.support.auth import login_as_admin

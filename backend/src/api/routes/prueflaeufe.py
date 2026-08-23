@@ -11,6 +11,7 @@ from api.automatisierung_beobachtung import (
     beobachte_automatisierung_nicht_begonnen,
 )
 from api.automatisierung_response import automatisierung_ausfuehren_response
+from api.current_user import RequestCurrentUserProvider
 from api.deps import get_request_deps
 from api.schemas import (
     AbschlussResponse,
@@ -120,10 +121,11 @@ def prueflauf_lesen(prueflauf_id: str, request: Request) -> PrueflaufDetailRespo
 @router.post("", status_code=201, response_model=PrueflaufResponse)
 def prueflauf_starten(body: PrueflaufStartenRequest, request: Request) -> PrueflaufResponse:
     deps = get_request_deps(request)
+    benutzer = RequestCurrentUserProvider(request).require()
     prueflauf = PruefungStarten(deps.katalog, deps.prueflauf_repo).execute(
         produktkodierung=body.produktkodierung,
         pruefobjekt_kennung=body.pruefobjekt_kennung,
-        pruefer_id=body.pruefer_id,
+        pruefer_id=benutzer.benutzer_id,
     )
     return _prueflauf_response(prueflauf)
 

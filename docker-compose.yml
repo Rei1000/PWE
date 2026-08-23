@@ -25,6 +25,8 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/app
       PWE_DATEI_STORAGE_PFAD: /var/pwe/dateien
+      # Development: erlaubt Default-Seed-Passwort admin-change-me (nur lokal).
+      # Produktion: ENV ändern + PWE_SEED_ADMIN_PASSWORD setzen oder PWE_SEED_ADMIN=false.
       ENV: development
     volumes:
       - pwe_dateien:/var/pwe/dateien

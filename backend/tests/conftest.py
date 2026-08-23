@@ -9,9 +9,32 @@ from __future__ import annotations
 
 import os
 
+# Gate 8.1a: Tests gelten als Dev/Test — Default-Seed-Passwort nur hier erlaubt.
+os.environ.setdefault("ENV", "test")
+
+import fastapi.testclient as _ftc
 import pytest
 
 from tests.support.alembic_migrate import alembic_ensure_head
+from tests.support.auth import login_as_admin
+
+# Gate 8.1a: API-Tests standardmäßig mit Session + CSRF (Seed-Admin).
+AUTO_LOGIN = True
+OriginalTestClient = _ftc.TestClient
+
+
+class _AuthTestClient(OriginalTestClient):
+    def __enter__(self):
+        super().__enter__()
+        if AUTO_LOGIN:
+            try:
+                self.headers.update(login_as_admin(self))
+            except AssertionError:
+                pass
+        return self
+
+
+_ftc.TestClient = _AuthTestClient
 
 
 @pytest.fixture(scope="session", autouse=True)

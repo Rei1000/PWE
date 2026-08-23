@@ -11,9 +11,33 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class PrueflaufStartenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     produktkodierung: str
     pruefobjekt_kennung: str
-    pruefer_id: str
+
+
+class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    login: str
+    passwort: str
+
+
+class LoginResponse(BaseModel):
+    benutzer_id: str
+    login: str
+    anzeigename: str
+    rollen: list[str]
+    csrf_token: str
+
+
+class MeResponse(BaseModel):
+    benutzer_id: str
+    login: str
+    anzeigename: str
+    status: str
+    rollen: list[str]
 
 
 class PrueflaufResponse(BaseModel):

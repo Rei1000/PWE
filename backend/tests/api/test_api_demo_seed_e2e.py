@@ -80,7 +80,6 @@ def test_http_e2e_demo_seed_und_automatisierung(demo_client: TestClient):
         json={
             "produktkodierung": KODIERUNG,
             "pruefobjekt_kennung": "DEMO-OBJ-1",
-            "pruefer_id": "demo-pruefer",
         },
     )
     assert start.status_code == 201
@@ -112,3 +111,4 @@ def test_http_e2e_demo_seed_und_automatisierung(demo_client: TestClient):
         s for s in detail2.json()["schritte"] if s["schritt_id"] == SCHRITT_ID
     )["nachweise"]
     assert len(nachweise) >= 1
+from tests.support.auth import login_as_admin

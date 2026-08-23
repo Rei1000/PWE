@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 
 import pytest
-from fastapi.testclient import TestClient
+from starlette.testclient import TestClient as RawTestClient
 
 from api.app import create_app
 from api.persistence import postgres_deps
@@ -23,7 +23,8 @@ def test_postgres_deps_factory_wird_pro_request_aufgerufen():
         session_ids.append(id(session))
         return postgres_deps(session, datei_speicher)
 
-    with TestClient(create_app(postgres_deps_factory=tracking_factory)) as client:
+    # RawTestClient: ohne Auto-Login (sonst zählt /auth/login als Extra-Request).
+    with RawTestClient(create_app(postgres_deps_factory=tracking_factory)) as client:
         assert client.get("/health").status_code == 200
         assert client.get("/health").status_code == 200
 
@@ -42,7 +43,7 @@ def test_simulation_port_ist_pro_request_neu():
         port_ids.append(id(deps.kommando_port))
         return deps
 
-    with TestClient(create_app(postgres_deps_factory=tracking_factory)) as client:
+    with RawTestClient(create_app(postgres_deps_factory=tracking_factory)) as client:
         assert client.get("/health").status_code == 200
         assert client.get("/health").status_code == 200
 

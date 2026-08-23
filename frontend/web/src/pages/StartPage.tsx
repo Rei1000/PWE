@@ -30,7 +30,6 @@ export function StartPage() {
     defaultValues: {
       produktkodierung: DEMO_KATALOG_ENTWURF.produktkodierung,
       pruefobjekt_kennung: "GER-800",
-      pruefer_id: "pruefer-1",
     },
   });
 
@@ -98,13 +97,9 @@ export function StartPage() {
                 </p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="pruefer_id">Prüfer-ID</Label>
-              <Input id="pruefer_id" {...form.register("pruefer_id")} />
-              {form.formState.errors.pruefer_id && (
-                <p className="text-sm text-destructive">{form.formState.errors.pruefer_id.message}</p>
-              )}
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Prüfer wird aus der angemeldeten Sitzung übernommen.
+            </p>
             <Button type="submit" disabled={startMutation.isPending}>
               <Play aria-hidden />
               {startMutation.isPending ? "Starte…" : "Prüflauf starten"}

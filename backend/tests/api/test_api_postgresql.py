@@ -85,7 +85,6 @@ def test_prueflauf_happy_path_over_postgresql(pg_api_client: TestClient):
         json={
             "produktkodierung": kodierung,
             "pruefobjekt_kennung": "GER-PG-API",
-            "pruefer_id": "pruefer-pg",
         },
     )
     assert start.status_code == 201
@@ -119,3 +118,4 @@ def test_prueflauf_happy_path_over_postgresql(pg_api_client: TestClient):
     pdf = pg_api_client.get(f"/prueflaeufe/{prueflauf_id}/protokoll/pdf")
     assert pdf.status_code == 200
     assert pdf.headers["content-type"] == "application/pdf"
+from tests.support.auth import login_as_admin

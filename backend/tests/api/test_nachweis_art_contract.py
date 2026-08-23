@@ -59,7 +59,6 @@ def _start_prueflauf(client: TestClient, *, produktkodierung: str = "1234567890"
         json={
             "produktkodierung": produktkodierung,
             "pruefobjekt_kennung": "GER-CONTRACT",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert response.status_code == 201
@@ -169,3 +168,4 @@ def test_contract_parity_in_memory_und_postgresql(memory_client: TestClient, pg_
 
         assert mem_response.status_code == pg_response.status_code == 201
         assert mem_response.json()["art"] == pg_response.json()["art"] == art
+from tests.support.auth import login_as_admin

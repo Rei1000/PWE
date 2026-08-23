@@ -48,7 +48,6 @@ def _start_prueflauf(client: TestClient) -> str:
         json={
             "produktkodierung": "1234567890",
             "pruefobjekt_kennung": "GER-100",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert response.status_code == 201
@@ -100,3 +99,4 @@ def test_get_prueflauf_nicht_gefunden_404(client: TestClient):
     response = client.get("/prueflaeufe/unbekannt")
     assert response.status_code == 404
     assert response.json()["code"] == "prueflauf_nicht_gefunden"
+from tests.support.auth import login_as_admin

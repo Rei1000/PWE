@@ -8,9 +8,12 @@ from fastapi import FastAPI, Request
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 
+from api.auth_middleware import apply_authentication
+from api.auth_settings import AuthCookieSettings
 from api.datei_speicher_wiring import DateiSpeicherSettings, create_datei_speicher
 from api.deps import ApiDeps, in_memory_deps
 from api.errors import register_exception_handlers
+from api.identity_seed import ensure_seed_administrator
 from api.kommando_wiring import KommandoAdapterSettings, configure_kommando_adapter
 from api.persistence import (
     PersistenceSettings,
@@ -19,7 +22,9 @@ from api.persistence import (
     initialize_postgresql_engine,
     postgres_deps,
 )
-from api.routes import katalog, prueflaeufe
+from api.routes import auth, katalog, prueflaeufe
+from adapters.security.argon2_hasher import Argon2PasswortHasher
+from adapters.persistence.postgresql.identity_repository import PostgresBenutzerRepository
 
 
 def create_app(
@@ -30,9 +35,11 @@ def create_app(
     settings = PersistenceSettings.from_env()
     use_postgresql = deps is None and settings.database_url is not None
     resolve_postgres_deps: PostgresDepsFactory = postgres_deps_factory or postgres_deps
+    auth_cookie_settings = AuthCookieSettings.from_env()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        app.state.auth_cookie_settings = auth_cookie_settings
         if deps is None:
             configure_kommando_adapter(KommandoAdapterSettings.from_env())
             app.state.datei_speicher = create_datei_speicher(DateiSpeicherSettings.from_env())
@@ -44,6 +51,16 @@ def create_app(
             app.state.engine = engine
             app.state.session_factory = create_session_factory(engine)
             app.state.persistence_mode = "postgresql"
+            session = app.state.session_factory()
+            try:
+                hasher = Argon2PasswortHasher()
+                ensure_seed_administrator(PostgresBenutzerRepository(session), hasher)
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+            finally:
+                session.close()
         else:
             app.state.persistence_mode = "in-memory"
             app.state.deps = in_memory_deps()
@@ -61,7 +78,11 @@ def create_app(
             session: Session = app.state.session_factory()
             request.state.deps = resolve_postgres_deps(session, app.state.datei_speicher)
             try:
-                response = await call_next(request)
+
+                async def after_deps(req: Request) -> Response:
+                    return await apply_authentication(req, call_next)
+
+                response = await after_deps(request)
                 session.commit()
                 return response
             except Exception:
@@ -70,10 +91,17 @@ def create_app(
             finally:
                 session.close()
 
+    else:
+
+        @app.middleware("http")
+        async def in_memory_auth(request: Request, call_next) -> Response:
+            return await apply_authentication(request, call_next)
+
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
+    app.include_router(auth.router)
     app.include_router(katalog.router)
     app.include_router(prueflaeufe.router)
     return app

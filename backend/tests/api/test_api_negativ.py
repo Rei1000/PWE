@@ -41,7 +41,6 @@ def _start_prueflauf(client: TestClient) -> str:
         json={
             "produktkodierung": "1234567890",
             "pruefobjekt_kennung": "GER-800",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert response.status_code == 201
@@ -102,3 +101,4 @@ def test_read_model_enthält_fortschritt(client: TestClient):
     assert body["kann_komponente_erfassen"] is True
     assert body["fehlende_komponenten"] == ["mainboard"]
     assert body["schritte"][0]["kann_nachweis_erfassen"] is False
+from tests.support.auth import login_as_admin

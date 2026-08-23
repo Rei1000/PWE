@@ -86,3 +86,4 @@ def test_postgresql_kommando_und_routine_crud(pg_api_client: TestClient):
     )
     assert pg_api_client.delete(f"/katalog/bibliothek/routinen/{routine_id}").status_code == 204
     assert pg_api_client.delete(f"/katalog/bibliothek/kommandos/{kommando_id}").status_code == 204
+from tests.support.auth import login_as_admin

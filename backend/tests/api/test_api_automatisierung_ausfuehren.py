@@ -71,7 +71,6 @@ def _start_prueflauf(client: TestClient) -> str:
         json={
             "produktkodierung": "1234567890",
             "pruefobjekt_kennung": "GER-AUTO",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert response.status_code == 201
@@ -148,7 +147,6 @@ def test_api_automatisierung_bibliotheksroutine_mehrere_aktionen():
             json={
                 "produktkodierung": "2222222222",
                 "pruefobjekt_kennung": "GER-ZWEI",
-                "pruefer_id": "pruefer-1",
             },
         )
         prueflauf_id = start.json()["prueflauf_id"]
@@ -216,7 +214,6 @@ def test_api_teilfehler_transport_ohne_roh_http_200():
             json={
                 "produktkodierung": "3333333333",
                 "pruefobjekt_kennung": "GER-TEIL",
-                "pruefer_id": "pruefer-1",
             },
         )
         prueflauf_id = start.json()["prueflauf_id"]
@@ -269,7 +266,6 @@ def test_api_teilfehler_geraete_err_http_200():
             json={
                 "produktkodierung": "4444444444",
                 "pruefobjekt_kennung": "GER-ERR",
-                "pruefer_id": "pruefer-1",
             },
         )
         response = client.post(_auto_url(start.json()["prueflauf_id"]))
@@ -321,7 +317,6 @@ def test_api_parserfehler_http_200():
             json={
                 "produktkodierung": "5555555555",
                 "pruefobjekt_kennung": "GER-PARSE",
-                "pruefer_id": "pruefer-1",
             },
         )
         response = client.post(_auto_url(start.json()["prueflauf_id"]))
@@ -376,7 +371,6 @@ def test_api_keine_automatisierung_409():
             json={
                 "produktkodierung": "6666666666",
                 "pruefobjekt_kennung": "GER-M",
-                "pruefer_id": "pruefer-1",
             },
         )
         response = client.post(_auto_url(start.json()["prueflauf_id"]))
@@ -480,7 +474,6 @@ def test_api_inkonsistente_materialisierung_409():
             json={
                 "produktkodierung": "7777777777",
                 "pruefobjekt_kennung": "GER-INK",
-                "pruefer_id": "pruefer-1",
             },
         )
         response = client.post(_auto_url(start.json()["prueflauf_id"]))
@@ -569,3 +562,4 @@ def test_legacy_transport_ohne_roh_ueber_adr0016_commit():
     body = response.json()
     assert body["fehlgeschlagen"] is True
     assert body["fehlerart"] == "keine_geraeteantwort"
+from tests.support.auth import login_as_admin

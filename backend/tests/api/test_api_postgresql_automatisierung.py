@@ -111,3 +111,4 @@ def test_api_automatisierung_postgresql_happy_path():
     assert nachweise[0].art == NachweisArt.ROHANTWORT
     assert nachweise[0].payload["kommandocode"] == KOMMANDOCODE
     assert nachweise[1].art == NachweisArt.EXTRAHIERTER_WERT
+from tests.support.auth import login_as_admin

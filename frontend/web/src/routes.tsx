@@ -2,8 +2,10 @@ import { Navigate } from "react-router-dom";
 
 import { AppLayout } from "@/components/layout/AppLayout";
 import { KatalogLayout } from "@/components/layout/KatalogLayout";
+import { RequireAuth } from "@/hooks/useAuth";
 import { AbschlussPage } from "@/pages/AbschlussPage";
 import { HealthPage } from "@/pages/HealthPage";
+import { LoginPage } from "@/pages/LoginPage";
 import { EntwurfEditorPage } from "@/pages/katalog/EntwurfEditorPage";
 import { EntwurfNeuPage } from "@/pages/katalog/EntwurfNeuPage";
 import { KatalogHubPage } from "@/pages/katalog/KatalogHubPage";
@@ -15,29 +17,35 @@ import { PrueflaufPage } from "@/pages/PrueflaufPage";
 import { StartPage } from "@/pages/StartPage";
 
 export const routes = [
+  { path: "/login", element: <LoginPage /> },
   {
     path: "/",
-    element: <AppLayout />,
+    element: <RequireAuth />,
     children: [
-      { index: true, element: <StartPage /> },
-      { path: "health", element: <HealthPage /> },
-      { path: "prueflaeufe/:prueflaufId", element: <PrueflaufPage /> },
-      { path: "prueflaeufe/:prueflaufId/abschluss", element: <AbschlussPage /> },
       {
-        path: "katalog",
-        element: <KatalogLayout />,
+        element: <AppLayout />,
         children: [
-          { index: true, element: <KatalogHubPage /> },
-          { path: "kommandos", element: <KommandosPage /> },
-          { path: "routinen", element: <RoutinenPage /> },
-          { path: "routinen/neu", element: <RoutineEditorPage /> },
-          { path: "routinen/:routineId", element: <RoutineEditorPage /> },
-          { path: "vorlagen", element: <VorlagenPage /> },
-          { path: "entwuerfe/neu", element: <EntwurfNeuPage /> },
-          { path: "entwuerfe/:produktdefinitionId", element: <EntwurfEditorPage /> },
+          { index: true, element: <StartPage /> },
+          { path: "health", element: <HealthPage /> },
+          { path: "prueflaeufe/:prueflaufId", element: <PrueflaufPage /> },
+          { path: "prueflaeufe/:prueflaufId/abschluss", element: <AbschlussPage /> },
+          {
+            path: "katalog",
+            element: <KatalogLayout />,
+            children: [
+              { index: true, element: <KatalogHubPage /> },
+              { path: "kommandos", element: <KommandosPage /> },
+              { path: "routinen", element: <RoutinenPage /> },
+              { path: "routinen/neu", element: <RoutineEditorPage /> },
+              { path: "routinen/:routineId", element: <RoutineEditorPage /> },
+              { path: "vorlagen", element: <VorlagenPage /> },
+              { path: "entwuerfe/neu", element: <EntwurfNeuPage /> },
+              { path: "entwuerfe/:produktdefinitionId", element: <EntwurfEditorPage /> },
+            ],
+          },
+          { path: "*", element: <Navigate to="/" replace /> },
         ],
       },
-      { path: "*", element: <Navigate to="/" replace /> },
     ],
   },
 ];

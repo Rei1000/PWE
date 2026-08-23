@@ -1,8 +1,24 @@
-import { Link, Outlet } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 
+import { logout } from "@/adapters/api/auth";
 import { getApiBaseUrl } from "@/adapters/api/client";
+import { Button } from "@/components/ui/button";
+import { useCurrentUser, useInvalidateSession } from "@/hooks/useAuth";
 
 export function AppLayout() {
+  const { data: user } = useCurrentUser();
+  const invalidate = useInvalidateSession();
+  const navigate = useNavigate();
+
+  const logoutMutation = useMutation({
+    mutationFn: logout,
+    onSettled: () => {
+      invalidate();
+      navigate("/login", { replace: true });
+    },
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -11,7 +27,7 @@ export function AppLayout() {
             <p className="text-lg font-semibold">PWE</p>
             <p className="text-xs text-muted-foreground">Prüf-Workflow-Engine — PC</p>
           </div>
-          <nav className="flex gap-4 text-sm">
+          <nav className="flex items-center gap-4 text-sm">
             <Link to="/" className="text-muted-foreground hover:text-foreground">
               Start
             </Link>
@@ -21,6 +37,20 @@ export function AppLayout() {
             <Link to="/health" className="text-muted-foreground hover:text-foreground">
               Health
             </Link>
+            {user && (
+              <>
+                <span className="text-muted-foreground">{user.anzeigename}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => logoutMutation.mutate()}
+                  disabled={logoutMutation.isPending}
+                >
+                  Abmelden
+                </Button>
+              </>
+            )}
           </nav>
         </div>
         <p className="mx-auto max-w-3xl px-6 pb-2 text-xs font-mono text-muted-foreground">

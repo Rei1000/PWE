@@ -71,8 +71,8 @@ def test_api_prueflauf_nach_katalog_setup(client: TestClient):
         json={
             "produktkodierung": "9876543210",
             "pruefobjekt_kennung": "GER-900",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert start.status_code == 201
     assert start.json()["produktkodierung"] == "9876543210"
+from tests.support.auth import login_as_admin

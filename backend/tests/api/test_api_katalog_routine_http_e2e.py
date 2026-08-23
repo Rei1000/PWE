@@ -104,7 +104,6 @@ def test_http_e2e_routine_anlegen_zuweisen_veroeffentlichen_prueflauf_ausfuehren
         json={
             "produktkodierung": kodierung,
             "pruefobjekt_kennung": "GER-E2E-82B1",
-            "pruefer_id": "pruefer-1",
         },
     )
     assert start.status_code == 201
@@ -127,3 +126,4 @@ def test_http_e2e_routine_anlegen_zuweisen_veroeffentlichen_prueflauf_ausfuehren
     assert body["ausfuehrung_id"]
     assert body["ausgefuehrte_aktionen"] >= 1
     assert len(body["nachweise"]) >= 1
+from tests.support.auth import login_as_admin

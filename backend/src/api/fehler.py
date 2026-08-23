@@ -21,6 +21,8 @@ def http_status_for_domain_error(exc: DomainError) -> int:
     if isinstance(exc, InvariantViolation):
         return 409
     name = type(exc).__name__
+    if name in {"UngueltigeAnmeldedaten", "NichtAuthentifiziert", "SessionAbgelaufen", "LoginNichtErlaubt"}:
+        return 401
     if name == "UngueltigerDateityp":
         return 415
     if name == "DateiZuGross":
@@ -36,6 +38,10 @@ def oeffentliche_fehlermeldung(exc: DomainError) -> str:
     if isinstance(exc, InvariantViolation):
         return "Die Aktion ist im aktuellen Zustand nicht zulässig."
     name = type(exc).__name__
+    if name in {"UngueltigeAnmeldedaten", "LoginNichtErlaubt"}:
+        return "Anmeldung fehlgeschlagen."
+    if name in {"NichtAuthentifiziert", "SessionAbgelaufen"}:
+        return "Nicht angemeldet."
     if name == "PrueflaufNichtGefunden":
         return "Der angeforderte Prüflauf wurde nicht gefunden."
     if name == "VersionNichtGefunden":

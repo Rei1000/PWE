@@ -34,6 +34,7 @@ def test_script_hat_keine_backend_imports():
 def test_seed_erfolgreiche_sequenz():
     mod = _load_script()
     responses = [
+        (200, {"benutzer_id": "u1", "login": "admin", "anzeigename": "Admin", "rollen": ["administrator"], "csrf_token": "csrf"}),
         (201, {"kommando_id": "k1", "bezeichnung": "Demo Messwert"}),
         (201, {"produktdefinition_id": "pd1", "produktkodierung": "9000000001"}),
         (200, {"produktdefinition_id": "pd1", "schritt_id": "demo-schritt-1", "kommando_id": "k1"}),
@@ -45,7 +46,7 @@ def test_seed_erfolgreiche_sequenz():
                 "version_id": "v1",
                 "produktkodierung": "9000000001",
                 "pruefobjekt_kennung": "DEMO-OBJ-1",
-                "pruefer_id": "demo-pruefer",
+                "pruefer_id": "u1",
                 "status": "gestartet",
             },
         ),
@@ -60,7 +61,7 @@ def test_seed_erfolgreiche_sequenz():
     with patch.object(mod, "_request", side_effect=fake_request):
         result = mod.seed_demo(api_base="http://example.test", start_prueflauf=True)
 
-    assert call_count["n"] == 5
+    assert call_count["n"] == 6
     assert result["kommando_id"] == "k1"
     assert result["prueflauf_id"] == "p1"
     assert result["frontend_pfad"] == "/prueflaeufe/p1"
@@ -73,6 +74,14 @@ def test_seed_stoppt_nach_fehlgeschlagenem_schritt():
     def fake_request(method, url, *, body=None):
         call_count["n"] += 1
         if call_count["n"] == 1:
+            return 200, {
+                "benutzer_id": "u1",
+                "login": "admin",
+                "anzeigename": "Admin",
+                "rollen": ["administrator"],
+                "csrf_token": "csrf",
+            }
+        if call_count["n"] == 2:
             return 201, {"kommando_id": "k1", "bezeichnung": "Demo Messwert"}
         raise mod.SeedStepError(
             "http",
@@ -85,7 +94,7 @@ def test_seed_stoppt_nach_fehlgeschlagenem_schritt():
         with pytest.raises(mod.SeedStepError) as exc_info:
             mod.seed_demo(api_base="http://example.test")
 
-    assert call_count["n"] == 2
+    assert call_count["n"] == 3
     assert exc_info.value.step == "Entwurf anlegen"
     assert "409" in str(exc_info.value)
 

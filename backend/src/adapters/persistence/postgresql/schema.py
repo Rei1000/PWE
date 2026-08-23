@@ -81,3 +81,24 @@ class ProtokollSnapshotRow(Base):
     snapshot_id: Mapped[str] = mapped_column(String(36), primary_key=True)
     prueflauf_id: Mapped[str] = mapped_column(String(36), nullable=False, unique=True, index=True)
     payload: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class BenutzerRow(Base):
+    __tablename__ = "benutzer"
+
+    benutzer_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    login: Mapped[str] = mapped_column(String(128), nullable=False, unique=True, index=True)
+    anzeigename: Mapped[str] = mapped_column(String(256), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    passwort_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    rollen_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class IdentitySessionRow(Base):
+    __tablename__ = "identity_session"
+
+    session_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    benutzer_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    csrf_token: Mapped[str] = mapped_column(String(128), nullable=False)
+    erzeugt_am: Mapped[str] = mapped_column(String(64), nullable=False)
+    zuletzt_gesehen_am: Mapped[str] = mapped_column(String(64), nullable=False)

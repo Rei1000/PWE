@@ -26,7 +26,7 @@ from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlich
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from domain.identity.benutzer import Benutzer, PasswortHash
 from domain.identity.berechtigungsprofil import Berechtigungsprofil
-from domain.identity.einweisungsnachweis import EinweisungBereitsGueltig
+from domain.identity.einweisungsnachweis import EinweisungBereitsGueltig, Einweisungsnachweis
 from domain.identity.start_qualifikation import QualifikationUnzureichend
 from domain.identity.typen import BenutzerStatus, Systemrolle
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
@@ -240,3 +240,62 @@ def test_publish_ohne_flag_keine_uebernahme():
         einweisungen.get_gueltige(benutzer_id="pruefer-1", version_id=v2.version_id)
         is None
     )
+
+
+def test_publish_uebernahme_ueberspringt_bestehende_einweisung_auf_v_neu():
+    """Wenn auf V_neu bereits eine gültige Einweisung existiert, kein Überschreiben."""
+    katalog = InMemoryKatalogRepository()
+    bibliothek = InMemoryBibliothekRepository()
+    einweisungen = InMemoryEinweisungsnachweisRepository()
+    benutzer_repo = InMemoryBenutzerRepository()
+    benutzer_repo.save(_pruefer())
+    registriere_standard_vorlagen(bibliothek, "vorlage-a")
+
+    entwurf = EntwurfAnlegen(katalog).execute(
+        produktkodierung="KODE-3",
+        prozedur_schritte=(
+            ProzedurSchrittEntwurf(
+                schritt_id="s1",
+                vorlage_id="vorlage-a",
+                ist_pflicht=True,
+                reihenfolge=1,
+            ),
+        ),
+    )
+    v1 = ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id
+    )
+    EinweisungAnlegen(einweisungen, benutzer_repo, katalog).execute(
+        benutzer_id="pruefer-1",
+        version_id=v1.version_id,
+        eingewiesen_durch="admin",
+    )
+
+    original_save_version = katalog.save_version
+
+    def save_version_mit_vorbefuellter_einweisung(version):
+        original_save_version(version)
+        einweisungen.save(
+            Einweisungsnachweis.anlegen(
+                benutzer_id="pruefer-1",
+                version_id=version.version_id,
+                eingewiesen_durch="abteilungsleiter",
+                bemerkung="Bereits auf V_neu",
+            )
+        )
+
+    katalog.save_version = save_version_mit_vorbefuellter_einweisung  # type: ignore[method-assign]
+
+    v2 = ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(
+        entwurf.produktdefinition_id,
+        einweisung_uebernehmen=True,
+        eingewiesen_durch="admin",
+        einweisungen=einweisungen,
+    )
+    auf_v2 = einweisungen.get_gueltige(benutzer_id="pruefer-1", version_id=v2.version_id)
+    assert auf_v2 is not None
+    assert auf_v2.bemerkung == "Bereits auf V_neu"
+    assert auf_v2.uebernommen_bei_publish is False
+    assert len(einweisungen.list_fuer_benutzer_version(
+        benutzer_id="pruefer-1", version_id=v2.version_id
+    )) == 1

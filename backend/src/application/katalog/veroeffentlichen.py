@@ -75,6 +75,13 @@ class ProduktdefinitionVeroeffentlichen:
             for alt in einweisungen.list_gueltige_fuer_version(v_alt):
                 if not alt.ist_gueltig(jetzt=jetzt):
                     continue
+                if (
+                    einweisungen.get_gueltige(
+                        benutzer_id=alt.benutzer_id, version_id=version.version_id
+                    )
+                    is not None
+                ):
+                    continue
                 neu = alt.uebernehmen_auf_version(
                     neue_version_id=version.version_id,
                     eingewiesen_durch=eingewiesen_durch,

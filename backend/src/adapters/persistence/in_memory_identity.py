@@ -6,7 +6,7 @@ from datetime import datetime
 
 from domain.identity.benutzer import Benutzer
 from domain.identity.berechtigungsprofil import Berechtigungsprofil
-from domain.identity.einweisungsnachweis import Einweisungsnachweis
+from domain.identity.einweisungsnachweis import EinweisungBereitsGueltig, Einweisungsnachweis
 from domain.identity.typen import EinweisungsStatus
 from ports.session_store import SessionDaten
 
@@ -109,6 +109,17 @@ class InMemoryEinweisungsnachweisRepository:
         self._by_id: dict[str, Einweisungsnachweis] = {}
 
     def save(self, einweisung: Einweisungsnachweis) -> None:
+        if einweisung.status == EinweisungsStatus.GUELTIG:
+            for existing in self._by_id.values():
+                if (
+                    existing.einweisung_id != einweisung.einweisung_id
+                    and existing.benutzer_id == einweisung.benutzer_id
+                    and existing.version_id == einweisung.version_id
+                    and existing.status == EinweisungsStatus.GUELTIG
+                ):
+                    raise EinweisungBereitsGueltig(
+                        "Es existiert bereits eine gültige Einweisung für Benutzer und Version"
+                    )
         self._by_id[einweisung.einweisung_id] = einweisung
 
     def get(self, einweisung_id: str) -> Einweisungsnachweis | None:

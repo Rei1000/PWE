@@ -17,3 +17,18 @@ def require_rollen(benutzer: Benutzer, *rollen: Systemrolle) -> None:
         return
     if not any(r in benutzer.rollen for r in rollen):
         raise NichtBerechtigt("Keine Berechtigung für diese Aktion")
+
+
+def require_katalog_bearbeiten(benutzer: Benutzer) -> None:
+    """Bibliothek CRUD und Entwurfsbearbeitung (ADR-0025)."""
+    require_rollen(
+        benutzer,
+        Systemrolle.ADMINISTRATOR,
+        Systemrolle.QM,
+        Systemrolle.ABTEILUNGSLEITER,
+    )
+
+
+def require_katalog_veroeffentlichen(benutzer: Benutzer) -> None:
+    """Publish und Einweisungsübernahme-Flag (ADR-0025)."""
+    require_rollen(benutzer, Systemrolle.ADMINISTRATOR, Systemrolle.QM)

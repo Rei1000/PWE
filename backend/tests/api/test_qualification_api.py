@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from adapters.persistence.in_memory import InMemoryKatalogRepository
 from api.app import create_app
+from api.auth_settings import CSRF_HEADER
 from api.deps import in_memory_deps
 from domain.identity.berechtigungsprofil import Berechtigungsprofil
 from domain.identity.einweisungsnachweis import Einweisungsnachweis
@@ -217,3 +218,87 @@ def test_fremd_prueflauf_mutation_403():
             json={"art": "kommentar", "payload": {"text": "x"}},
         )
         assert r.status_code == 403
+
+
+def test_abgelaufene_einweisung_neue_anlegen_erlaubt():
+    app, deps = _app_with_version()
+    with TestClient(app) as client:
+        me = client.get("/auth/me").json()
+        deps.einweisung_repo.save(
+            Einweisungsnachweis.anlegen(
+                benutzer_id=me["benutzer_id"],
+                version_id="ver-1",
+                eingewiesen_durch="admin",
+                gueltig_bis=date.today() - timedelta(days=1),
+            )
+        )
+        r = client.post(
+            "/identity/einweisungen",
+            json={"benutzer_id": me["benutzer_id"], "version_id": "ver-1"},
+        )
+        assert r.status_code == 201, r.text
+        assert r.json()["status"] == "gueltig"
+
+
+def test_pruefer_katalog_entwurf_403():
+    from domain.identity.benutzer import Benutzer, PasswortHash
+    from domain.identity.typen import BenutzerStatus, Systemrolle
+    from starlette.testclient import TestClient as RawTestClient
+
+    deps = in_memory_deps(seed_admin=False)
+    hasher = deps.passwort_hasher
+    deps.benutzer_repo.save(
+        Benutzer.anlegen(
+            login="nur-pruefer",
+            anzeigename="Nur Prüfer",
+            passwort_hash=hasher.hash("secret"),
+            rollen=frozenset({Systemrolle.PRUEFER}),
+            status=BenutzerStatus.AKTIV,
+        )
+    )
+    app = create_app(deps)
+    with RawTestClient(app) as client:
+        login = client.post("/auth/login", json={"login": "nur-pruefer", "passwort": "secret"})
+        assert login.status_code == 200
+        headers = {CSRF_HEADER: login.json()["csrf_token"]}
+        r = client.post(
+            "/katalog/entwuerfe",
+            json={
+                "produktkodierung": "9999999999",
+                "prozedur_schritte": [],
+                "sollbestueckung": [],
+            },
+            headers=headers,
+        )
+        assert r.status_code == 403
+        assert r.json()["code"] == "nicht_berechtigt"
+
+
+def test_pruefer_publish_403():
+    from domain.identity.benutzer import Benutzer, PasswortHash
+    from domain.identity.typen import BenutzerStatus, Systemrolle
+    from starlette.testclient import TestClient as RawTestClient
+
+    deps = in_memory_deps(seed_admin=False)
+    hasher = deps.passwort_hasher
+    deps.benutzer_repo.save(
+        Benutzer.anlegen(
+            login="nur-pruefer",
+            anzeigename="Nur Prüfer",
+            passwort_hash=hasher.hash("secret"),
+            rollen=frozenset({Systemrolle.PRUEFER}),
+            status=BenutzerStatus.AKTIV,
+        )
+    )
+    app = create_app(deps)
+    with RawTestClient(app) as client:
+        login = client.post("/auth/login", json={"login": "nur-pruefer", "passwort": "secret"})
+        assert login.status_code == 200
+        headers = {CSRF_HEADER: login.json()["csrf_token"]}
+        r = client.post(
+            "/katalog/entwuerfe/pd-x/veroeffentlichen",
+            json={},
+            headers=headers,
+        )
+        assert r.status_code == 403
+        assert r.json()["code"] == "nicht_berechtigt"

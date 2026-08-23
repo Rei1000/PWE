@@ -8,6 +8,7 @@ from domain.identity.benutzer import Benutzer
 from domain.identity.berechtigungsprofil import Berechtigungsprofil
 from domain.identity.einweisungsnachweis import EinweisungBereitsGueltig, Einweisungsnachweis
 from domain.identity.typen import EinweisungsStatus
+from domain.shared.errors import InvariantViolation
 from ports.session_store import SessionDaten
 
 
@@ -95,11 +96,9 @@ class InMemoryBerechtigungsprofilRepository:
         return list(self._profile.values())
 
     def delete(self, profil_id: str) -> None:
-        self._profile.pop(profil_id, None)
-        for bid, pids in list(self._benutzer_profile.items()):
-            pids.discard(profil_id)
-            if not pids:
-                del self._benutzer_profile[bid]
+        raise InvariantViolation(
+            "Berechtigungsprofile dürfen in V1 nicht hart gelöscht werden — deaktivieren"
+        )
 
     def profil_ids_fuer_benutzer(self, benutzer_id: str) -> frozenset[str]:
         return frozenset(self._benutzer_profile.get(benutzer_id, ()))

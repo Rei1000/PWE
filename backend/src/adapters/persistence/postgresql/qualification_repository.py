@@ -16,6 +16,7 @@ from adapters.persistence.postgresql.schema import (
 from domain.identity.berechtigungsprofil import Berechtigungsprofil
 from domain.identity.einweisungsnachweis import Einweisungsnachweis
 from domain.identity.typen import EinweisungsStatus
+from domain.shared.errors import InvariantViolation
 
 
 def _profil_to_domain(
@@ -109,17 +110,9 @@ class PostgresBerechtigungsprofilRepository:
         return [_profil_to_domain(r, _load_pd_ids(self._session, r.profil_id)) for r in rows]
 
     def delete(self, profil_id: str) -> None:
-        self._session.execute(
-            delete(BenutzerProfilRow).where(BenutzerProfilRow.profil_id == profil_id)
+        raise InvariantViolation(
+            "Berechtigungsprofile dürfen in V1 nicht hart gelöscht werden — deaktivieren"
         )
-        self._session.execute(
-            delete(ProfilProduktdefinitionRow).where(
-                ProfilProduktdefinitionRow.profil_id == profil_id
-            )
-        )
-        row = self._session.get(BerechtigungsprofilRow, profil_id)
-        if row is not None:
-            self._session.delete(row)
 
     def profil_ids_fuer_benutzer(self, benutzer_id: str) -> frozenset[str]:
         stmt = select(BenutzerProfilRow.profil_id).where(

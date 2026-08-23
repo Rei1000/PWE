@@ -49,6 +49,15 @@ export const abschlussResponseSchema = z.object({
   snapshot_id: z.string(),
 });
 
+export const fotoNachweisResponseSchema = z.object({
+  nachweis_id: z.string(),
+  art: z.literal("foto"),
+  datei_id: z.string(),
+  mime_type: z.string(),
+  groesse_bytes: z.number().int(),
+  dateiname: z.string().nullable().optional(),
+});
+
 export const nachweisDetailSchema = z.object({
   nachweis_id: z.string(),
   art: z.string(),
@@ -121,3 +130,5 @@ export type AutomatisierungAusfuehrenResponse = z.infer<
   typeof automatisierungAusfuehrenResponseSchema
 >;
 export type AutomatisierungFehlerart = z.infer<typeof automatisierungFehlerartSchema>;
+export type FotoNachweisResponse = z.infer<typeof fotoNachweisResponseSchema>;
+export type NachweisDetail = z.infer<typeof nachweisDetailSchema>;

@@ -70,6 +70,22 @@ export async function apiFetchBlob(path: string, accept = "application/pdf"): Pr
   return response.blob();
 }
 
+/** Multipart-Upload — kein Content-Type setzen (Boundary durch Browser). */
+export async function apiPostMultipart<T>(path: string, formData: FormData): Promise<T> {
+  const url = `${getApiBaseUrl()}${path}`;
+  const response = await fetch(url, {
+    method: "POST",
+    body: formData,
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw await parseErrorResponse(response);
+  }
+
+  return (await response.json()) as T;
+}
+
 export function apiPost<T>(path: string, body?: unknown): Promise<T> {
   return apiFetch<T>(path, {
     method: "POST",

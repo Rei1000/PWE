@@ -160,3 +160,163 @@ def test_audit_nur_admin():
         assert client.get("/identity/audit", headers=headers).status_code == 403
         headers = _login(client, "admin", "a")
         assert client.get("/identity/audit", headers=headers).status_code == 200
+
+
+def test_force_change_blockiert_identity_und_prueflauf():
+    deps = in_memory_deps(seed_admin=False)
+    hasher = deps.passwort_hasher
+    deps.benutzer_repo.save(
+        Benutzer.anlegen(
+            login="force",
+            anzeigename="F",
+            passwort_hash=hasher.hash("alt"),
+            rollen=frozenset({Systemrolle.ADMINISTRATOR, Systemrolle.PRUEFER}),
+            status=BenutzerStatus.AKTIV,
+            passwortwechsel_erforderlich=True,
+        )
+    )
+    app = create_app(deps)
+    with RawTestClient(app) as client:
+        headers = _login(client, "force", "alt")
+        assert client.get("/identity/benutzer", headers=headers).status_code == 403
+        assert client.get("/identity/profile", headers=headers).status_code == 403
+        assert (
+            client.post(
+                "/prueflaeufe",
+                json={"produktkodierung": "1234567890", "pruefobjekt_kennung": "X"},
+                headers=headers,
+            ).status_code
+            == 403
+        )
+
+
+def test_einweisung_nur_fuer_aktiven_benutzer():
+    from domain.katalog.version import ProduktdefinitionsVersion
+
+    deps = in_memory_deps()
+    deps.katalog.register_aktive_version(
+        ProduktdefinitionsVersion(
+            version_id="ver-e1",
+            produktdefinition_id="pd-e1",
+            produktkodierung="1111111111",
+            prozedur_schritte=(),
+        )
+    )
+    app = create_app(deps)
+    with TestClient(app) as client:
+        neu = client.post(
+            "/identity/benutzer",
+            json={
+                "login": "einw-neu",
+                "anzeigename": "N",
+                "passwort": "geheim-1",
+                "rollen": ["pruefer"],
+            },
+        )
+        assert neu.status_code == 201
+        bid = neu.json()["benutzer_id"]
+        r = client.post(
+            "/identity/einweisungen",
+            json={"benutzer_id": bid, "version_id": "ver-e1"},
+        )
+        assert r.status_code == 409
+
+
+def test_sperren_invalidiert_alle_sessions():
+    from datetime import UTC, datetime
+
+    from ports.session_store import SessionDaten
+
+    deps = in_memory_deps()
+    hasher = deps.passwort_hasher
+    ziel = Benutzer.anlegen(
+        login="ziel",
+        anzeigename="Z",
+        passwort_hash=hasher.hash("z"),
+        rollen=frozenset({Systemrolle.PRUEFER}),
+        status=BenutzerStatus.AKTIV,
+        benutzer_id="ziel-1",
+    )
+    deps.benutzer_repo.save(ziel)
+    now = datetime.now(UTC)
+    for sid in ("s1", "s2"):
+        deps.session_store.speichern(
+            SessionDaten(
+                session_id=sid,
+                benutzer_id="ziel-1",
+                csrf_token="c",
+                erzeugt_am=now,
+                zuletzt_gesehen_am=now,
+            )
+        )
+    app = create_app(deps)
+    with TestClient(app) as client:
+        assert client.post("/identity/benutzer/ziel-1/sperren").status_code == 200
+    assert deps.session_store.laden("s1") is None
+    assert deps.session_store.laden("s2") is None
+
+
+def test_profil_deaktivieren_blockiert_start_lauf_bleibt():
+    from domain.identity.berechtigungsprofil import Berechtigungsprofil
+    from domain.identity.einweisungsnachweis import Einweisungsnachweis
+    from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
+
+    deps = in_memory_deps()
+    deps.katalog.register_aktive_version(
+        ProduktdefinitionsVersion(
+            version_id="ver-p",
+            produktdefinition_id="pd-p",
+            produktkodierung="2222222222",
+            prozedur_schritte=(
+                MaterialisierterProzedurSchritt(
+                    schritt_id="s1", vorlage_id="v1", ist_pflicht=True, reihenfolge=1
+                ),
+            ),
+        )
+    )
+    app = create_app(deps)
+    with TestClient(app) as client:
+        me = client.get("/auth/me").json()
+        profil = Berechtigungsprofil.anlegen(
+            bezeichnung="P", produktdefinition_ids={"pd-p"}
+        )
+        deps.profile_repo.save(profil)
+        deps.profile_repo.benutzer_zuordnen(
+            profil_id=profil.profil_id, benutzer_id=me["benutzer_id"]
+        )
+        deps.einweisung_repo.save(
+            Einweisungsnachweis.anlegen(
+                benutzer_id=me["benutzer_id"],
+                version_id="ver-p",
+                eingewiesen_durch="admin",
+            )
+        )
+        ok = client.post(
+            "/prueflaeufe",
+            json={"produktkodierung": "2222222222", "pruefobjekt_kennung": "X"},
+        )
+        assert ok.status_code == 201, ok.text
+        assert (
+            client.post(f"/identity/profile/{profil.profil_id}/deaktivieren").status_code
+            == 200
+        )
+        blocked = client.post(
+            "/prueflaeufe",
+            json={"produktkodierung": "2222222222", "pruefobjekt_kennung": "Y"},
+        )
+        assert blocked.status_code == 403
+        pid = ok.json()["prueflauf_id"]
+        cont = client.post(
+            f"/prueflaeufe/{pid}/schritte/s1/nachweise",
+            json={"art": "kommentar", "payload": {"text": "ok"}},
+        )
+        assert cont.status_code == 201, cont.text
+        assert (
+            client.post(f"/identity/profile/{profil.profil_id}/aktivieren").status_code
+            == 200
+        )
+        again = client.post(
+            "/prueflaeufe",
+            json={"produktkodierung": "2222222222", "pruefobjekt_kennung": "Z"},
+        )
+        assert again.status_code == 201, again.text

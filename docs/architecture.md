@@ -53,7 +53,7 @@ Leitprinzipien:
 | **Katalog** | Design Time | Produktdefinition, ProduktdefinitionsVersion, Bibliothek, Sollvorgaben, Sollbestückung, Aktivierungsregeln |
 | **Prüfausführung** | Run Time | Prüflauf, PrüfschrittDurchführung, Nachweise, Beurteilungen, Routine-Orchestrierung |
 | **Protokoll** | Post-Run Time | ProtokollSnapshot, Archiv |
-| **Identity** | Querschnitt | Benutzer, Systemrollen, Berechtigungsprofile, Einweisungsnachweise, Prüferpräferenzen ([ADR-0023](adr/0023-identity-bounded-context.md)) |
+| **Identity** | Querschnitt | Benutzer, Systemrollen, Berechtigungsprofile, Einweisungsnachweise, Identity-Audit, Prüferpräferenzen ([ADR-0023](adr/0023-identity-bounded-context.md)) |
 | **Auswertung** | Read Model | Dashboard, Statistiken |
 
 **Kein eigener Context:** Gerätekommunikation — erfolgt über `ExternesKommandoPort` und Adapter (z. B. `com/`).
@@ -71,9 +71,21 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 | **Katalog** | Produktdefinition, ProduktdefinitionsVersion, Prüfprozedur, ProzedurSchritt, PrüfschrittVorlage, Routine, Externes Kommando | Entwurf änderbar; Version unveränderlich |
 | **Prüfausführung** | Prüflauf | Referenz auf ProduktdefinitionsVersion; enthält PrüfschrittDurchführungen und Nachweise |
 | **Protokoll** | ProtokollSnapshot | Unveränderlich nach Erstellung |
-| **Identity** | Benutzer, Berechtigungsprofil, Einweisungsnachweis | Rollen, Profile↔Produktdefinition-IDs, Einweisung↔Versions-IDs; nur ID-Referenzen zu Katalog |
+| **Identity** | Benutzer, Berechtigungsprofil, Einweisungsnachweis, Identity-Audit-Eintrag | Rollen, Profile↔Produktdefinition-IDs, Einweisung↔Versions-IDs; Benutzer-Lifecycle und Letzter-Admin-Invariante; nur ID-Referenzen zu Katalog |
 
-**Context-Grenzen Identity:** Identity besitzt die Zuordnung **Profil ↔ Produktdefinition**. Zwischen Identity, Katalog, Prüfausführung und Protokoll nur **IDs** — **keine Domain-Imports** zwischen den Contexts ([ADR-0023](adr/0023-identity-bounded-context.md)). Authentifizierung V1: Session-Cookie ([ADR-0024](adr/0024-authentication-v1.md)); Qualifikation: [ADR-0026](adr/0026-qualification-model.md).
+**Context-Grenzen Identity:** Identity besitzt die Zuordnung **Profil ↔ Produktdefinition** sowie Benutzer-Lifecycle, Passwortprozesse und append-only **Identity-Audit**. Zwischen Identity, Katalog, Prüfausführung und Protokoll nur **IDs** — **keine Domain-Imports** zwischen den Contexts ([ADR-0023](adr/0023-identity-bounded-context.md)). Authentifizierung V1: Session-Cookie ([ADR-0024](adr/0024-authentication-v1.md)); Qualifikation: [ADR-0026](adr/0026-qualification-model.md); Administration Backend: Gate **8.1c1** ✅ (UI folgt **8.1c2**).
+
+**Identity Administration (Gate 8.1c1 ✅, Backend):**
+
+| Thema | Umsetzung |
+|-------|-----------|
+| Benutzer-Lifecycle | Statusmaschine Neu → Aktiv ↔ Gesperrt → Archiviert; Archivieren statt Hard-Delete |
+| Letzter Administrator | Nach jeder Status-/Rollen-Mutation mindestens ein Benutzer mit Status **Aktiv** und Rolle **Administrator**; PostgreSQL `pg_advisory_xact_lock` in derselben UoW |
+| Force-Change | `passwortwechsel_erforderlich` — nach Login nur `/auth/me`, `/auth/logout`, `/auth/passwort` |
+| Passwort | Anlegen (Hash, Force-Change), Admin-Reset, Self-Change; Sessions invalidieren bei Reset/Self-Change sowie Sperren/Archivieren |
+| Profil aktiv/inaktiv | Deaktivieren statt Hard-Delete; nur **aktive** Profile zählen für Startregel; laufende Prüfläufe unberührt |
+| Identity-Audit | Append-only Persistenz + Admin-Read-API; keine Passwort-/Session-/CSRF-Daten in Details |
+| Admin-API | `/identity/benutzer`, Status, Rollen, Passwort-Reset, `/identity/audit` — **ohne** Frontend-Administrations-UI (Gate 8.1c2) |
 
 **Prüflauf-Zugriff (V1):** Start = Qualifikation; Schreiben = Ownership; Lesen = AuthN ohne Ownership ([ADR-0025](adr/0025-authorization.md) „Write narrowly / Read broadly“).
 
@@ -101,7 +113,7 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 - **Katalog:** Produktdefinition, ProduktdefinitionsVersion, Basisprodukt, Option, Kundenprofil, Prüfprozedur, ProzedurSchritt, PrüfschrittVorlage, Routine, Sollvorgabe, Sollbestückung, Aktivierungsregel, ExternesKommando.
 - **Prüfausführung:** Prüflauf, PrüfschrittDurchführung, Nachweis, Beurteilung, Pflichtschritt-Regeln, Routine-Ausführung.
 - **Protokoll:** ProtokollSnapshot, Archiv-Invarianten.
-- **Identity:** Benutzer, Systemrollen, Berechtigungsprofile, Einweisungsnachweise, Prüferpräferenzen.
+- **Identity:** Benutzer, Systemrollen, Berechtigungsprofile, Einweisungsnachweise, Identity-Audit, Prüferpräferenzen.
 
 ### Ports
 
@@ -115,7 +127,8 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 | `DruckPort` | Druck (zukünftig; Gate 8.4 nutzt Browser-PDF-Viewer, kein DruckPort) |
 | `DateiSpeicherPort` | Fotos, Dateien — Gate 8.3a ✅ ([ADR-0022](adr/0022-foto-nachweis-dateispeicher.md)) |
 | `BenutzerRepository` / `SessionStore` | Benutzer, Session — Gate **8.1a** ✅ ([ADR-0023](adr/0023-identity-bounded-context.md), [ADR-0024](adr/0024-authentication-v1.md)) |
-| `BerechtigungsprofilRepository` / `EinweisungsnachweisRepository` | Profile ↔ Produktdefinition-IDs, Einweisungen ↔ Versions-IDs — Gate **8.1b** 🔄 ([ADR-0026](adr/0026-qualification-model.md)) |
+| `BerechtigungsprofilRepository` / `EinweisungsnachweisRepository` | Profile ↔ Produktdefinition-IDs, Einweisungen ↔ Versions-IDs — Gate **8.1b** ✅ ([ADR-0026](adr/0026-qualification-model.md)) |
+| `IdentityAuditRepository` | Append-only Identity-Audit — Gate **8.1c1** ✅ |
 
 ### Adapter
 

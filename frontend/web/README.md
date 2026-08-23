@@ -69,7 +69,7 @@ Design-Time-Verwaltung der Bibliothek:
 | `/katalog/routinen` | Routinen-Liste; Editor unter `/katalog/routinen/neu` bzw. `/:routineId` |
 | `/katalog/vorlagen` | PrüfschrittVorlagen CRUD (`bezeichnung`, `beschreibung`) |
 
-- Kennzeichnung „Katalog-Setup / Laborbetrieb“ ohne Auth (ADR-0001)
+- Kennzeichnung „Katalog-Setup / Laborbetrieb“; Session-Authentifizierung erforderlich (Gate 8.1a)
 - Routinen: geordnete `kommando_ids`, Hoch/Runter — kein Drag-and-Drop
 - Keine Kommandoausführung in diesem Bereich
 
@@ -88,6 +88,14 @@ Design-Time-Editor für Produktdefinitions-Entwürfe — **kein** Prüflaufstart
 - Sollvorgaben: einfacher Key/Min/Max-Editor (Transport-Dict, keine Domain-Materialisierung)
 - Publish erzeugt neue Version (`version_id`); Entwurf bleibt bearbeitbar
 - Hoch/Runter-Reihenfolge — kein Drag-and-Drop
+
+### Identity Administration (Gate 8.1c1 Backend / 8.1c2 UI)
+
+Das **Backend** für Benutzerverwaltung, Passwort/Force-Change, Profile aktiv/inaktiv, Einweisungen und Audit ist vollständig über `/identity/*` und `/auth/*` verfügbar ([`docs/technical-domain/api.md`](../../docs/technical-domain/api.md)).
+
+**Frontend-Administration folgt in Gate 8.1c2** — aktuell keine UI für Benutzerliste, Rollen, Status, Passwort-Reset oder Audit. Force-Change-Flow im Frontend ist ebenfalls noch nicht implementiert; das Backend erzwingt `passwortwechsel_erforderlich` serverseitig.
+
+Katalog- und Prüflauf-UI erfordern eine gültige Session (Gate 8.1a); Qualifikation beim Prüflauf-Start (Gate 8.1b).
 
 ## Skripte
 

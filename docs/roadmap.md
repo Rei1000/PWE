@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 8.2–8.4 ✅ — Gate **8.1a** ✅; **8.1b** ✅; **8.1c1** Identity-Admin-Backend 🔄 auf `feat/gate-8-1c1-identity-admin-backend`; Gate 8.1 gesamt ⏳; Gate 9 ⏸ — Gate 7 ✅, Gate 6.3 ✅
+**▶ Aktueller Stand:** Gate 8.2–8.4 ✅ — Gate **8.1a** ✅; **8.1b** ✅; **8.1c1** Identity-Admin-Backend ✅ (PR [#53](https://github.com/Rei1000/PWE/pull/53), Merge `67fce4e`); Gate **8.1c** 🔄 (nächster Slice **8.1c2** UI); Gate 8.1 gesamt ⏳; Gate 9 ⏸ — Gate 7 ✅, Gate 6.3 ✅
 
 ---
 
@@ -206,8 +206,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 8.1 | **Identity & Qualification** (gesliced) | ⏳ | **P1** | 8.1a–8.1c · nach 8.2–8.4 ✅ |
 | 8.1a | **Identity Foundation** — Benutzer, Login, Authentifizierung, Systemrollen, Middleware, Session (ADR-0024), Benutzerstatus, Route Guards; `pruefer_id` = authentifizierter Benutzer | ✅ | **P1** | PR [#51](https://github.com/Rei1000/PWE/pull/51) — Merge `54decb9` · 8.1 |
 | 8.1b | **Qualification Engine** — Berechtigungsprofile ↔ Produktdefinition; Einweisungsnachweise ↔ ProduktdefinitionsVersion; Start nur mit Qualifikation; Publish-Regel „Einweisung übernehmen“ | ✅ | **P1** | PR [#52](https://github.com/Rei1000/PWE/pull/52) — Merge `8a39495` · 8.1a |
-| 8.1c | **Identity Administration** — Verwaltung Benutzer/Rollen/Profile/Einweisungen; Aktivieren/Sperren/Archivieren; Audit | 🔄 | P2 | 8.1c1 Backend 🔄 · 8.1c2 Frontend folgt · 8.1a, 8.1b |
-| 8.1c1 | **Identity Admin Backend** — Lifecycle, Passwort/Force-Change, Letzter-Admin, Profil aktiv/inaktiv, Audit append-only, Admin-API | 🔄 | **P1** | Feature-Branch `feat/gate-8-1c1-identity-admin-backend` · 8.1b |
+| 8.1c | **Identity Administration** — Verwaltung Benutzer/Rollen/Profile/Einweisungen; Aktivieren/Sperren/Archivieren; Audit | 🔄 | P2 | 8.1c1 Backend ✅ · **8.1c2** Frontend UI ⏳ · 8.1a, 8.1b |
+| 8.1c1 | **Identity Admin Backend** — Lifecycle, Passwort/Force-Change, Letzter-Admin, Profil aktiv/inaktiv, Audit append-only, Admin-API | ✅ | **P1** | PR [#53](https://github.com/Rei1000/PWE/pull/53) — Merge `67fce4e` (Feature `f7e80b7`) · 8.1b |
 
 ### Roadmap-Anpassung (2026-08-23) — Gate 8.1 Identity & Qualification
 
@@ -282,7 +282,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Thema | Gate | Begründung |
 |-------|------|------------|
-| Identity & Qualification (Gesamtfeature) | 8.1 | Gesliced 8.1a–c; 8.1a ✅; **8.1b** 🔄 auf Feature-Branch — nicht mehr pauschal ⏸ |
+| Identity & Qualification (Gesamtfeature) | 8.1 | Gesliced 8.1a–c; 8.1a ✅ · 8.1b ✅ · 8.1c1 ✅; **8.1c2** UI offen — nicht mehr pauschal ⏸ |
 | Vollständige Katalogverwaltung | 8.2 | historisch; Gate 8.2 inkl. Admin-UI inzwischen ✅ |
 | Legacy-Storage-Exit (`externes_kommando`) | 7.4+ | Alembic-Basis ✅ (Gate 7.5); physische Feldentfernung + Datenstrategie offen |
 | API In-Memory-Default | 7.1 | Dev/Test ohne `DATABASE_URL`; docker-compose setzt PostgreSQL (Gate 7.2) |
@@ -295,6 +295,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-23 | Gate **8.1c1** Identity Admin Backend ✅ — PR [#53](https://github.com/Rei1000/PWE/pull/53), Merge `67fce4e` (Feature `f7e80b7`); Scope: Benutzer-Lifecycle, Letzter-Admin, Passwort/Force-Change, Session-Invalidierung, Identity-Lesematrix, Profil aktiv/inaktiv, append-only Audit, Admin-/Read-API, Alembic `0005`; **ohne** Admin-UI; CI Backend **483**, PostgreSQL **43**, Frontend **113** | Nach-Merge-Dokumentation |
 | 2026-08-23 | Gate **8.1c1** Identity Admin Backend 🔄 auf `feat/gate-8-1c1-identity-admin-backend`; Gate 8.1b ✅ (PR #52); Gate 8.1c 🔄 | Feature-Branch-Status; kein Merge-Claim |
 | 2026-08-23 | Gate **8.1b** Qualification Engine 🔄 auf `feat/gate-8-1b-qualification-engine` (nicht gemerged); Gate 8.1a ✅; Gate 8.1 gesamt bleibt ⏳ | Feature-Branch-Status; kein Merge-Claim |
 | 2026-08-23 | Gate 8.1 neu ausgerichtet — **Identity & Qualification**; Slices **8.1a** Foundation, **8.1b** Qualification Engine, **8.1c** Administration; Rollen Admin/QM/Abteilungsleiter/Prüfer (Mehrfachrollen); drei Ebenen Rolle/Profil/Einweisung; Benutzerstatus Neu/Aktiv/Gesperrt/Archiviert; Status ⏳, nächster Slice **8.1a**; Gate 9.1-Bezug auf 8.1 angepasst | Architekturprüfung Identity & Qualification; „Auth“ allein zu eng |
@@ -352,6 +353,6 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.1c1 — Identity Admin Backend** 🔄 in Arbeit (Feature-Branch `feat/gate-8-1c1-identity-admin-backend`; P1). Gate **8.1a/8.1b** ✅.
+**Gate 8.1c2 — Identity Administration UI** ⏳ (Frontend für Benutzer-/Profil-/Einweisungsverwaltung und Force-Change; P2). Gate **8.1a/8.1b/8.1c1** ✅.
 
-Reihenfolge: **8.1a ✅ → 8.1b ✅ → 8.1c1 🔄 → 8.1c2**. Gate 8.2–8.4 bleiben ✅. Gate 9 bleibt ⏸ bis nach Gate 8.1 (mind. Foundation). Offene Follow-ups (Storage Exit, PDF-Fotoeinbettung, Foto-Löschen, S3, …) bleiben P2 und sind **kein** Ersatz für 8.1c.
+Reihenfolge: **8.1a ✅ → 8.1b ✅ → 8.1c1 ✅ → 8.1c2**. Gate 8.1c (Gesamtfeature) bleibt 🔄 bis 8.1c2 abgeschlossen. Gate 8.2–8.4 bleiben ✅. Gate 9 bleibt ⏸ bis nach Gate 8.1. Offene Follow-ups (Storage Exit, PDF-Fotoeinbettung, Foto-Löschen, S3, …) bleiben P2 und sind **kein** Ersatz für 8.1c2.

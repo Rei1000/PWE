@@ -92,6 +92,9 @@ class BenutzerRow(Base):
     status: Mapped[str] = mapped_column(String(32), nullable=False)
     passwort_hash: Mapped[str] = mapped_column(Text, nullable=False)
     rollen_json: Mapped[str] = mapped_column(Text, nullable=False)
+    passwortwechsel_erforderlich: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
 
 
 class IdentitySessionRow(Base):
@@ -110,6 +113,19 @@ class BerechtigungsprofilRow(Base):
     profil_id: Mapped[str] = mapped_column(String(36), primary_key=True)
     bezeichnung: Mapped[str] = mapped_column(String(256), nullable=False)
     beschreibung: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    aktiv: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+
+class IdentityAuditRow(Base):
+    __tablename__ = "identity_audit"
+
+    audit_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    akteur_benutzer_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    ziel_benutzer_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    aktion: Mapped[str] = mapped_column(String(64), nullable=False)
+    zeitpunkt: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    referenz_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    details_json: Mapped[str] = mapped_column(Text, nullable=False)
 
 
 class ProfilProduktdefinitionRow(Base):

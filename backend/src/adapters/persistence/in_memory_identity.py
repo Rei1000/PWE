@@ -29,6 +29,25 @@ class InMemoryBenutzerRepository:
             return None
         return self._by_id.get(bid)
 
+    def list_all(self, *, for_update: bool = False) -> list[Benutzer]:
+        return list(self._by_id.values())
+
+
+class InMemoryIdentityAuditRepository:
+    def __init__(self) -> None:
+        self._items: dict[str, object] = {}
+
+    def append(self, eintrag) -> None:
+        if eintrag.audit_id in self._items:
+            raise ValueError(f"Audit {eintrag.audit_id} existiert bereits")
+        self._items[eintrag.audit_id] = eintrag
+
+    def get(self, audit_id: str):
+        return self._items.get(audit_id)
+
+    def list_all(self) -> list:
+        return sorted(self._items.values(), key=lambda e: e.zeitpunkt, reverse=True)
+
 
 class InMemorySessionStore:
     def __init__(self) -> None:
@@ -157,3 +176,6 @@ class InMemoryEinweisungsnachweisRepository:
             for e in self._by_id.values()
             if e.benutzer_id == benutzer_id and e.version_id == version_id
         ]
+
+    def list_fuer_benutzer(self, benutzer_id: str) -> list[Einweisungsnachweis]:
+        return [e for e in self._by_id.values() if e.benutzer_id == benutzer_id]

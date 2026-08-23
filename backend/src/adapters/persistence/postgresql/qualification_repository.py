@@ -26,6 +26,7 @@ def _profil_to_domain(
         bezeichnung=row.bezeichnung,
         beschreibung=row.beschreibung,
         produktdefinition_ids=pd_ids,
+        aktiv=bool(getattr(row, "aktiv", True)),
     )
 
 
@@ -78,11 +79,13 @@ class PostgresBerechtigungsprofilRepository:
                     profil_id=profil.profil_id,
                     bezeichnung=profil.bezeichnung,
                     beschreibung=profil.beschreibung,
+                    aktiv=profil.aktiv,
                 )
             )
         else:
             existing.bezeichnung = profil.bezeichnung
             existing.beschreibung = profil.beschreibung
+            existing.aktiv = profil.aktiv
             self._session.execute(
                 delete(ProfilProduktdefinitionRow).where(
                     ProfilProduktdefinitionRow.profil_id == profil.profil_id
@@ -205,5 +208,11 @@ class PostgresEinweisungsnachweisRepository:
         stmt = select(EinweisungsnachweisRow).where(
             EinweisungsnachweisRow.benutzer_id == benutzer_id,
             EinweisungsnachweisRow.version_id == version_id,
+        )
+        return [_row_to_einweisung(row) for row in self._session.scalars(stmt).all()]
+
+    def list_fuer_benutzer(self, benutzer_id: str) -> list[Einweisungsnachweis]:
+        stmt = select(EinweisungsnachweisRow).where(
+            EinweisungsnachweisRow.benutzer_id == benutzer_id
         )
         return [_row_to_einweisung(row) for row in self._session.scalars(stmt).all()]

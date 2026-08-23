@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 8.2–8.4 ✅ — Gate **8.1a** ✅; **8.1b** ✅; **8.1c1** Identity-Admin-Backend ✅ (PR [#53](https://github.com/Rei1000/PWE/pull/53), Merge `67fce4e`); Gate **8.1c** 🔄 (nächster Slice **8.1c2** UI); Gate 8.1 gesamt ⏳; Gate 9 ⏸ — Gate 7 ✅, Gate 6.3 ✅
+**▶ Aktueller Stand:** Gate **8.1–8.4** ✅ (Identity & Qualification inkl. Verwaltungs-UI abgeschlossen); Gate **9** ⏸ — Gate 7 ✅, Gate 6.3 ✅
 
 ---
 
@@ -184,8 +184,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Gate 8 — V1-Erweiterung
 
-**Geliefert (8.2–8.4):** ✅ Katalog-Admin, Foto/Storage, Browser-PDF.  
-**Offen:** Gate **8.1 Identity & Qualification** ⏳ (gesliced).
+**Geliefert:** ✅ Katalog-Admin (8.2), Foto/Storage (8.3), Browser-PDF (8.4), Identity & Qualification (8.1 inkl. Verwaltungs-UI).
 
 **Historisch (2026-07-14):** Solange [ADR-0001](adr/0001-v1-scope-deferrals.md) und Einzel-PC-Laborbetrieb galten, **Katalog-Admin vor Auth**, Foto/Storage getrennt.
 
@@ -203,11 +202,12 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 8.3a | Storage-Port und Nachweis-Integration | ✅ | P2 | PR [#42](https://github.com/Rei1000/PWE/pull/42) — Merge `f6cb6a0` (Feature `ba1ed79`, Fix `a61235c`, `e6f1f27`), [ADR-0022](adr/0022-foto-nachweis-dateispeicher.md) · 8.3 |
 | 8.3b | Frontend Foto-Upload | ✅ | P3 | PR [#44](https://github.com/Rei1000/PWE/pull/44) — Merge `2f874c0` (Feature `4df576f`, Fix `9d80632`) · 8.3a |
 | 8.4 | Protokoll öffnen / Browserdruck (PDF-Viewer) | ✅ | P3 | PR [#46](https://github.com/Rei1000/PWE/pull/46) — Merge `3f5b0e8` (Feature `d2c02d4`, Fix `ce78f1e`) · PDF (Gate 5.5) |
-| 8.1 | **Identity & Qualification** (gesliced) | ⏳ | **P1** | 8.1a–8.1c · nach 8.2–8.4 ✅ |
+| 8.1 | **Identity & Qualification** (gesliced) | ✅ | **P1** | 8.1a–8.1c2 · PR [#51](https://github.com/Rei1000/PWE/pull/51)–[#55](https://github.com/Rei1000/PWE/pull/55) |
 | 8.1a | **Identity Foundation** — Benutzer, Login, Authentifizierung, Systemrollen, Middleware, Session (ADR-0024), Benutzerstatus, Route Guards; `pruefer_id` = authentifizierter Benutzer | ✅ | **P1** | PR [#51](https://github.com/Rei1000/PWE/pull/51) — Merge `54decb9` · 8.1 |
 | 8.1b | **Qualification Engine** — Berechtigungsprofile ↔ Produktdefinition; Einweisungsnachweise ↔ ProduktdefinitionsVersion; Start nur mit Qualifikation; Publish-Regel „Einweisung übernehmen“ | ✅ | **P1** | PR [#52](https://github.com/Rei1000/PWE/pull/52) — Merge `8a39495` · 8.1a |
-| 8.1c | **Identity Administration** — Verwaltung Benutzer/Rollen/Profile/Einweisungen; Aktivieren/Sperren/Archivieren; Audit | 🔄 | P2 | 8.1c1 Backend ✅ · **8.1c2** Frontend UI ⏳ · 8.1a, 8.1b |
+| 8.1c | **Identity Administration** — Verwaltung Benutzer/Rollen/Profile/Einweisungen; Aktivieren/Sperren/Archivieren; Audit | ✅ | P2 | 8.1c1 Backend · 8.1c2 UI |
 | 8.1c1 | **Identity Admin Backend** — Lifecycle, Passwort/Force-Change, Letzter-Admin, Profil aktiv/inaktiv, Audit append-only, Admin-API | ✅ | **P1** | PR [#53](https://github.com/Rei1000/PWE/pull/53) — Merge `67fce4e` (Feature `f7e80b7`) · 8.1b |
+| 8.1c2 | **Identity Admin UI** — Verwaltungs-UI Benutzer/Profile/Einweisungen, Force-Change, Rollenmatrix UX | ✅ | P2 | PR [#55](https://github.com/Rei1000/PWE/pull/55) — Merge `1651fe7` · 8.1c1 |
 
 ### Roadmap-Anpassung (2026-08-23) — Gate 8.1 Identity & Qualification
 
@@ -264,7 +264,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | P2 | HEIC-Unterstützung | deferred |
 | P2 | PDF-Fotoeinbettung (`ProtokollErzeugungPort`) | deferred; kein nächster Gate-Slice |
 | P2 | Blob-Cache / Galerie / Kamera-Zugriff | deferred; bewusst nicht in 8.3b |
-| P2 | Auth / Download-Schutz | Gate 8.1 Identity & Qualification ⏳ (Fundament in 8.1a) |
+| P2 | Auth / Download-Schutz | Gate 8.1 Identity & Qualification ✅ |
 | P2 | Legacy-Storage-Exit (`externes_kommando` physisch entfernen) | separater Slice (Gate 7.4+); Follow-up, nicht nächster Gate-8-Slice |
 
 ---
@@ -273,7 +273,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | # | Schritt | Status | Prio | Begründung Deferred |
 |---|---------|--------|------|---------------------|
-| 9.1 | Auswertung (Read Model, Dashboard) | ⏸ | P4 | Eigener Bounded Context; nach stabilem Run-Time-Kern und **Gate 8.1 Identity & Qualification** (mind. 8.1a AuthN; Auswertung mit Nutzerbezug ideal nach 8.1b/c) |
+| 9.1 | Auswertung (Read Model, Dashboard) | ⏸ | P4 | Eigener Bounded Context; nach stabilem Run-Time-Kern und **Gate 8.1** ✅ |
 | 9.2 | Smartphone / Sync | ⏸ | P4 | [ADR-0001](adr/0001-v1-scope-deferrals.md) — Sync-Modell ungeklärt, höchstes technisches Risiko |
 
 ---
@@ -282,12 +282,12 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Thema | Gate | Begründung |
 |-------|------|------------|
-| Identity & Qualification (Gesamtfeature) | 8.1 | Gesliced 8.1a–c; 8.1a ✅ · 8.1b ✅ · 8.1c1 ✅; **8.1c2** UI offen — nicht mehr pauschal ⏸ |
+| Identity & Qualification (Gesamtfeature) | 8.1 | 8.1a–8.1c2 ✅ — vollständig abgeschlossen |
 | Vollständige Katalogverwaltung | 8.2 | historisch; Gate 8.2 inkl. Admin-UI inzwischen ✅ |
 | Legacy-Storage-Exit (`externes_kommando`) | 7.4+ | Alembic-Basis ✅ (Gate 7.5); physische Feldentfernung + Datenstrategie offen |
 | API In-Memory-Default | 7.1 | Dev/Test ohne `DATABASE_URL`; docker-compose setzt PostgreSQL (Gate 7.2) |
 | OpenAPI-Codegen / erweiterte 422-Details | 6.1+ | Optional mit Frontend Bootstrap |
-| Auswertung / Smartphone | 9.x | ADR-0001, eigener Context / höchstes Risiko; 9.1 nach Gate 8.1 |
+| Auswertung / Smartphone | 9.x | ADR-0001, eigener Context / höchstes Risiko; Gate 8.1 ✅ |
 
 ---
 
@@ -295,7 +295,9 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
-| 2026-08-23 | Gate **8.1c1** Identity Admin Backend ✅ — PR [#53](https://github.com/Rei1000/PWE/pull/53), Merge `67fce4e` (Feature `f7e80b7`); Scope: Benutzer-Lifecycle, Letzter-Admin, Passwort/Force-Change, Session-Invalidierung, Identity-Lesematrix, Profil aktiv/inaktiv, append-only Audit, Admin-/Read-API, Alembic `0005`; **ohne** Admin-UI; CI Backend **483**, PostgreSQL **43**, Frontend **113** | Nach-Merge-Dokumentation |
+| 2026-08-23 | Gate **8.1** Identity & Qualification ✅ — PR [#55](https://github.com/Rei1000/PWE/pull/55) (8.1c2 UI, Merge `1651fe7`); Slices 8.1a–8.1c2 vollständig; CI Backend **483**, PostgreSQL **43**, Frontend **127** | Nach-Merge-Dokumentation Gate 8.1 |
+| 2026-08-23 | Gate **8.1c2** Identity Admin UI ✅ — PR [#55](https://github.com/Rei1000/PWE/pull/55), Merge `1651fe7`; Verwaltungs-UI, Force-Change; bekannte P2: Read-Endpunkt Benutzer↔Profil | Nach-Merge-Dokumentation |
+| 2026-08-23 | Gate **8.1c1** Identity Admin Backend ✅ — PR [#53](https://github.com/Rei1000/PWE/pull/53), Merge `67fce4e` (Feature `f7e80b7`); Scope: Benutzer-Lifecycle, Letzter-Admin, Passwort/Force-Change, Session-Invalidierung, Identity-Lesematrix, Profil aktiv/inaktiv, append-only Audit, Admin-/Read-API, Alembic `0005`; CI Backend **483**, PostgreSQL **43**, Frontend **113** | Nach-Merge-Dokumentation |
 | 2026-08-23 | Gate **8.1c1** Identity Admin Backend 🔄 auf `feat/gate-8-1c1-identity-admin-backend`; Gate 8.1b ✅ (PR #52); Gate 8.1c 🔄 | Feature-Branch-Status; kein Merge-Claim |
 | 2026-08-23 | Gate **8.1b** Qualification Engine 🔄 auf `feat/gate-8-1b-qualification-engine` (nicht gemerged); Gate 8.1a ✅; Gate 8.1 gesamt bleibt ⏳ | Feature-Branch-Status; kein Merge-Claim |
 | 2026-08-23 | Gate 8.1 neu ausgerichtet — **Identity & Qualification**; Slices **8.1a** Foundation, **8.1b** Qualification Engine, **8.1c** Administration; Rollen Admin/QM/Abteilungsleiter/Prüfer (Mehrfachrollen); drei Ebenen Rolle/Profil/Einweisung; Benutzerstatus Neu/Aktiv/Gesperrt/Archiviert; Status ⏳, nächster Slice **8.1a**; Gate 9.1-Bezug auf 8.1 angepasst | Architekturprüfung Identity & Qualification; „Auth“ allein zu eng |
@@ -353,8 +355,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.1c2 — Identity Administration UI** ⏳ (PR [#55](https://github.com/Rei1000/PWE/pull/55); Frontend für Benutzer-/Profil-/Einweisungsverwaltung und Force-Change). Gate **8.1a/8.1b/8.1c1** ✅.
+**Gate 8 (8.1–8.4) gesamt ✅** — V1-Erweiterung abgeschlossen.
 
-**Bekannte Einschränkung (P2, kein Merge-Blocker):** Benutzer↔Berechtigungsprofil — Write-APIs vorhanden, kein Read-Endpunkt für vollständige Zuordnungsliste beim ersten UI-Laden; `sessionStorage` nur als Sitzungs-UX-Cache. Details: [`docs/technical-domain/api.md`](technical-domain/api.md) § Bekannte API-Einschränkung.
+**Nächster regulärer Slice:** **Gate 9** (V2+, ⏸) — Auswertung, Smartphone, Sync.
 
-Reihenfolge: **8.1a ✅ → 8.1b ✅ → 8.1c1 ✅ → 8.1c2**. Gate 8.1c (Gesamtfeature) bleibt 🔄 bis 8.1c2 abgeschlossen. Gate 8.2–8.4 bleiben ✅. Gate 9 bleibt ⏸ bis nach Gate 8.1. Offene Follow-ups (Storage Exit, PDF-Fotoeinbettung, Foto-Löschen, S3, …) bleiben P2 und sind **kein** Ersatz für 8.1c2.
+**P2-Follow-ups** (kein Bestandteil von Gate 8.1): u. a. Read-Endpunkt Benutzer↔Profil ([`api.md`](technical-domain/api.md) § Bekannte API-Einschränkung), Storage Exit, PDF-Fotoeinbettung, Entwurfs-LIST, Audit-Dashboard-UI.

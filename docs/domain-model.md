@@ -369,7 +369,7 @@ PWE beginnt fachlich beim **Qualitätsprozess**. Produktionsprozesse (Kundenauft
 | **Zweck** | Fachlicher Nachweis, dass ein Benutzer eine konkrete **ProduktdefinitionsVersion** prüfen darf. |
 | **Mindestinhalt** | Benutzer, Version, eingewiesen durch, Datum, optional gültig bis, Status, Bemerkung. |
 | **Beziehungen** | Bezieht sich auf eine veröffentlichte ProduktdefinitionsVersion. Ownership: Identity. |
-| **Invarianten** | Start eines Prüflaufs nur mit gültiger Einweisung für die aktive Version (zusätzlich Profil und Prüfer-Rolle). Neue Einweisung nur für Benutzer mit Status **Aktiv**. **Implementierungsstand:** Domain/Application/HTTP für Profile und Einweisungen Gate **8.1b** ✅; Benutzerverwaltung, Passwort, Profil aktiv/inaktiv, Identity-Audit Gate **8.1c1** ✅ (Backend); Verwaltungs-**UI** Gate **8.1c2**.
+| **Invarianten** | Start eines Prüflaufs nur mit gültiger Einweisung für die aktive Version (zusätzlich Profil und Prüfer-Rolle). Neue Einweisung nur für Benutzer mit Status **Aktiv**. **Implementierungsstand:** Gate **8.1** vollständig ✅ — Foundation (8.1a), Qualification Engine (8.1b), Administration Backend (8.1c1), Verwaltungs-UI (8.1c2). Bekannte P2 außerhalb Gate 8.1: kein Read-Endpunkt für bestehende Benutzer↔Profil-Zuordnungen ([`api.md`](technical-domain/api.md)). |
 
 #### Identity-Audit-Eintrag
 

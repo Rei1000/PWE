@@ -109,11 +109,12 @@ Mehrfachrollen sind erlaubt. Administratorrechte ersetzen keine fachliche Qualif
 
 1. **Authentifizierung** — Session-basierter Login; nur Benutzer mit Status **Aktiv** ([ADR-0024](adr/0024-authentication-v1.md)).
 2. **Qualifikation** — Start eines Prüflaufs nur mit Prüfer-Rolle, passendem **Berechtigungsprofil** (nur aktive Profile) und gültiger **Einweisung** für die aktive Version ([ADR-0026](adr/0026-qualification-model.md)).
-3. **Benutzerverwaltung (Backend, Gate 8.1c1)** — Anlegen mit Status **Neu**; Aktivieren/Sperren/Archivieren/Wiederherstellen; Rollenverwaltung nur Administrator; **Letzter-Administrator-Schutz**.
+3. **Benutzerverwaltung** — Anlegen mit Status **Neu**; Aktivieren/Sperren/Archivieren/Wiederherstellen; Rollenverwaltung nur Administrator; **Letzter-Administrator-Schutz** (Backend 8.1c1, UI 8.1c2).
 4. **Passwortverwaltung** — Admin-Reset und Self-Change; `passwortwechsel_erforderlich` bis erzwungener Änderung; keine Klartextpasswörter in Audit.
 5. **Profil-Lifecycle** — Berechtigungsprofile aktiv/inaktiv (Deaktivieren statt Löschen); Zuordnungen bleiben erhalten.
 6. **Einweisungen** — nur für Benutzer Status **Aktiv**; Widerruf historischer Einweisungen weiterhin möglich.
-7. **Identity-Audit** — append-only Protokoll administrativer Mutationen; Lesen nur Administrator; **keine** Admin-UI in 8.1c1 (folgt 8.1c2).
+7. **Identity-Audit** — append-only Protokoll administrativer Mutationen; Lesen nur Administrator (Backend-API); **keine** Audit-Dashboard-UI.
+8. **Verwaltungs-UI** — Benutzer, Profile, Einweisungen unter `/verwaltung`; Force-Change unter `/passwort-aendern` (Gate 8.1c2).
 
 ---
 

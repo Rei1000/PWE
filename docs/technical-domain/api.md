@@ -319,7 +319,7 @@ Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruef
 
 ## Authentifizierung / Identity
 
-Gate **8.1** ([ADR-0023](../adr/0023-identity-bounded-context.md)–[0027](../adr/0027-authenticated-pruefer-id.md)). **Stand:** **8.1a** ✅ · **8.1b** ✅ · **8.1c1** ✅ (Admin-Backend); Verwaltungs-**UI** folgt **8.1c2**.
+Gate **8.1** ([ADR-0023](../adr/0023-identity-bounded-context.md)–[0027](../adr/0027-authenticated-pruefer-id.md)). **Stand:** **8.1a** ✅ · **8.1b** ✅ · **8.1c1** ✅ · **8.1c2** ✅ (Verwaltungs-UI).
 
 | Thema | Stand | Slice |
 |-------|-------|-------|
@@ -330,10 +330,11 @@ Gate **8.1** ([ADR-0023](../adr/0023-identity-bounded-context.md)–[0027](../ad
 | Qualification | Profil ↔ Produktdefinition; Einweisung ↔ ProduktdefinitionsVersion; Startregel ([ADR-0026](../adr/0026-qualification-model.md)) | **8.1b** ✅ |
 | Force-Change | `passwortwechsel_erforderlich` — Middleware blockiert alle Pfade außer `/auth/me`, `/auth/logout`, `/auth/passwort` | **8.1c1** ✅ |
 | Identity Administration (Backend) | Benutzer-Lifecycle, Rollen, Passwort-Reset, Profil aktiv/inaktiv, append-only Audit | **8.1c1** ✅ |
+| Identity Administration (UI) | `/verwaltung` — Benutzer, Profile, Einweisungen; Force-Change; Rollenmatrix UX | **8.1c2** ✅ |
 
-### Identity-HTTP (Gate 8.1b / 8.1c1)
+### Identity-HTTP (Gate 8.1b / 8.1c1) und Verwaltungs-UI (8.1c2)
 
-Unter `/identity` (Session erforderlich; Rollen je Endpoint). **Keine Admin-UI** — nur HTTP-API (UI: Gate **8.1c2**).
+Unter `/identity` (Session erforderlich; Rollen je Endpoint). Verwaltungs-**UI** unter `/verwaltung` (Frontend, Gate **8.1c2** ✅).
 
 | Ressource | Operationen | Lesen (Admin/QM/Abt.) | Schreiben |
 |-----------|-------------|------------------------|-----------|
@@ -355,7 +356,7 @@ Für die Zuordnung **Benutzer ↔ Berechtigungsprofil** existieren Write-Operati
 | Erstes Laden | Bestehende serverseitige Zuordnungen sind in der UI **nicht vollständig rekonstruierbar** |
 | Security | Kein Security-Problem — Zuweisung/Entfernen bleibt serverseitig autorisiert |
 | Architektur | Kein Architekturbruch |
-| Gate 8.1c2 | **Kein Merge-Blocker** — bekannte API-/UX-Einschränkung |
+| Gate 8.1c2 | **Kein Bestandteil von Gate 8.1** — bekannte API-/UX-Einschränkung außerhalb des Scopes |
 
 **Mögliche spätere Verbesserung (noch kein verbindliches Design):** dedizierter Read-Contract, z. B. Benutzer-Detail inklusive `profil_ids` oder eigener Read-Endpunkt für Benutzer↔Profile.
 
@@ -386,4 +387,5 @@ Ohne veröffentlichte Produktdefinition schlägt `POST /prueflaeufe` mit `versio
 ## Bewusst offen (nach Merge)
 
 - OpenAPI-Versionierung / erweiterte Validierungsdetails (`errors[]` bei 422)
-- Identity-Administrations-**UI** und Audit-Dashboard (Gate **8.1c2**; Backend 8.1c1 ✅)
+- Audit-Dashboard-UI (Backend-Read-API `/identity/audit` vorhanden; bewusst nicht in Gate 8.1c2)
+- Read-Endpunkt Benutzer↔Profil (P2 — siehe § Bekannte API-Einschränkung)

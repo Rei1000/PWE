@@ -73,9 +73,9 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 | **Protokoll** | ProtokollSnapshot | Unveränderlich nach Erstellung |
 | **Identity** | Benutzer, Berechtigungsprofil, Einweisungsnachweis, Identity-Audit-Eintrag | Rollen, Profile↔Produktdefinition-IDs, Einweisung↔Versions-IDs; Benutzer-Lifecycle und Letzter-Admin-Invariante; nur ID-Referenzen zu Katalog |
 
-**Context-Grenzen Identity:** Identity besitzt die Zuordnung **Profil ↔ Produktdefinition** sowie Benutzer-Lifecycle, Passwortprozesse und append-only **Identity-Audit**. Zwischen Identity, Katalog, Prüfausführung und Protokoll nur **IDs** — **keine Domain-Imports** zwischen den Contexts ([ADR-0023](adr/0023-identity-bounded-context.md)). Authentifizierung V1: Session-Cookie ([ADR-0024](adr/0024-authentication-v1.md)); Qualifikation: [ADR-0026](adr/0026-qualification-model.md); Administration Backend: Gate **8.1c1** ✅ (UI folgt **8.1c2**).
+**Context-Grenzen Identity:** Identity besitzt die Zuordnung **Profil ↔ Produktdefinition** sowie Benutzer-Lifecycle, Passwortprozesse und append-only **Identity-Audit**. Zwischen Identity, Katalog, Prüfausführung und Protokoll nur **IDs** — **keine Domain-Imports** zwischen den Contexts ([ADR-0023](adr/0023-identity-bounded-context.md)). Authentifizierung V1: Session-Cookie ([ADR-0024](adr/0024-authentication-v1.md)); Qualifikation: [ADR-0026](adr/0026-qualification-model.md); Administration: Gate **8.1c1** ✅ (Backend), **8.1c2** ✅ (UI).
 
-**Identity Administration (Gate 8.1c1 ✅, Backend):**
+**Identity Administration (Gate 8.1c1 ✅ Backend, 8.1c2 ✅ UI):**
 
 | Thema | Umsetzung |
 |-------|-----------|
@@ -85,7 +85,8 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 | Passwort | Anlegen (Hash, Force-Change), Admin-Reset, Self-Change; Sessions invalidieren bei Reset/Self-Change sowie Sperren/Archivieren |
 | Profil aktiv/inaktiv | Deaktivieren statt Hard-Delete; nur **aktive** Profile zählen für Startregel; laufende Prüfläufe unberührt |
 | Identity-Audit | Append-only Persistenz + Admin-Read-API; keine Passwort-/Session-/CSRF-Daten in Details |
-| Admin-API | `/identity/benutzer`, Status, Rollen, Passwort-Reset, `/identity/audit` — **ohne** Frontend-Administrations-UI (Gate 8.1c2) |
+| Admin-API | `/identity/benutzer`, Status, Rollen, Passwort-Reset, `/identity/audit` |
+| Verwaltungs-UI | `/verwaltung` — Benutzer, Profile, Einweisungen; Force-Change `/passwort-aendern`; Rollenmatrix UX (Gate **8.1c2**); **kein** Audit-Dashboard |
 
 **Prüflauf-Zugriff (V1):** Start = Qualifikation; Schreiben = Ownership; Lesen = AuthN ohne Ownership ([ADR-0025](adr/0025-authorization.md) „Write narrowly / Read broadly“).
 

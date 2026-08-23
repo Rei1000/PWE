@@ -26,3 +26,8 @@ Langfristig relevante Architekturentscheidungen. Fachdomäne: `docs/domain-model
 | [0020](0020-pruefschritt-vorlage-materialisierung.md) | PrüfschrittVorlage — Bibliothek und Materialisierung (Gate 8.2b1) |
 | [0021](0021-entwurfsbearbeitung-http.md) | Erweiterte Entwurfsbearbeitung HTTP (Gate 8.2b2) |
 | [0022](0022-foto-nachweis-dateispeicher.md) | Foto-Nachweis und DateiSpeicherPort (Gate 8.3a) |
+| [0023](0023-identity-bounded-context.md) | Identity Bounded Context (Gate 8.1) |
+| [0024](0024-authentication-v1.md) | Authentication V1 — Session-Cookie (Gate 8.1) |
+| [0025](0025-authorization.md) | Authorization — Rollen, Profile, Einweisung (Gate 8.1) |
+| [0026](0026-qualification-model.md) | Qualification Model (Gate 8.1) |
+| [0027](0027-authenticated-pruefer-id.md) | Authentifizierter Benutzer statt freier pruefer_id (Gate 8.1) |

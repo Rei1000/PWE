@@ -29,11 +29,18 @@ Das Pflichtenheft beschreibt PC- und Smartphone-Nutzung, Export, Mehrarbeitsplat
 
 **Persönliche Schrittreihenfolge (Domain Model §12):** Rein **UI-Darstellung** in V1. ProtokollSnapshot und Beurteilungen folgen der **materialisierten Prozedurreihenfolge**, nicht der individuellen Sortierung.
 
+## Klarstellung (Gate 8.1 — Identity & Qualification)
+
+Die ursprüngliche V1-Annahme „ein Prüfer, eine Sitzung“ und der daraus abgeleitete **Laborbetrieb ohne Authentifizierung** (u. a. Katalog-Setup/Admin vor Auth) bleiben als **historischer Lieferkontext** gültig und werden durch dieses ADR **nicht rückwirkend umgedeutet**.
+
+**Gate 8.1** ([ADR-0023](0023-identity-bounded-context.md) ff.) **erweitert** diesen Rahmen bewusst: Identity & Qualification (Session-Auth, Rollen, Profile, Einweisungen) werden verbindlich eingeführt. „Kein Auth“ ist damit **kein Dauerzustand** mehr für den produktiven Mehrbenutzerpfad; Smartphone/Sync bleiben gemäß Abschnitt „V1 liefert nicht“ zurückgestellt.
+
 ## Konsequenzen
 
 - Kein Sync-ADR in V1 nötig
 - API/Frontend V1: nur PC-Web
 - Pflichtenheft-Features für Smartphone bleiben gültig, aber **priorisiert zurückgestellt**
+- Ab Gate 8.1: Authentifizierung und Qualifikation nach ADR-0023–0027; frühere „kein Auth“-Aussagen in Folgedokumenten beziehen sich auf den Vor-8.1-Laborstand
 
 ## Alternativen
 

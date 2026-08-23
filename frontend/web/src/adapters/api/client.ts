@@ -16,6 +16,17 @@ export function getApiBaseUrl(): string {
   return import.meta.env.VITE_API_BASE_URL ?? "/api";
 }
 
+const CSRF_COOKIE = "pwe_csrf";
+const CSRF_HEADER = "X-CSRF-Token";
+
+function readCookie(name: string): string | undefined {
+  if (typeof document === "undefined") {
+    return undefined;
+  }
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
 function buildHeaders(init?: RequestInit): HeadersInit {
   const headers: Record<string, string> = {
     Accept: "application/json",
@@ -24,6 +35,13 @@ function buildHeaders(init?: RequestInit): HeadersInit {
   const body = init?.body;
   if (body !== undefined && body !== null && typeof body === "string" && !headers["Content-Type"]) {
     headers["Content-Type"] = "application/json";
+  }
+  const method = (init?.method ?? "GET").toUpperCase();
+  if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
+    const csrf = readCookie(CSRF_COOKIE);
+    if (csrf && !headers[CSRF_HEADER]) {
+      headers[CSRF_HEADER] = csrf;
+    }
   }
   return headers;
 }
@@ -41,12 +59,17 @@ async function parseErrorResponse(response: Response): Promise<ApiError> {
   return new ApiError(detail, response.status, code);
 }
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+async function rawFetch(path: string, init?: RequestInit): Promise<Response> {
   const url = `${getApiBaseUrl()}${path}`;
-  const response = await fetch(url, {
+  return fetch(url, {
     ...init,
+    credentials: "include",
     headers: buildHeaders(init),
   });
+}
+
+export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await rawFetch(path, init);
 
   if (!response.ok) {
     throw await parseErrorResponse(response);
@@ -61,7 +84,10 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
 export async function apiFetchBlob(path: string, accept = "application/pdf"): Promise<Blob> {
   const url = `${getApiBaseUrl()}${path}`;
-  const response = await fetch(url, { headers: { Accept: accept } });
+  const response = await fetch(url, {
+    credentials: "include",
+    headers: buildHeaders({ headers: { Accept: accept } }),
+  });
 
   if (!response.ok) {
     throw await parseErrorResponse(response);
@@ -73,10 +99,16 @@ export async function apiFetchBlob(path: string, accept = "application/pdf"): Pr
 /** Multipart-Upload — kein Content-Type setzen (Boundary durch Browser). */
 export async function apiPostMultipart<T>(path: string, formData: FormData): Promise<T> {
   const url = `${getApiBaseUrl()}${path}`;
+  const csrf = readCookie(CSRF_COOKIE);
+  const headers: Record<string, string> = { Accept: "application/json" };
+  if (csrf) {
+    headers[CSRF_HEADER] = csrf;
+  }
   const response = await fetch(url, {
     method: "POST",
     body: formData,
-    headers: { Accept: "application/json" },
+    credentials: "include",
+    headers,
   });
 
   if (!response.ok) {

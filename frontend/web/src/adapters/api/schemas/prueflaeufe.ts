@@ -3,7 +3,6 @@ import { z } from "zod";
 export const prueflaufStartenRequestSchema = z.object({
   produktkodierung: z.string().min(1),
   pruefobjekt_kennung: z.string().min(1),
-  pruefer_id: z.string().min(1),
 });
 
 export const prueflaufResponseSchema = z.object({

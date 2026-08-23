@@ -324,11 +324,12 @@ Unter `/identity` (Session erforderlich; Rollen je Endpoint):
 
 Verwaltungs-UI folgt Gate **8.1c**.
 
-### Prüflauf: Qualifikation und Ownership (Gate 8.1b)
+### Prüflauf: Qualifikation, Ownership und Lesen (Gate 8.1b)
 
-- **`POST /prueflaeufe`:** Start nur mit gültiger Qualifikation (Prüfer-Rolle + passendes Profil + gültige Einweisung für die Version). Sonst **403** `qualifikation_unzureichend`. Qualifikation wird **nur hier** erzwungen — nicht erneut bei späteren Mutationen.
+- **Start** (`POST /prueflaeufe`): nur mit gültiger Qualifikation (Prüfer-Rolle + passendes Profil + gültige Einweisung). Sonst **403** `qualifikation_unzureichend`. Qualifikation **nur hier** — nicht bei späteren Mutationen oder Reads.
+- **Schreiben** (Nachweise, Foto, Automatisierung, Beurteilung, Abschluss): AuthN + Ownership (`Session-Benutzer == pruefer_id`) — sonst **403** `prueflauf_nicht_eigentuemer`.
+- **Lesen** (`GET` Prüflauf, Protokoll/PDF, Foto-Download): AuthN (Status Aktiv) — **bewusst ohne** Ownership, Qualifikation oder Profil. Ziel: Wissensfluss (Prüfer lernen voneinander; QM/Abteilungen brauchen Transparenz). Feinere Leserechte später möglich ([ADR-0025](../adr/0025-authorization.md)).
 - **Publish:** `POST /katalog/entwuerfe/{id}/veroeffentlichen` akzeptiert optional `einweisung_uebernehmen` (Default `false`) — übernimmt gültige Einweisungen auf die neue Version ([ADR-0026](../adr/0026-qualification-model.md)).
-- **Ownership:** Schreibende Prüflauf-Endpunkte (Nachweise, Automatisierung, Beurteilung, Abschluss, …) erfordern, dass der Session-Benutzer `pruefer_id` des Prüflaufs ist — sonst **403** `prueflauf_nicht_eigentuemer`. Read (`GET`) ohne Ownership-Zwang.
 
 ## Frontend-Vorbereitung (Katalog)
 

@@ -47,7 +47,7 @@ Administrator-/QM-/Abteilungsleiter-Rechte ersetzen keine der Punkte 3–4.
 
 - Gültige Einweisung: Status gültig und optional `gültig bis` nicht überschritten.
 - **Widerruf:** Status widerrufen → **neue Starts** mit dieser Version für den Benutzer sind blockiert.
-- **Laufende Prüfläufe** werden bei nachträglichem Widerruf **nicht rückwirkend fachlich verändert** (kein Mid-Run-Kill der Domänendaten). Fortsetzen unterliegt weiterhin AuthN und „Benutzer = Prüflauf-`pruefer_id`“ (sobald enforced).
+- **Laufende Prüfläufe** werden bei nachträglichem Widerruf **nicht rückwirkend fachlich verändert** (kein Mid-Run-Kill der Domänendaten). **Schreiben**/Fortsetzen: AuthN + Ownership (`Benutzer == pruefer_id`). **Lesen** (Prüflauf, Protokoll, PDF, Foto): nur AuthN — keine Qualifikation, kein Ownership ([ADR-0025](0025-authorization.md) „Read broadly“).
 
 ### Benutzerstatus
 

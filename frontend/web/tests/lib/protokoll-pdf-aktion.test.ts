@@ -11,40 +11,43 @@ describe("openProtokollPdfInViewer", () => {
     vi.restoreAllMocks();
   });
 
-  it("erzeugt Blob-URL, öffnet Tab und gibt URL nach Delay frei", () => {
+  it("erzeugt Blob-URL, öffnet per Anchor-Click und gibt URL nach Delay frei", () => {
     vi.useFakeTimers();
     const createObjectURL = vi.fn(() => "blob:protokoll-1");
     const revokeObjectURL = vi.fn();
-    const open = vi.fn(() => ({ closed: false }));
     vi.stubGlobal("URL", { ...URL, createObjectURL, revokeObjectURL });
-    vi.stubGlobal("window", { ...window, open });
+
+    const click = vi.fn();
+    const anchor = {
+      href: "",
+      target: "",
+      rel: "",
+      click,
+    } as unknown as HTMLAnchorElement;
+    const createElement = vi.spyOn(document, "createElement").mockReturnValue(anchor);
+    const appendChild = vi.spyOn(document.body, "appendChild").mockImplementation((node) => node);
+    const removeChild = vi.spyOn(document.body, "removeChild").mockImplementation((node) => node);
 
     const blob = new Blob([new Uint8Array([1, 2, 3])], { type: "application/pdf" });
-    const result = openProtokollPdfInViewer(blob);
+    openProtokollPdfInViewer(blob);
 
-    expect(result.ok).toBe(true);
     expect(createObjectURL).toHaveBeenCalledWith(blob);
-    expect(open).toHaveBeenCalledWith("blob:protokoll-1", "_blank", "noopener,noreferrer");
+    expect(createElement).toHaveBeenCalledWith("a");
+    expect(anchor.href).toBe("blob:protokoll-1");
+    expect(anchor.target).toBe("_blank");
+    expect(anchor.rel).toBe("noopener noreferrer");
+    expect(appendChild).toHaveBeenCalledWith(anchor);
+    expect(click).toHaveBeenCalledOnce();
+    expect(removeChild).toHaveBeenCalledWith(anchor);
     expect(revokeObjectURL).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(60_000);
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:protokoll-1");
     vi.useRealTimers();
-  });
 
-  it("revoked sofort und meldet Fehler wenn Popup blockiert", () => {
-    const createObjectURL = vi.fn(() => "blob:blocked");
-    const revokeObjectURL = vi.fn();
-    const open = vi.fn(() => null);
-    vi.stubGlobal("URL", { ...URL, createObjectURL, revokeObjectURL });
-    vi.stubGlobal("window", { ...window, open });
-
-    const blob = new Blob([new Uint8Array([1])], { type: "application/pdf" });
-    const result = openProtokollPdfInViewer(blob);
-
-    expect(result.ok).toBe(false);
-    expect(result.reason).toBe("popup_blocked");
-    expect(revokeObjectURL).toHaveBeenCalledWith("blob:blocked");
+    createElement.mockRestore();
+    appendChild.mockRestore();
+    removeChild.mockRestore();
   });
 });
 

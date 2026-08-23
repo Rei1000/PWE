@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 import { Download, ExternalLink, FileCheck, Loader2 } from "lucide-react";
-import { useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 
 import { fetchProtokollPdf, type AbschlussResponse } from "@/adapters/api";
@@ -26,12 +25,10 @@ export function AbschlussPage() {
   const { prueflaufId = "" } = useParams();
   const location = useLocation();
   const abschluss = (location.state as AbschlussLocationState | null)?.abschluss;
-  const [popupHinweis, setPopupHinweis] = useState<string | null>(null);
 
   const downloadMutation = useMutation({
     mutationFn: () => fetchProtokollPdf(prueflaufId),
     onSuccess: (blob) => {
-      setPopupHinweis(null);
       downloadProtokollPdfBlob(blob, `protokoll-${prueflaufId.slice(0, 8)}.pdf`);
     },
   });
@@ -39,14 +36,7 @@ export function AbschlussPage() {
   const openMutation = useMutation({
     mutationFn: () => fetchProtokollPdf(prueflaufId),
     onSuccess: (blob) => {
-      const result = openProtokollPdfInViewer(blob);
-      if (!result.ok) {
-        setPopupHinweis(
-          "Das Popup wurde blockiert. Bitte Popups erlauben oder „Protokoll-PDF herunterladen“ nutzen und die Datei lokal öffnen.",
-        );
-        return;
-      }
-      setPopupHinweis(null);
+      openProtokollPdfInViewer(blob);
     },
   });
 
@@ -91,7 +81,6 @@ export function AbschlussPage() {
           <Button
             type="button"
             onClick={() => {
-              setPopupHinweis(null);
               openMutation.reset();
               downloadMutation.reset();
               openMutation.mutate();
@@ -110,7 +99,6 @@ export function AbschlussPage() {
             type="button"
             variant="secondary"
             onClick={() => {
-              setPopupHinweis(null);
               openMutation.reset();
               downloadMutation.reset();
               downloadMutation.mutate();
@@ -127,11 +115,10 @@ export function AbschlussPage() {
           </Button>
         </div>
 
-        {popupHinweis && (
-          <p className="text-sm text-destructive" role="alert">
-            {popupHinweis}
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground">
+          „Anzeigen & Drucken“ öffnet das Protokoll im Browser. Drucken und Speichern erfolgen über
+          den PDF-Viewer. Falls kein neuer Tab erscheint, Popups prüfen oder die Datei herunterladen.
+        </p>
         <ApiErrorAlert error={aktionError} />
 
         <Link to="/" className="inline-block text-sm underline">

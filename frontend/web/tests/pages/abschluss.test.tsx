@@ -65,7 +65,6 @@ describe("AbschlussPage Gate 8.4", () => {
   it("öffnet PDF im Viewer nach Klick auf Anzeigen & Drucken", async () => {
     const blob = new Blob([new Uint8Array([1, 2])], { type: "application/pdf" });
     vi.mocked(prueflaeufeApi.fetchProtokollPdf).mockResolvedValue(blob);
-    vi.mocked(pdfAktion.openProtokollPdfInViewer).mockReturnValue({ ok: true });
 
     wrap(createElement(AbschlussPage));
 
@@ -90,22 +89,6 @@ describe("AbschlussPage Gate 8.4", () => {
       expect(screen.getByRole("alert").textContent).toMatch(/nicht gefunden|Prüflauf/i);
     });
     expect(pdfAktion.openProtokollPdfInViewer).not.toHaveBeenCalled();
-  });
-
-  it("zeigt Hinweis wenn Popup blockiert wird", async () => {
-    const blob = new Blob([new Uint8Array([1])], { type: "application/pdf" });
-    vi.mocked(prueflaeufeApi.fetchProtokollPdf).mockResolvedValue(blob);
-    vi.mocked(pdfAktion.openProtokollPdfInViewer).mockReturnValue({
-      ok: false,
-      reason: "popup_blocked",
-    });
-
-    wrap(createElement(AbschlussPage));
-    fireEvent.click(screen.getByRole("button", { name: /Anzeigen & Drucken/i }));
-
-    await waitFor(() => {
-      expect(screen.getByRole("alert").textContent).toMatch(/Popup|herunterladen/i);
-    });
   });
 
   it("lässt Download unverändert über downloadProtokollPdfBlob laufen", async () => {

@@ -1,24 +1,22 @@
 /** PDF-Ausgabeaktionen für die AbschlussPage (Gate 8.4) — kein window.print(). */
 
-export type OpenProtokollPdfResult =
-  | { ok: true }
-  | { ok: false; reason: "popup_blocked" };
-
 /**
  * Öffnet das Protokoll-PDF im nativen Browser-Viewer (neuer Tab).
+ * Nutzt Anchor+click statt window.open — unabhängig vom noopener-Rückgabewert.
  * Revoke verzögert, damit der Viewer die Blob-URL noch laden kann.
  */
-export function openProtokollPdfInViewer(blob: Blob): OpenProtokollPdfResult {
+export function openProtokollPdfInViewer(blob: Blob): void {
   const url = URL.createObjectURL(blob);
-  const opened = window.open(url, "_blank", "noopener,noreferrer");
-  if (!opened) {
-    URL.revokeObjectURL(url);
-    return { ok: false, reason: "popup_blocked" };
-  }
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.target = "_blank";
+  anchor.rel = "noopener noreferrer";
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
   window.setTimeout(() => {
     URL.revokeObjectURL(url);
   }, 60_000);
-  return { ok: true };
 }
 
 /** Erzwingt Datei-Download — bestehendes Speichern-Verhalten. */

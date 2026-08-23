@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { ApiError } from "@/adapters/api/client";
 import { fetchMe, type MeResponse } from "@/adapters/api/auth";
+import { darfIdentityLesen } from "@/lib/identityRoles";
 
 export const ME_QUERY_KEY = ["auth", "me"] as const;
 
@@ -37,4 +38,27 @@ export function RequireAuth() {
   }
 
   return <Outlet context={{ user: data satisfies MeResponse }} />;
+}
+
+/** Blockiert alle Routen außer Passwort-Änderung bei erzwungenem Passwortwechsel. */
+export function RequireNoForceChange() {
+  const location = useLocation();
+  const { data } = useCurrentUser();
+
+  if (data?.passwortwechsel_erforderlich) {
+    return <Navigate to="/passwort-aendern" replace state={{ from: location.pathname }} />;
+  }
+
+  return <Outlet />;
+}
+
+/** Verwaltungsbereich — nur Admin, QM, Abteilungsleiter (ADR-0025). */
+export function RequireIdentityAccess() {
+  const { data } = useCurrentUser();
+
+  if (!darfIdentityLesen(data)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
 }

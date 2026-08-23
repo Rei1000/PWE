@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
-import { login } from "@/adapters/api/auth";
+import { login, fetchMe } from "@/adapters/api/auth";
 import { ApiErrorAlert } from "@/components/ApiErrorAlert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,10 +30,17 @@ export function LoginPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) => login(values.login, values.passwort),
+    mutationFn: async (values: FormValues) => {
+      await login(values.login, values.passwort);
+      return fetchMe();
+    },
     onSuccess: async (user) => {
       qc.setQueryData(ME_QUERY_KEY, user);
-      navigate(from, { replace: true });
+      if (user.passwortwechsel_erforderlich) {
+        navigate("/passwort-aendern", { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     },
   });
 

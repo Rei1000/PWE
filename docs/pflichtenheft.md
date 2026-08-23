@@ -2,7 +2,7 @@
 
 Fachliche Anforderungen. Verbindliche Domänensprache: **`docs/domain-model.md`**.
 
-**V1/V2-Abgrenzung:** Der V1-Umfang und bewusst zurückgestellte Features (Smartphone, Sync, Dashboard, Auth, …) sind in [ADR-0001](adr/0001-v1-scope-deferrals.md) dokumentiert. Nicht als V1 umgesetzte Anforderungen in diesem Dokument sind Zielbild, nicht aktueller Implementierungsstand.
+**V1/V2-Abgrenzung:** Der V1-Umfang und bewusst zurückgestellte Features (Smartphone, Sync, Dashboard, …) sind in [ADR-0001](adr/0001-v1-scope-deferrals.md) dokumentiert. **Identity & Qualification** (Gate 8.1) erweitert den früheren Laborbetrieb ohne Auth — siehe Klarstellung in ADR-0001 und [ADR-0023](adr/0023-identity-bounded-context.md)–[0027](adr/0027-authenticated-pruefer-id.md). Nicht als V1 umgesetzte Anforderungen in diesem Dokument sind Zielbild, nicht aktueller Implementierungsstand.
 
 ---
 
@@ -36,8 +36,8 @@ PWE ist eine **konfigurierbare Prüf-Workflow-Engine** — keine Spezialsoftware
 - **Zentraler Schlüssel (erste Anwendung):** Die Artikelnummer (**Produktkodierung**) löst die passende **Produktdefinition** und deren aktive **ProduktdefinitionsVersion** auf.
 - **Benutzer und Systeme in der Umgebung:**
   - Prüfer (PC-Arbeitsplatz)
-  - Prüfer (Smartphone, parallele Nutzung im lokalen Netzwerk)
-  - Administratoren (Produktdefinitionen, Katalog, Konfiguration)
+  - Prüfer (Smartphone, parallele Nutzung im lokalen Netzwerk) — V2+
+  - Administrator, QM, Abteilungsleiter (Katalog-, Qualitäts- und Einweisungsverantwortung gemäß Rollenmodell)
   - Externes Prüfobjekt (in der ersten Anwendung: Ergometer über COM-Schnittstelle)
   - Drucker (Protokollausgabe)
   - Produktlaufkarte (Eingangsinformation aus der Produktion, optional)
@@ -50,8 +50,12 @@ PWE ist eine **konfigurierbare Prüf-Workflow-Engine** — keine Spezialsoftware
 
 | Gruppe | Bedürfnisse | Berechtigungen (grob) |
 |--------|-------------|------------------------|
-| Admin | Produktdefinitionen, Katalog, PrüfschrittVorlagen, Routinen, Prüfprozeduren, externe Kommandos, Systemeinstellungen | Vollzugriff auf Konfiguration und Veröffentlichung |
-| User (Prüfer) | Prüfung durchführen, fortsetzen, wiederholen; persönliche Reihenfolge der Schritte anpassen | Prüfungsdurchführung, Historie durchsuchen, eigene Schrittreihenfolge |
+| **Administrator** | System, Benutzer, Rollen; Katalog und Veröffentlichung | Vollzugriff auf Konfiguration und Benutzerverwaltung |
+| **QM** | Prüfworkflows freigeben, Profile verwalten | Veröffentlichen; Profil↔Produktdefinition; kein personenbezogenes Einweisen (vgl. Domain Model / ADR-0025) |
+| **Abteilungsleiter** | Entwürfe, Einweisungen, Profile zuweisen | Entwürfe bearbeiten; **kein** Veröffentlichen; Einweisungen dokumentieren |
+| **Prüfer** | Prüfung durchführen, fortsetzen, wiederholen; persönliche Schrittreihenfolge (UI) | Run-Time nur mit passendem **Berechtigungsprofil** und gültiger **Einweisung** |
+
+Mehrfachrollen sind erlaubt. Administratorrechte ersetzen keine fachliche Qualifikation. Details: `docs/domain-model.md` §4.20, ADR-0025/0026.
 
 ---
 
@@ -109,7 +113,7 @@ PWE ist eine **konfigurierbare Prüf-Workflow-Engine** — keine Spezialsoftware
 - **FR-002 (Konfigurierbarkeit):** Erweiterbarkeit ohne Programmcode-Änderungen am Engine-Kern durch Konfiguration.
 - **FR-003 (Pflichtschritte):** Pflicht-ProzedurSchritte müssen erfolgreich beurteilt werden. Nicht bestandene Pflichtschritte machen den Prüflauf ungültig. Ungültige Prüfläufe dürfen gespeichert und protokolliert werden.
 - **FR-004 (Unveränderlichkeit):** Abgeschlossene Prüfläufe und ProtokollSnapshots sind unveränderlich. Neue Prüfungen erzeugen neuen Prüflauf.
-- **FR-005 (Benutzerrechte):** Prüfer dürfen ausschließlich ihre persönliche Schrittreihenfolge ändern. Administratoren verwalten Katalog und Produktdefinitionen.
+- **FR-005 (Benutzerrechte):** Prüfer dürfen ihre persönliche Schrittreihenfolge (UI) anpassen, nicht die materialisierte Prozedur. Katalog-, Publish- und Einweisungsrechte folgen den Systemrollen (Administrator, QM, Abteilungsleiter, Prüfer). Fachliches Prüfen erfordert Qualifikation (Profil + Einweisung) — siehe Domain Model §4.20 und ADR-0025/0026.
 - **FR-006 (Dokumentation):** Kommentare und Bauteilwechsel werden als **Nachweise** protokolliert; neue Komponenten-Seriennummern müssen erfasst werden.
 - **FR-007 (Protokollsprache):** Richtet sich nach dem Kundenprofil der Produktdefinition; Bedienoberfläche zunächst Deutsch.
 - **FR-008 (Versionierung):** Neue Prüfläufe referenzieren ausschließlich eine veröffentlichte ProduktdefinitionsVersion; die Referenz ändert sich nie.

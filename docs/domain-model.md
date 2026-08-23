@@ -338,11 +338,37 @@ PWE beginnt fachlich beim **Qualitätsprozess**. Produktionsprozesse (Kundenauft
 
 | | |
 |---|---|
-| **Zweck** | Identität und Berechtigung; persönliche Schrittreihenfolge. |
-| **Verantwortung** | Rollen Admin/User; individuelle UI-Reihenfolge ohne Änderung der Prozedur. |
-| **Lebenszyklus** | Persistent; unabhängig von Prüfläufen. |
-| **Beziehungen** | Prüflauf dokumentiert Prüfer; Präferenz beeinflusst Darstellung, nicht Sollvorgaben. |
-| **Invarianten** | Nur Admins verwalten Katalog und Produktdefinitionen. |
+| **Zweck** | Identität, Autorisierung und Qualifikation; persönliche Schrittreihenfolge (nur UI). |
+| **Verantwortung** | Benutzerverwaltung im Identity-Context ([ADR-0023](adr/0023-identity-bounded-context.md)); Systemrollen, Berechtigungsprofile, Einweisungsnachweise; individuelle UI-Reihenfolge ohne Änderung der Prozedur. |
+| **Lebenszyklus** | Persistent; unabhängig von Prüfläufen. Status: **Neu**, **Aktiv**, **Gesperrt**, **Archiviert** (Archivieren statt Löschen). |
+| **Beziehungen** | Prüflauf dokumentiert den Prüfer (`pruefer_id` = Benutzer); Präferenz beeinflusst Darstellung, nicht Sollvorgaben. Profile und Einweisungen siehe unten. |
+| **Invarianten** | Administrative Rechte ersetzen keine fachliche Qualifikation. Fachliches Prüfen erfordert Rolle **Prüfer** sowie passendes Profil und gültige Einweisung ([ADR-0025](adr/0025-authorization.md), [ADR-0026](adr/0026-qualification-model.md)). |
+
+**Systemrollen** (Mehrfachrollen erlaubt):
+
+| Rolle | Kurz |
+|-------|------|
+| **Administrator** | System, Benutzer, Rollen; voller administrativer Zugriff |
+| **QM** | Workflows freigeben/veröffentlichen; Berechtigungsprofile verwalten |
+| **Abteilungsleiter** | Entwürfe bearbeiten; Profile zuweisen; Einweisungen dokumentieren; **kein** Veröffentlichen |
+| **Prüfer** | Run-Time: freigegebene Prüfungen durchführen (nur mit Qualifikation) |
+
+#### Berechtigungsprofil
+
+| | |
+|---|---|
+| **Zweck** | Legt fest, welche **Produktdefinitionen** (Stamm) ein Benutzer grundsätzlich nutzen darf. |
+| **Beziehungen** | n:m zu Benutzer; n:m zu Produktdefinition. **Nicht** an ProduktdefinitionsVersion gebunden. Ownership: Identity. |
+| **Invarianten** | Ein Benutzer kann mehrere Profile besitzen; eine Produktdefinition kann mehreren Profilen zugeordnet sein. |
+
+#### Einweisungsnachweis
+
+| | |
+|---|---|
+| **Zweck** | Fachlicher Nachweis, dass ein Benutzer eine konkrete **ProduktdefinitionsVersion** prüfen darf. |
+| **Mindestinhalt** | Benutzer, Version, eingewiesen durch, Datum, optional gültig bis, Status, Bemerkung. |
+| **Beziehungen** | Bezieht sich auf eine veröffentlichte ProduktdefinitionsVersion. Ownership: Identity. |
+| **Invarianten** | Start eines Prüflaufs nur mit gültiger Einweisung für die aktive Version (zusätzlich Profil und Prüfer-Rolle). |
 
 ---
 

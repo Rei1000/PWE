@@ -72,7 +72,7 @@ Implementierung: `api/fehler.py`, Handler in `api/errors.py`.
 
 ## Katalog-Setup für Automatisierung (Gate 6.3a, ADR-0017)
 
-Minimaler Setup-Contract für PC-/Laborbetrieb ([ADR-0001](../adr/0001-v1-scope-deferrals.md)). **Kein Auth** — nicht für ungeschützte Mehrbenutzer- oder Internetbereitstellung. Keine Ausführungslogik im Katalog-Layer.
+Minimaler Setup-Contract für PC-/Laborbetrieb ([ADR-0001](../adr/0001-v1-scope-deferrals.md)). Historisch ohne Auth eingeführt; ab Gate **8.1** gilt Session-Authentifizierung und Autorisierung ([ADR-0024](../adr/0024-authentication-v1.md), [ADR-0025](../adr/0025-authorization.md)) — Endpunkte sind **nicht** für ungeschützte Internetbereitstellung vorgesehen. Keine Ausführungslogik im Katalog-Layer.
 
 ### Externes Kommando anlegen
 
@@ -258,7 +258,7 @@ Antworten (`NachweisResponse`, Read Model) liefern `art` als denselben String-We
 
 Fachliche Kontextvalidierung: Nachweis muss zum Prüflauf gehören und `art=foto` sein. Response: Binärinhalt, `Content-Type` aus Payload, `Content-Disposition: inline`.
 
-Kein Auth in Gate 8.3a — Gate 8.1 folgt später.
+Download unterliegt ab Gate 8.1 der Session-Authentifizierung ([ADR-0024](../adr/0024-authentication-v1.md)); fachliche Kontextvalidierung (Nachweis gehört zum Prüflauf) bleibt bestehen ([ADR-0022](../adr/0022-foto-nachweis-dateispeicher.md)). Rollen- und Qualifikationsprüfung folgen den Identity-Slices (8.1a/8.1b).
 
 ## Read Model (Gate 6.0)
 
@@ -293,22 +293,27 @@ Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruef
 
 ## Authentifizierung / Identity
 
-| Thema | Status | Begründung |
-|-------|--------|------------|
-| Auth-Middleware, Tokens | ⏸ P2 | ADR-0001: V1 PC-only, kein Multi-User-Betrieb. |
-| `pruefer_id` im Request-Body | ✅ V1-Slice | Ausreichend für Frontend-Prototyp; Identity-Context folgt mit Auth-Slice. |
+Zielarchitektur Gate **8.1** ([ADR-0023](../adr/0023-identity-bounded-context.md)–[0027](../adr/0027-authenticated-pruefer-id.md)). **Implementierungsstand:** ADRs angenommen; Code folgt ab Slice **8.1a** (Foundation), Qualifikation in **8.1b**.
+
+| Thema | Architektur (verbindlich) | Slice |
+|-------|---------------------------|-------|
+| Authentifizierung | Serverseitige **Session** + Cookie (**HttpOnly**, **Secure**, **SameSite**); **kein** JWT / LocalStorage-Token in V1 ([ADR-0024](../adr/0024-authentication-v1.md)) | 8.1a |
+| Authentifizierter Benutzer | Request-Kontext aus Session; Status muss **Aktiv** sein | 8.1a |
+| `pruefer_id` | Bei **neuen** Prüfläufen aus dem Session-Benutzer abgeleitet — **kein** Trust in clientgelieferte freie Strings ([ADR-0027](../adr/0027-authenticated-pruefer-id.md)); historische freie Werte bleiben lesbar | 8.1a |
+| Systemrollen | Administrator, QM, Abteilungsleiter, Prüfer (Mehrfachrollen); API erzwingt Policies, Frontend-Guards nur UX ([ADR-0025](../adr/0025-authorization.md)) | 8.1a (Rollen am User); feine Katalog-Matrix mit Guards |
+| Qualification | Profil ↔ Produktdefinition; Einweisung ↔ ProduktdefinitionsVersion; Startregel ([ADR-0026](../adr/0026-qualification-model.md)) | **8.1b** — hier noch nicht als implementiert beschreiben |
+
+Keine neuen Identity-HTTP-Endpunkte in diesem Dokument vorwegnehmen, solange sie nicht existieren.
 
 ## Frontend-Vorbereitung (Katalog)
 
-Ohne veröffentlichte Produktdefinition schlägt `POST /prueflaeufe` mit `version_nicht_gefunden` fehl. Der minimale Katalog-Flow für den nächsten Frontend-Slice:
+Ohne veröffentlichte Produktdefinition schlägt `POST /prueflaeufe` mit `version_nicht_gefunden` fehl. Der minimale Katalog-Flow:
 
 1. `POST /katalog/entwuerfe` — Entwurf anlegen
 2. `POST /katalog/entwuerfe/{id}/veroeffentlichen` — aktive Version materialisieren
-3. `POST /prueflaeufe` — Prüfung starten
-
-Keine Admin-UI, keine vollständige Katalogverwaltung in diesem Slice.
+3. `POST /prueflaeufe` — Prüfung starten (nach 8.1a: authentifizierter Benutzer; nach 8.1b: Qualifikation)
 
 ## Bewusst offen (nach Merge)
 
 - OpenAPI-Versionierung / erweiterte Validierungsdetails (`errors[]` bei 422)
-- Authentifizierung und serverseitiger Identity-Context
+- Identity-HTTP-Verwaltungsendpunkte und vollständige Policy-Enforcement (Gate 8.1a–c)

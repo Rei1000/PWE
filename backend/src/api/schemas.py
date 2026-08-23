@@ -38,6 +38,62 @@ class MeResponse(BaseModel):
     anzeigename: str
     status: str
     rollen: list[str]
+    passwortwechsel_erforderlich: bool = False
+
+
+class PasswortAendernRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    altes_passwort: str
+    neues_passwort: str
+
+
+class BenutzerAnlegenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    login: str
+    anzeigename: str
+    passwort: str
+    rollen: list[str]
+
+
+class BenutzerRollenSetzenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    rollen: list[str]
+
+
+class PasswortResetRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    neues_passwort: str
+
+
+class BenutzerResponse(BaseModel):
+    benutzer_id: str
+    login: str
+    anzeigename: str
+    status: str
+    rollen: list[str]
+    passwortwechsel_erforderlich: bool
+
+
+class BenutzerListeResponse(BaseModel):
+    benutzer: list[BenutzerResponse]
+
+
+class AuditEintragResponse(BaseModel):
+    audit_id: str
+    akteur_benutzer_id: str
+    ziel_benutzer_id: str | None = None
+    aktion: str
+    zeitpunkt: datetime
+    referenz_id: str | None = None
+    details: dict[str, Any]
+
+
+class AuditListeResponse(BaseModel):
+    eintraege: list[AuditEintragResponse]
 
 
 class PrueflaufResponse(BaseModel):
@@ -409,6 +465,7 @@ class ProfilResponse(BaseModel):
     bezeichnung: str
     beschreibung: str | None = None
     produktdefinition_ids: list[str]
+    aktiv: bool = True
 
 
 class EinweisungAnlegenRequest(BaseModel):

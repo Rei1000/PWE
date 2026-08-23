@@ -1,4 +1,4 @@
-"""API-Autorisierung — Rollenprüfung (Gate 8.1b, ADR-0025)."""
+"""API-Autorisierung — Rollenprüfung (Gate 8.1b/8.1c1, ADR-0025)."""
 
 from __future__ import annotations
 
@@ -32,3 +32,17 @@ def require_katalog_bearbeiten(benutzer: Benutzer) -> None:
 def require_katalog_veroeffentlichen(benutzer: Benutzer) -> None:
     """Publish und Einweisungsübernahme-Flag (ADR-0025)."""
     require_rollen(benutzer, Systemrolle.ADMINISTRATOR, Systemrolle.QM)
+
+
+def require_identity_lesen(benutzer: Benutzer) -> None:
+    """Benutzer/Profile/Einweisungen lesen — Admin, QM, Abteilungsleiter."""
+    require_rollen(
+        benutzer,
+        Systemrolle.ADMINISTRATOR,
+        Systemrolle.QM,
+        Systemrolle.ABTEILUNGSLEITER,
+    )
+
+
+def require_administrator(benutzer: Benutzer) -> None:
+    require_rollen(benutzer, Systemrolle.ADMINISTRATOR)

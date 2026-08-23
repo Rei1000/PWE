@@ -16,7 +16,7 @@ from application.katalog.routine_zuweisen import RoutineProzedurSchrittZuweisen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
 from application.pruefausfuehrung.prueflauf_lesen import PrueflaufLesen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from domain.katalog.errors import MaterialisierteAutomatisierungInkonsistent
 from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
@@ -50,7 +50,7 @@ def test_prueflauf_lesen_liefert_materialisierte_schritte():
     )
     ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1111111111",
         pruefobjekt_kennung="OBJ-1",
         pruefer_id="p1",
@@ -97,7 +97,7 @@ def test_lesen_einzelkommando_hat_automatisierung_fehlende_komponenten_ux():
     )
     ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="2222222222",
         pruefobjekt_kennung="OBJ-2",
         pruefer_id="p1",
@@ -149,7 +149,7 @@ def test_lesen_bibliotheksroutine_hat_automatisierung():
     )
     ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="3333333333",
         pruefobjekt_kennung="OBJ-3",
         pruefer_id="p1",
@@ -187,7 +187,7 @@ def test_lesen_legacy_externes_kommando_erkannt():
         )
     )
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="4444444444",
         pruefobjekt_kennung="OBJ-4",
         pruefer_id="p1",
@@ -227,7 +227,7 @@ def test_lesen_abgeschlossen_nicht_ausfuehrbar():
     )
     ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="5555555555",
         pruefobjekt_kennung="OBJ-5",
         pruefer_id="p1",
@@ -282,7 +282,7 @@ def test_lesen_inkonsistente_automatisierung_nicht_verschluckt():
         )
     )
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="6666666666",
         pruefobjekt_kennung="OBJ-6",
         pruefer_id="p1",

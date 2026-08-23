@@ -12,7 +12,7 @@ from adapters.persistence.in_memory import (
 )
 from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 
@@ -60,7 +60,7 @@ def test_externes_kommando_simulation_bis_gueltiger_lauf():
         }
     )
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1234567890",
         pruefobjekt_kennung="GER-500",
         pruefer_id="pruefer-1",

@@ -59,4 +59,3 @@ def test_openapi_automatisierung_erweitert_optional():
     assert "kommando_id" in props
     assert "routine_id" in props
     assert schema.get("additionalProperties") is False
-from tests.support.auth import login_as_admin

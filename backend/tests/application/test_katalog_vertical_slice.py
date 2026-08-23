@@ -14,7 +14,7 @@ from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlich
 from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 
 
@@ -56,7 +56,7 @@ def test_katalog_slice_entwurf_veroeffentlichen_und_prueflauf():
     assert katalog.get_aktive_version_fuer_kodierung("9876543210") is not None
     assert version.version_id == entwurf.aktive_version_id
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="9876543210",
         pruefobjekt_kennung="GER-100",
         pruefer_id="pruefer-1",
@@ -130,7 +130,7 @@ def test_laufende_pruefung_bleibt_auf_alter_version_nach_neuer_veroeffentlichung
     )
     v1 = ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="2222222222",
         pruefobjekt_kennung="GER-200",
         pruefer_id="pruefer-1",

@@ -17,6 +17,7 @@ from application.katalog.routine_zuweisen import RoutineProzedurSchrittZuweisen
 from application.katalog.externes_kommando_anlegen import ExternesKommandoAnlegen
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
+from tests.support.qualification import qualify_client_for_kodierung
 
 KOMMANDOCODE = "READ_VOLTAGE"
 SCHRIITT_ID = "schritt-a"
@@ -105,6 +106,7 @@ def test_http_e2e_setup_und_automatisierung_ausfuehren(client: TestClient):
     version = client.post(f"/katalog/entwuerfe/{produktdefinition_id}/veroeffentlichen")
     assert version.status_code == 201
 
+    qualify_client_for_kodierung(client, kodierung)
     start = client.post(
         "/prueflaeufe",
         json={
@@ -344,4 +346,3 @@ def test_zuweisung_extra_feld_422(client: TestClient):
         json={"kommando_id": "x", "adapter": "com"},
     )
     assert response.status_code == 422
-from tests.support.auth import login_as_admin

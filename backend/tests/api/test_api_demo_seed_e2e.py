@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from api.app import create_app
 from api.deps import in_memory_deps
+from tests.support.qualification import qualify_client_for_kodierung
 from api.kommando_wiring import (
     DEMO_KOMMANDOCODE,
     KommandoAdapterSettings,
@@ -75,6 +76,7 @@ def test_http_e2e_demo_seed_und_automatisierung(demo_client: TestClient):
     version = client.post(f"/katalog/entwuerfe/{pd_id}/veroeffentlichen")
     assert version.status_code == 201
 
+    qualify_client_for_kodierung(client, KODIERUNG)
     start = client.post(
         "/prueflaeufe",
         json={
@@ -111,4 +113,3 @@ def test_http_e2e_demo_seed_und_automatisierung(demo_client: TestClient):
         s for s in detail2.json()["schritte"] if s["schritt_id"] == SCHRITT_ID
     )["nachweise"]
     assert len(nachweise) >= 1
-from tests.support.auth import login_as_admin

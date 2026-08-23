@@ -34,4 +34,3 @@ def test_validierungsfehler_hat_code(client: TestClient):
     body = response.json()
     assert body["code"] == "validation"
     assert body["detail"] == "Validierungsfehler"
-from tests.support.auth import login_as_admin

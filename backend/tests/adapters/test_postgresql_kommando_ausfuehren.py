@@ -3,7 +3,7 @@
 import pytest
 
 from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
 from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
@@ -40,7 +40,7 @@ def test_postgresql_legacy_ek_only_routine_ausfuehren_persistiert_nachweise(pg_r
         )
     )
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="7777777771",
         pruefobjekt_kennung="GER-PG-K",
         pruefer_id="pruefer-pg",
@@ -89,7 +89,7 @@ def test_postgresql_legacy_ek_only_geraete_err_persistiert_rohantwort(pg_repos):
         )
     )
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="7777777772",
         pruefobjekt_kennung="GER-PG-K-ERR",
         pruefer_id="pruefer-pg",

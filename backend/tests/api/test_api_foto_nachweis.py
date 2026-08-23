@@ -18,6 +18,7 @@ from domain.katalog.version import MaterialisierterProzedurSchritt, Produktdefin
 from domain.pruefausfuehrung.foto_regeln import MAX_FOTO_GROESSE_BYTES
 from foto_fixtures import JPEG_BYTES, PNG_BYTES
 from helpers import vorlage_anlegen_http
+from tests.support.qualification import qualify_client_for_kodierung
 
 
 def _unique_kodierung() -> str:
@@ -47,6 +48,7 @@ def memory_client() -> TestClient:
         )
     )
     with TestClient(create_app(deps)) as client:
+        qualify_client_for_kodierung(client, "1234567890")
         yield client
 
 
@@ -59,6 +61,7 @@ def pg_client() -> TestClient:
 
 
 def _start_prueflauf(client: TestClient, *, produktkodierung: str = "1234567890") -> str:
+    qualify_client_for_kodierung(client, produktkodierung)
     response = client.post(
         "/prueflaeufe",
         json={
@@ -218,4 +221,3 @@ def test_postgresql_abschluss_mit_foto_snapshot_nur_nachweis_id(pg_client: TestC
     abschluss = pg_client.post(f"/prueflaeufe/{prueflauf_id}/abschluss")
     assert abschluss.status_code == 200
     assert "snapshot_id" in abschluss.json()
-from tests.support.auth import login_as_admin

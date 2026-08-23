@@ -11,6 +11,7 @@ from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPor
 from api.app import create_app
 from api.deps import in_memory_deps
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
+from tests.support.qualification import qualify_client_for_kodierung
 
 KOMMANDOCODE = "READ_VOLTAGE"
 SCHRIITT_ID = "schritt-a"
@@ -99,6 +100,7 @@ def test_http_e2e_routine_anlegen_zuweisen_veroeffentlichen_prueflauf_ausfuehren
     version_id = version.json()["version_id"]
     assert version_id
 
+    qualify_client_for_kodierung(client, kodierung)
     start = client.post(
         "/prueflaeufe",
         json={
@@ -126,4 +128,3 @@ def test_http_e2e_routine_anlegen_zuweisen_veroeffentlichen_prueflauf_ausfuehren
     assert body["ausfuehrung_id"]
     assert body["ausgefuehrte_aktionen"] >= 1
     assert len(body["nachweise"]) >= 1
-from tests.support.auth import login_as_admin

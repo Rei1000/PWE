@@ -6,7 +6,7 @@ import pytest
 
 from adapters.persistence.in_memory import InMemoryKatalogRepository, InMemoryPrueflaufRepository
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
 from domain.katalog.errors import MaterialisierteAutomatisierungInkonsistent
 from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
@@ -60,7 +60,7 @@ def _offenen_prueflauf(
     katalog: InMemoryKatalogRepository,
     prueflauf_repo: InMemoryPrueflaufRepository,
 ):
-    return PruefungStarten(katalog, prueflauf_repo).execute(
+    return make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1234567890",
         pruefobjekt_kennung="GER-VB",
         pruefer_id="pruefer-1",
@@ -138,7 +138,7 @@ def test_routine_keine_automatisierung_ruft_port_nicht_auf():
         )
     )
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="9999999999",
         pruefobjekt_kennung="GER-MAN",
         pruefer_id="pruefer-1",
@@ -190,7 +190,7 @@ def test_routine_inkonsistente_materialisierung_ruft_port_nicht_auf():
         )
     )
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="8888888888",
         pruefobjekt_kennung="GER-INK",
         pruefer_id="pruefer-1",
@@ -263,7 +263,7 @@ def test_routine_zwei_aktionen_ruft_port_zweimal_bei_erfolg():
         )
     )
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="7777777777",
         pruefobjekt_kennung="GER-ZWEI",
         pruefer_id="pruefer-1",
@@ -320,7 +320,7 @@ def test_routine_stop_on_first_failure_ruft_nur_erste_aktion():
         )
     )
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="6666666666",
         pruefobjekt_kennung="GER-STOP",
         pruefer_id="pruefer-1",

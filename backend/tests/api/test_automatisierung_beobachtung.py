@@ -27,6 +27,7 @@ from domain.katalog.routine import (
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.pruefausfuehrung.errors import PrueflaufNichtGefunden
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
+from tests.support.qualification import qualify_client_for_kodierung
 
 LOGGER_NAME = "pwe.automatisierung.beobachtung"
 KOMMANDOCODE = "READ_VOLTAGE"
@@ -64,6 +65,7 @@ def _katalog_mit_routine(katalog: InMemoryKatalogRepository) -> None:
 
 
 def _start_prueflauf(client: TestClient) -> str:
+    qualify_client_for_kodierung(client, "1234567890")
     response = client.post(
         "/prueflaeufe",
         json={
@@ -185,4 +187,3 @@ def test_api_vorbedingungsfehler_beobachtung_nicht_begonnen(caplog: pytest.LogCa
     assert "ausfuehrung_begonnen=false" in messages[0]
     assert "http_status=404" in messages[0]
     assert EVENT_AUSGEFUEHRT not in " ".join(r.getMessage() for r in caplog.records)
-from tests.support.auth import login_as_admin

@@ -179,4 +179,3 @@ def test_automatisierung_beide_ids_422(client: TestClient):
         json={"kommando_id": "a", "routine_id": "b"},
     )
     assert response.status_code == 422
-from tests.support.auth import login_as_admin

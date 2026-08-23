@@ -11,7 +11,7 @@ from application.katalog.entwurf_anlegen import EntwurfAnlegen
 from application.katalog.externes_kommando_anlegen import ExternesKommandoAnlegen
 from application.katalog.kommando_zuweisen import KommandoProzedurSchrittZuweisen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
 from domain.katalog.externes_kommando import MaterialisiertesExternesKommando
 from domain.katalog.materialisierung import aufgeloeste_materialisierte_routine
@@ -89,7 +89,7 @@ def test_neue_version_ohne_legacy_ausfuehrbar_via_routine():
     )
     ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="5555555556",
         pruefobjekt_kennung="GER-WE",
         pruefer_id="pruefer-1",
@@ -145,7 +145,7 @@ def test_legacy_ek_only_bleibt_nach_write_exit_lesbar_und_ausfuehrbar():
     assert restored.schritt_by_id("schritt-a").materialisierte_routine is None
 
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="5555555557",
         pruefobjekt_kennung="GER-LEG",
         pruefer_id="pruefer-1",

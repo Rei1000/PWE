@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from api.app import create_app
 from api.deps import in_memory_deps
+from tests.support.qualification import qualify_client_for_kodierung
 
 
 @pytest.fixture
@@ -66,6 +67,7 @@ def test_api_prueflauf_nach_katalog_setup(client: TestClient):
     pd_id = entwurf.json()["produktdefinition_id"]
     client.post(f"/katalog/entwuerfe/{pd_id}/veroeffentlichen")
 
+    qualify_client_for_kodierung(client, "9876543210")
     start = client.post(
         "/prueflaeufe",
         json={
@@ -75,4 +77,3 @@ def test_api_prueflauf_nach_katalog_setup(client: TestClient):
     )
     assert start.status_code == 201
     assert start.json()["produktkodierung"] == "9876543210"
-from tests.support.auth import login_as_admin

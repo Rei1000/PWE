@@ -10,7 +10,7 @@ from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlich
 from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 from helpers import registriere_standard_vorlagen
 
@@ -71,7 +71,7 @@ def test_postgresql_end_to_end_prueflauf(pg_repos, pg_session):
     )
     ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="6666666666",
         pruefobjekt_kennung="GER-300",
         pruefer_id="pruefer-1",

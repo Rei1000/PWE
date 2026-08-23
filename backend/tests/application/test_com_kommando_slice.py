@@ -11,7 +11,7 @@ from adapters.persistence.in_memory import (
     InMemoryPrueflaufRepository,
 )
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 from domain.pruefausfuehrung.prueflauf import NachweisArt
@@ -49,7 +49,7 @@ def test_com_adapter_slice_bis_gueltiger_lauf():
     transport = InMemorySeriellerTransport({KOMMANDOCODE: b"OK spannung=230"})
     kommando_port = ComExternesKommandoPort(transport)
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1234567890",
         pruefobjekt_kennung="GER-600",
         pruefer_id="pruefer-1",

@@ -4,7 +4,7 @@ import pytest
 
 from adapters.simulation.externes_kommando import SimuliertesExternesKommandoPort
 from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from domain.katalog.routine import (
     MaterialisierteKommandoAktion,
     MaterialisierteRoutine,
@@ -54,7 +54,7 @@ def test_postgresql_routine_teilfehler_persistiert_erste_welle(pg_repos):
         )
     )
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="8888888881",
         pruefobjekt_kennung="GER-PG-R",
         pruefer_id="pruefer-pg",

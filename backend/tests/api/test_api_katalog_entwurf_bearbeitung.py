@@ -192,4 +192,3 @@ def test_put_reihenfolge_409_unvollstaendig(client: TestClient):
     )
     assert response.status_code == 409
     assert response.json()["code"] == "ungueltige_schritt_reihenfolge"
-from tests.support.auth import login_as_admin

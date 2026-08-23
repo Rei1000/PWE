@@ -43,4 +43,3 @@ def test_openapi_vorlage_detail_mit_beschreibung():
     spec = _openapi()
     detail_schema = spec["components"]["schemas"]["PruefschrittVorlageDetailResponse"]
     assert "beschreibung" in detail_schema.get("properties", {})
-from tests.support.auth import login_as_admin

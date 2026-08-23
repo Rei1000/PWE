@@ -14,6 +14,7 @@ from api.deps import in_memory_deps
 from api.schemas import NACHWEIS_ART_API_WERTE
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from helpers import vorlage_anlegen_http
+from tests.support.qualification import qualify_client_for_kodierung
 
 
 def _unique_kodierung() -> str:
@@ -42,6 +43,7 @@ def memory_client() -> TestClient:
         )
     )
     with TestClient(create_app(deps)) as client:
+        qualify_client_for_kodierung(client, "1234567890")
         yield client
 
 
@@ -54,6 +56,7 @@ def pg_client() -> TestClient:
 
 
 def _start_prueflauf(client: TestClient, *, produktkodierung: str = "1234567890") -> str:
+    qualify_client_for_kodierung(client, produktkodierung)
     response = client.post(
         "/prueflaeufe",
         json={
@@ -168,4 +171,3 @@ def test_contract_parity_in_memory_und_postgresql(memory_client: TestClient, pg_
 
         assert mem_response.status_code == pg_response.status_code == 201
         assert mem_response.json()["art"] == pg_response.json()["art"] == art
-from tests.support.auth import login_as_admin

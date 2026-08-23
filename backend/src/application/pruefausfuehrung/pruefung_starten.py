@@ -1,11 +1,21 @@
-"""Use Case: Prüfung starten."""
+"""Use Case-Erweiterung — Qualifikation vor Prüflauf-Start (Gate 8.1b)."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
+from domain.identity.start_qualifikation import (
+    QualifikationUnzureichend,
+    StartQualifikationKontext,
+    start_qualifikation_erlaubt,
+)
+from domain.identity.typen import EinweisungsStatus
 from domain.pruefausfuehrung.prueflauf import Prueflauf
 from domain.shared.errors import DomainError
+from ports.benutzer_repository import BenutzerRepository
+from ports.berechtigungsprofil_repository import BerechtigungsprofilRepository
+from ports.einweisungsnachweis_repository import EinweisungsnachweisRepository
 from ports.katalog_repository import KatalogRepository
 from ports.prueflauf_repository import PrueflaufRepository
 
@@ -16,8 +26,13 @@ class VersionNichtGefunden(DomainError):
 
 @dataclass
 class PruefungStarten:
+    """Application-Orchestrierung: Katalog + Identity Startregel + Prüflauf (Gate 8.1b)."""
+
     katalog: KatalogRepository
     prueflauf_repo: PrueflaufRepository
+    benutzer_repo: BenutzerRepository
+    profile: BerechtigungsprofilRepository
+    einweisungen: EinweisungsnachweisRepository
 
     def execute(
         self,
@@ -29,6 +44,35 @@ class PruefungStarten:
         version = self.katalog.get_aktive_version_fuer_kodierung(produktkodierung)
         if version is None:
             raise VersionNichtGefunden(f"Keine aktive Version für {produktkodierung}")
+
+        benutzer = self.benutzer_repo.get(pruefer_id)
+        if benutzer is None:
+            raise QualifikationUnzureichend("Qualifikation unzureichend")
+
+        profile = tuple(self.profile.profile_fuer_benutzer(pruefer_id))
+        einweisung = self.einweisungen.get_gueltige(
+            benutzer_id=pruefer_id, version_id=version.version_id
+        )
+        jetzt = datetime.now(UTC)
+        if (
+            einweisung is not None
+            and einweisung.status == EinweisungsStatus.GUELTIG
+            and not einweisung.ist_gueltig(jetzt=jetzt)
+        ):
+            self.einweisungen.save(einweisung.als_abgelaufen())
+            einweisung = None
+
+        start_qualifikation_erlaubt(
+            StartQualifikationKontext(
+                benutzer=benutzer,
+                produktdefinition_id=version.produktdefinition_id,
+                version_id=version.version_id,
+                version_ist_aktive_veroeffentlichte=True,
+                profile_des_benutzers=profile,
+                gueltige_einweisung=einweisung,
+                jetzt=jetzt,
+            )
+        )
 
         schritt_ids = [s.schritt_id for s in version.aktive_schritte()]
         prueflauf = Prueflauf.starten(

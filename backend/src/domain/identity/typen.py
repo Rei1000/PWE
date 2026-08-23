@@ -17,3 +17,9 @@ class BenutzerStatus(str, Enum):
     AKTIV = "aktiv"
     GESPERRT = "gesperrt"
     ARCHIVIERT = "archiviert"
+
+
+class EinweisungsStatus(str, Enum):
+    GUELTIG = "gueltig"
+    WIDERRUFEN = "widerrufen"
+    ABGELAUFEN = "abgelaufen"

@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** Gate 8.2–8.4 ✅ — Gate **8.1a** ✅; **8.1b Qualification Engine** 🔄 auf `feat/gate-8-1b-qualification-engine`; Gate 8.1 gesamt ⏳; Gate 9 ⏸ — Gate 7 ✅, Gate 6.3 ✅
+**▶ Aktueller Stand:** Gate 8.2–8.4 ✅ — Gate **8.1a** ✅; **8.1b** ✅; **8.1c1** Identity-Admin-Backend 🔄 auf `feat/gate-8-1c1-identity-admin-backend`; Gate 8.1 gesamt ⏳; Gate 9 ⏸ — Gate 7 ✅, Gate 6.3 ✅
 
 ---
 
@@ -205,8 +205,9 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 8.4 | Protokoll öffnen / Browserdruck (PDF-Viewer) | ✅ | P3 | PR [#46](https://github.com/Rei1000/PWE/pull/46) — Merge `3f5b0e8` (Feature `d2c02d4`, Fix `ce78f1e`) · PDF (Gate 5.5) |
 | 8.1 | **Identity & Qualification** (gesliced) | ⏳ | **P1** | 8.1a–8.1c · nach 8.2–8.4 ✅ |
 | 8.1a | **Identity Foundation** — Benutzer, Login, Authentifizierung, Systemrollen, Middleware, Session (ADR-0024), Benutzerstatus, Route Guards; `pruefer_id` = authentifizierter Benutzer | ✅ | **P1** | PR [#51](https://github.com/Rei1000/PWE/pull/51) — Merge `54decb9` · 8.1 |
-| 8.1b | **Qualification Engine** — Berechtigungsprofile ↔ Produktdefinition; Einweisungsnachweise ↔ ProduktdefinitionsVersion; Start nur mit Qualifikation; Publish-Regel „Einweisung übernehmen“ | 🔄 | **P1** | Feature-Branch `feat/gate-8-1b-qualification-engine` · 8.1a |
-| 8.1c | **Identity Administration** — Verwaltung Benutzer/Rollen/Profile/Einweisungen; Aktivieren/Sperren/Archivieren; Audit | ⏳ | P2 | 8.1a, 8.1b |
+| 8.1b | **Qualification Engine** — Berechtigungsprofile ↔ Produktdefinition; Einweisungsnachweise ↔ ProduktdefinitionsVersion; Start nur mit Qualifikation; Publish-Regel „Einweisung übernehmen“ | ✅ | **P1** | PR [#52](https://github.com/Rei1000/PWE/pull/52) — Merge `8a39495` · 8.1a |
+| 8.1c | **Identity Administration** — Verwaltung Benutzer/Rollen/Profile/Einweisungen; Aktivieren/Sperren/Archivieren; Audit | 🔄 | P2 | 8.1c1 Backend 🔄 · 8.1c2 Frontend folgt · 8.1a, 8.1b |
+| 8.1c1 | **Identity Admin Backend** — Lifecycle, Passwort/Force-Change, Letzter-Admin, Profil aktiv/inaktiv, Audit append-only, Admin-API | 🔄 | **P1** | Feature-Branch `feat/gate-8-1c1-identity-admin-backend` · 8.1b |
 
 ### Roadmap-Anpassung (2026-08-23) — Gate 8.1 Identity & Qualification
 
@@ -294,6 +295,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-23 | Gate **8.1c1** Identity Admin Backend 🔄 auf `feat/gate-8-1c1-identity-admin-backend`; Gate 8.1b ✅ (PR #52); Gate 8.1c 🔄 | Feature-Branch-Status; kein Merge-Claim |
 | 2026-08-23 | Gate **8.1b** Qualification Engine 🔄 auf `feat/gate-8-1b-qualification-engine` (nicht gemerged); Gate 8.1a ✅; Gate 8.1 gesamt bleibt ⏳ | Feature-Branch-Status; kein Merge-Claim |
 | 2026-08-23 | Gate 8.1 neu ausgerichtet — **Identity & Qualification**; Slices **8.1a** Foundation, **8.1b** Qualification Engine, **8.1c** Administration; Rollen Admin/QM/Abteilungsleiter/Prüfer (Mehrfachrollen); drei Ebenen Rolle/Profil/Einweisung; Benutzerstatus Neu/Aktiv/Gesperrt/Archiviert; Status ⏳, nächster Slice **8.1a**; Gate 9.1-Bezug auf 8.1 angepasst | Architekturprüfung Identity & Qualification; „Auth“ allein zu eng |
 | 2026-08-23 | Gate 8.4 abgeschlossen — PR #46, Merge `3f5b0e8` (Feature `d2c02d4`, Fix `ce78f1e`); Protokoll im Browser-PDF-Viewer öffnen (Frontend-only, kein DruckPort); Gate 8.2–8.4 ✅ (8.1 war damals Auth ⏸); CI 110 Frontend / 398 Backend | Nach-Merge-Pflege |
@@ -350,6 +352,6 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Gate 8.1b — Qualification Engine** 🔄 in Arbeit (Feature-Branch `feat/gate-8-1b-qualification-engine`; P1). Gate **8.1a** ✅.
+**Gate 8.1c1 — Identity Admin Backend** 🔄 in Arbeit (Feature-Branch `feat/gate-8-1c1-identity-admin-backend`; P1). Gate **8.1a/8.1b** ✅.
 
-Reihenfolge: **8.1a ✅ → 8.1b 🔄 → 8.1c**. Gate 8.2–8.4 bleiben ✅. Gate 9 bleibt ⏸ bis nach Gate 8.1 (mind. Foundation). Offene Follow-ups (Storage Exit, PDF-Fotoeinbettung, Foto-Löschen, S3, …) bleiben P2 und sind **kein** Ersatz für 8.1b/c.
+Reihenfolge: **8.1a ✅ → 8.1b ✅ → 8.1c1 🔄 → 8.1c2**. Gate 8.2–8.4 bleiben ✅. Gate 9 bleibt ⏸ bis nach Gate 8.1 (mind. Foundation). Offene Follow-ups (Storage Exit, PDF-Fotoeinbettung, Foto-Löschen, S3, …) bleiben P2 und sind **kein** Ersatz für 8.1c.

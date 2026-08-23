@@ -17,7 +17,7 @@ Berechtigungsprofil  ←n:m→  Produktdefinition          (Stamm, nicht Version
 Einweisungsnachweis  ────→  ProduktdefinitionsVersion  (veröffentlicht)
 ```
 
-**Profil → Produktdefinition:** beschreibt, welche Produktlinien grundsätzlich erlaubt sind; bleibt über Releases stabil.
+**Profil → Produktdefinition:** beschreibt, welche Produktlinien grundsätzlich erlaubt sind; bleibt über Releases stabil. Nur **aktive** Profile zählen für die Startregel (Gate 8.1c1); Deaktivierung berührt laufende Prüfläufe nicht.
 
 **Einweisung → ProduktdefinitionsVersion:** Version ist unveränderlich und Run-Time-Referenz des Prüflaufs; Audit und Re-Qualifikation erfordern Versionsbezug.
 

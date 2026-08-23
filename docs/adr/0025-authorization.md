@@ -64,6 +64,8 @@ Neu · Aktiv · Gesperrt · Archiviert — Archivieren statt Löschen. Login und
 | **Schreiben** am Prüflauf | AuthN + Ownership (`aktueller Benutzer == pruefer_id`) |
 | **Lesen** (Prüflauf, Protokoll, PDF, Foto-Download) | AuthN (Status Aktiv) — bewusst **ohne** Ownership |
 
+**Identity-Daten (Benutzer, Rollen, Profile, Einweisungen)** folgen **nicht** Read broadly: Lesen nur **Administrator, QM, Abteilungsleiter**; Prüfer kein Identity-Read. Login-Metadaten und Audit nur Administrator (Gate 8.1c1).
+
 ### Verbindliche Regeln (Kurz)
 
 - Admin verwaltet System und Benutzer.
@@ -87,13 +89,13 @@ Neu · Aktiv · Gesperrt · Archiviert — Archivieren statt Löschen. Login und
 |-------|----------------|
 | **8.1a** | Rollen am Benutzer; Middleware authentifiziert; grobe Guards möglich; volle Katalog-Matrix und Qualifikation noch nicht zwingend vollständig enforced |
 | **8.1b** | Profil + Einweisung + Startregel enforced |
-| **8.1c** | Verwaltungs-UI und Audit für Zuweisungen |
+| **8.1c** | Verwaltungs-UI und Audit für Zuweisungen; Backend-Admin in **8.1c1** |
 
 ## Konsequenzen
 
 - Policies und Tests müssen Mehrfachrollen abdecken.
 - Katalog- und Prüflauf-APIs werden schrittweise geschützt (8.1a → 8.1b).
-
+- Append-only Identity-Audit (ohne UI in 8.1c1); Audit-UI später.
 ## Alternativen
 
 - Nur zwei Rollen Admin/User: verworfen — QM/Abteilungsleiter und Qualifikation fehlen.

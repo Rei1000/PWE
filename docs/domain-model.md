@@ -340,9 +340,9 @@ PWE beginnt fachlich beim **Qualitätsprozess**. Produktionsprozesse (Kundenauft
 |---|---|
 | **Zweck** | Identität, Autorisierung und Qualifikation; persönliche Schrittreihenfolge (nur UI). |
 | **Verantwortung** | Benutzerverwaltung im Identity-Context ([ADR-0023](adr/0023-identity-bounded-context.md)); Systemrollen, Berechtigungsprofile, Einweisungsnachweise; individuelle UI-Reihenfolge ohne Änderung der Prozedur. |
-| **Lebenszyklus** | Persistent; unabhängig von Prüfläufen. Status: **Neu**, **Aktiv**, **Gesperrt**, **Archiviert** (Archivieren statt Löschen). |
+| **Lebenszyklus** | Persistent; unabhängig von Prüfläufen. Status: **Neu**, **Aktiv**, **Gesperrt**, **Archiviert** (Archivieren statt Löschen). Feld `passwortwechsel_erforderlich`: nach Login nur Session-Endpunkte und Passwort ändern bis Zurücksetzung (Gate 8.1c1). |
 | **Beziehungen** | Prüflauf dokumentiert den Prüfer (`pruefer_id` = Benutzer); Präferenz beeinflusst Darstellung, nicht Sollvorgaben. Profile und Einweisungen siehe unten. |
-| **Invarianten** | Administrative Rechte ersetzen keine fachliche Qualifikation. Fachliches Prüfen erfordert Rolle **Prüfer** sowie passendes Profil und gültige Einweisung ([ADR-0025](adr/0025-authorization.md), [ADR-0026](adr/0026-qualification-model.md)). |
+| **Invarianten** | Administrative Rechte ersetzen keine fachliche Qualifikation. Fachliches Prüfen erfordert Rolle **Prüfer** sowie passendes Profil und gültige Einweisung ([ADR-0025](adr/0025-authorization.md), [ADR-0026](adr/0026-qualification-model.md)). **Letzter-Administrator-Invariante:** Nach jeder Mutation von Status oder Rollen muss mindestens ein Benutzer mit Status **Aktiv** und Rolle **Administrator** verbleiben (Gate 8.1c1). |
 
 **Systemrollen** (Mehrfachrollen erlaubt):
 
@@ -359,7 +359,8 @@ PWE beginnt fachlich beim **Qualitätsprozess**. Produktionsprozesse (Kundenauft
 |---|---|
 | **Zweck** | Legt fest, welche **Produktdefinitionen** (Stamm) ein Benutzer grundsätzlich nutzen darf. |
 | **Beziehungen** | n:m zu Benutzer; n:m zu Produktdefinition. **Nicht** an ProduktdefinitionsVersion gebunden. Ownership: Identity. |
-| **Invarianten** | Ein Benutzer kann mehrere Profile besitzen; eine Produktdefinition kann mehreren Profilen zugeordnet sein. |
+| **Lebenszyklus** | **Aktiv** oder **inaktiv** (Deaktivieren statt Hard-Delete, Gate 8.1c1). Zuordnungen zu Benutzern und Produktdefinitionen bleiben bei Deaktivierung erhalten. |
+| **Invarianten** | Ein Benutzer kann mehrere Profile besitzen; eine Produktdefinition kann mehreren Profilen zugeordnet sein. Nur **aktive** Profile zählen für die Startregel ([ADR-0026](adr/0026-qualification-model.md)). |
 
 #### Einweisungsnachweis
 
@@ -368,7 +369,16 @@ PWE beginnt fachlich beim **Qualitätsprozess**. Produktionsprozesse (Kundenauft
 | **Zweck** | Fachlicher Nachweis, dass ein Benutzer eine konkrete **ProduktdefinitionsVersion** prüfen darf. |
 | **Mindestinhalt** | Benutzer, Version, eingewiesen durch, Datum, optional gültig bis, Status, Bemerkung. |
 | **Beziehungen** | Bezieht sich auf eine veröffentlichte ProduktdefinitionsVersion. Ownership: Identity. |
-| **Invarianten** | Start eines Prüflaufs nur mit gültiger Einweisung für die aktive Version (zusätzlich Profil und Prüfer-Rolle). **Implementierungsstand:** Domain/Application/HTTP für Profile und Einweisungen in Gate **8.1b** (Feature-Branch); Verwaltungs-UI Gate **8.1c**. |
+| **Invarianten** | Start eines Prüflaufs nur mit gültiger Einweisung für die aktive Version (zusätzlich Profil und Prüfer-Rolle). Neue Einweisung nur für Benutzer mit Status **Aktiv**. **Implementierungsstand:** Domain/Application/HTTP für Profile und Einweisungen Gate **8.1b** ✅; Benutzerverwaltung, Passwort, Profil aktiv/inaktiv, Identity-Audit Gate **8.1c1** ✅ (Backend); Verwaltungs-**UI** Gate **8.1c2**.
+
+#### Identity-Audit-Eintrag
+
+| | |
+|---|---|
+| **Zweck** | Nachvollziehbarkeit administrativer Identity-Mutationen (Benutzer, Rollen, Status, Passwort, Profile, Einweisungen). |
+| **Lebenszyklus** | **Append-only** — keine Updates, keine Deletes (Gate 8.1c1). |
+| **Mindestinhalt** | Akteur, Aktion, Zeitpunkt, optional Ziel-Benutzer, Referenz, Details (ohne Passwort-/Session-/CSRF-Daten). |
+| **Leserechte** | Nur **Administrator** (kein Audit-Dashboard in 8.1c1). |
 
 ---
 

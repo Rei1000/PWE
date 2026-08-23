@@ -4,8 +4,9 @@ from fastapi.testclient import TestClient
 from starlette.testclient import TestClient as RawTestClient
 
 from api.app import create_app
+from api.auth_settings import CSRF_HEADER
 from api.deps import in_memory_deps
-from api.identity_seed import DEFAULT_ADMIN_LOGIN
+from api.identity_seed import DEFAULT_ADMIN_LOGIN, DEFAULT_ADMIN_PASSWORD
 from tests.support.auth import login_as_admin
 
 
@@ -63,7 +64,7 @@ def test_prueflauf_start_uses_session_user_not_body():
     app = create_app(deps)
     with TestClient(app) as client:
         me = client.get("/auth/me").json()
-        response = client.post(
+        forbidden = client.post(
             "/prueflaeufe",
             json={
                 "produktkodierung": "1234567890",
@@ -71,9 +72,17 @@ def test_prueflauf_start_uses_session_user_not_body():
                 "pruefer_id": "impersonate-me",
             },
         )
+        assert forbidden.status_code == 422, forbidden.text
+
+        response = client.post(
+            "/prueflaeufe",
+            json={
+                "produktkodierung": "1234567890",
+                "pruefobjekt_kennung": "SN-1",
+            },
+        )
         assert response.status_code == 201, response.text
         assert response.json()["pruefer_id"] == me["benutzer_id"]
-        assert response.json()["pruefer_id"] != "impersonate-me"
 
 
 def test_csrf_required_when_session_present():
@@ -83,3 +92,60 @@ def test_csrf_required_when_session_present():
         response = client.post("/auth/logout")
         assert response.status_code == 403
         assert response.json()["code"] == "csrf_ungueltig"
+
+
+def test_session_cookie_httponly_and_new_id_on_login():
+    app = create_app(in_memory_deps())
+    with RawTestClient(app) as client:
+        first = client.post(
+            "/auth/login",
+            json={"login": DEFAULT_ADMIN_LOGIN, "passwort": DEFAULT_ADMIN_PASSWORD},
+        )
+        assert first.status_code == 200
+        sid1 = client.cookies.get("pwe_session")
+        assert sid1
+        # HttpOnly: Set-Cookie-Header prüfen
+        set_cookie = first.headers.get("set-cookie", "")
+        assert "HttpOnly" in set_cookie or "httponly" in set_cookie.lower()
+
+        headers = {CSRF_HEADER: first.json()["csrf_token"]}
+        client.post("/auth/logout", headers=headers)
+        second = client.post(
+            "/auth/login",
+            json={"login": DEFAULT_ADMIN_LOGIN, "passwort": DEFAULT_ADMIN_PASSWORD},
+        )
+        sid2 = second.cookies.get("pwe_session")
+        assert sid2
+        assert sid2 != sid1
+
+
+def test_gesperrter_benutzer_verliert_session():
+    from domain.identity.benutzer import Benutzer, PasswortHash
+    from domain.identity.typen import BenutzerStatus, Systemrolle
+
+    deps = in_memory_deps(seed_admin=False)
+    hasher = deps.passwort_hasher
+    user = Benutzer.anlegen(
+        login="locked",
+        anzeigename="Locked",
+        passwort_hash=hasher.hash("secret"),
+        rollen=frozenset({Systemrolle.PRUEFER}),
+        status=BenutzerStatus.AKTIV,
+    )
+    deps.benutzer_repo.save(user)
+    app = create_app(deps)
+    with RawTestClient(app) as client:
+        login = client.post("/auth/login", json={"login": "locked", "passwort": "secret"})
+        assert login.status_code == 200
+        assert client.get("/auth/me").status_code == 200
+
+        locked = Benutzer(
+            benutzer_id=user.benutzer_id,
+            login=user.login,
+            anzeigename=user.anzeigename,
+            status=BenutzerStatus.GESPERRT,
+            rollen=user.rollen,
+            passwort_hash=user.passwort_hash,
+        )
+        deps.benutzer_repo.save(locked)
+        assert client.get("/auth/me").status_code == 401

@@ -11,11 +11,15 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class PrueflaufStartenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     produktkodierung: str
     pruefobjekt_kennung: str
 
 
 class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     login: str
     passwort: str
 

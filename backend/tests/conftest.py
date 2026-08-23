@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import os
 
+# Gate 8.1a: Tests gelten als Dev/Test — Default-Seed-Passwort nur hier erlaubt.
+os.environ.setdefault("ENV", "test")
+
 import fastapi.testclient as _ftc
 import pytest
 

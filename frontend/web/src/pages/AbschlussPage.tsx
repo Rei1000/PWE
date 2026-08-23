@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import { Download, FileCheck, Loader2 } from "lucide-react";
+import { Download, ExternalLink, FileCheck, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 
 import { fetchProtokollPdf, type AbschlussResponse } from "@/adapters/api";
@@ -12,6 +13,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  downloadProtokollPdfBlob,
+  openProtokollPdfInViewer,
+} from "@/lib/protokollPdfAktion";
 
 type AbschlussLocationState = {
   abschluss?: AbschlussResponse;
@@ -21,18 +26,32 @@ export function AbschlussPage() {
   const { prueflaufId = "" } = useParams();
   const location = useLocation();
   const abschluss = (location.state as AbschlussLocationState | null)?.abschluss;
+  const [popupHinweis, setPopupHinweis] = useState<string | null>(null);
 
-  const pdfMutation = useMutation({
+  const downloadMutation = useMutation({
     mutationFn: () => fetchProtokollPdf(prueflaufId),
     onSuccess: (blob) => {
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = `protokoll-${prueflaufId.slice(0, 8)}.pdf`;
-      anchor.click();
-      URL.revokeObjectURL(url);
+      setPopupHinweis(null);
+      downloadProtokollPdfBlob(blob, `protokoll-${prueflaufId.slice(0, 8)}.pdf`);
     },
   });
+
+  const openMutation = useMutation({
+    mutationFn: () => fetchProtokollPdf(prueflaufId),
+    onSuccess: (blob) => {
+      const result = openProtokollPdfInViewer(blob);
+      if (!result.ok) {
+        setPopupHinweis(
+          "Das Popup wurde blockiert. Bitte Popups erlauben oder „Protokoll-PDF herunterladen“ nutzen und die Datei lokal öffnen.",
+        );
+        return;
+      }
+      setPopupHinweis(null);
+    },
+  });
+
+  const busy = downloadMutation.isPending || openMutation.isPending;
+  const aktionError = openMutation.error ?? downloadMutation.error;
 
   return (
     <Card>
@@ -68,19 +87,52 @@ export function AbschlussPage() {
           </dl>
         )}
 
-        <Button
-          type="button"
-          onClick={() => pdfMutation.mutate()}
-          disabled={pdfMutation.isPending || !prueflaufId}
-        >
-          {pdfMutation.isPending ? (
-            <Loader2 className="animate-spin" aria-hidden />
-          ) : (
-            <Download aria-hidden />
-          )}
-          Protokoll-PDF herunterladen
-        </Button>
-        <ApiErrorAlert error={pdfMutation.error} />
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            onClick={() => {
+              setPopupHinweis(null);
+              openMutation.reset();
+              downloadMutation.reset();
+              openMutation.mutate();
+            }}
+            disabled={busy || !prueflaufId}
+            aria-busy={openMutation.isPending}
+          >
+            {openMutation.isPending ? (
+              <Loader2 className="animate-spin" aria-hidden />
+            ) : (
+              <ExternalLink aria-hidden />
+            )}
+            Anzeigen & Drucken
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setPopupHinweis(null);
+              openMutation.reset();
+              downloadMutation.reset();
+              downloadMutation.mutate();
+            }}
+            disabled={busy || !prueflaufId}
+            aria-busy={downloadMutation.isPending}
+          >
+            {downloadMutation.isPending ? (
+              <Loader2 className="animate-spin" aria-hidden />
+            ) : (
+              <Download aria-hidden />
+            )}
+            Protokoll-PDF herunterladen
+          </Button>
+        </div>
+
+        {popupHinweis && (
+          <p className="text-sm text-destructive" role="alert">
+            {popupHinweis}
+          </p>
+        )}
+        <ApiErrorAlert error={aktionError} />
 
         <Link to="/" className="inline-block text-sm underline">
           Neuer Prüflauf

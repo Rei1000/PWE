@@ -50,7 +50,7 @@ flowchart LR
   G5 -.->|Transport| G5c[API write]
 ```
 
-**▶ Aktueller Stand:** **Gate 8 ✅** — Gate 8.1 Auth ⏸ (deferred); Gate 9 ⏸ — Gate 7 ✅, Gate 6.3 ✅
+**▶ Aktueller Stand:** Gate 8.2–8.4 ✅ — **nächster Slice Gate 8.1a** (Identity Foundation); Gate 8.1 Identity & Qualification ⏳; Gate 9 ⏸ — Gate 7 ✅, Gate 6.3 ✅
 
 ---
 
@@ -182,25 +182,55 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ---
 
-## Gate 8 — V1-Erweiterung ✅
+## Gate 8 — V1-Erweiterung
 
-**Neu priorisiert (2026-07-14):** Solange [ADR-0001](adr/0001-v1-scope-deferrals.md) und Einzel-PC-Laborbetrieb gelten, **Katalog-Admin vor Auth**, Foto/Storage getrennt, Auth vor echtem Mehrbenutzerbetrieb.
+**Geliefert (8.2–8.4):** ✅ Katalog-Admin, Foto/Storage, Browser-PDF.  
+**Offen:** Gate **8.1 Identity & Qualification** ⏳ (gesliced).
 
-| # | Schritt | Status | Prio | Abhängigkeit |
-|---|---------|--------|------|--------------|
-| 8.2 | Katalog-Administration (Bibliothek, Vorlagen, Routinen — HTTP + UI, gesliced) | ✅ | P2 | 8.2a–8.2c | 6.3, 7.5 |
-| 8.2a | Bibliothek-HTTP CRUD (Kommandos, Routinen, Listen) | ✅ | P2 | PR [#32](https://github.com/Rei1000/PWE/pull/32) — Merge `3956914`, [ADR-0019](adr/0019-bibliothek-http-crud.md) | 6.3a |
+**Historisch (2026-07-14):** Solange [ADR-0001](adr/0001-v1-scope-deferrals.md) und Einzel-PC-Laborbetrieb galten, **Katalog-Admin vor Auth**, Foto/Storage getrennt.
+
+| # | Schritt | Status | Prio | Referenz / Abhängigkeit |
+|---|---------|--------|------|-------------------------|
+| 8.2 | Katalog-Administration (Bibliothek, Vorlagen, Routinen — HTTP + UI, gesliced) | ✅ | P2 | 8.2a–8.2c · 6.3, 7.5 |
+| 8.2a | Bibliothek-HTTP CRUD (Kommandos, Routinen, Listen) | ✅ | P2 | PR [#32](https://github.com/Rei1000/PWE/pull/32) — Merge `3956914`, [ADR-0019](adr/0019-bibliothek-http-crud.md) · 6.3a |
 | 8.2b | Vorlagen und erweiterte Entwurfsbearbeitung (gesliced) | ✅ | P3 | 8.2b1, 8.2b2 |
-| 8.2b1 | PrüfschrittVorlage: Bibliothek, Materialisierung und HTTP | ✅ | P3 | PR [#34](https://github.com/Rei1000/PWE/pull/34) — Merge `64f4735` (Feature `7905ad7`, PG-Fix `29151d1`), [ADR-0020](adr/0020-pruefschritt-vorlage-materialisierung.md) | 8.2a |
-| 8.2b2 | Erweiterte Entwurfsbearbeitung HTTP | ✅ | P3 | PR [#36](https://github.com/Rei1000/PWE/pull/36) — Merge `61da712` (Feature `41aa6d4`), [ADR-0021](adr/0021-entwurfsbearbeitung-http.md) | 8.2b1 |
+| 8.2b1 | PrüfschrittVorlage: Bibliothek, Materialisierung und HTTP | ✅ | P3 | PR [#34](https://github.com/Rei1000/PWE/pull/34) — Merge `64f4735` (Feature `7905ad7`, PG-Fix `29151d1`), [ADR-0020](adr/0020-pruefschritt-vorlage-materialisierung.md) · 8.2a |
+| 8.2b2 | Erweiterte Entwurfsbearbeitung HTTP | ✅ | P3 | PR [#36](https://github.com/Rei1000/PWE/pull/36) — Merge `61da712` (Feature `41aa6d4`), [ADR-0021](adr/0021-entwurfsbearbeitung-http.md) · 8.2b1 |
 | 8.2c | Katalog-Admin-UI (gesliced) | ✅ | P3 | 8.2c1, 8.2c2 |
-| 8.2c1 | Bibliothek-Admin-UI (Kommandos, Routinen, Vorlagen) | ✅ | P3 | PR [#38](https://github.com/Rei1000/PWE/pull/38) — Merge `3ab3bfd` (Feature `5a3d930`) | 8.2a, 8.2b1 |
-| 8.2c2 | Entwurfseditor-UI | ✅ | P3 | PR [#40](https://github.com/Rei1000/PWE/pull/40) — Merge `b1dbc56` (Feature `2955ca6`, Fix `8568c5e`) | 8.2b2, 8.2c1 |
+| 8.2c1 | Bibliothek-Admin-UI (Kommandos, Routinen, Vorlagen) | ✅ | P3 | PR [#38](https://github.com/Rei1000/PWE/pull/38) — Merge `3ab3bfd` (Feature `5a3d930`) · 8.2a, 8.2b1 |
+| 8.2c2 | Entwurfseditor-UI | ✅ | P3 | PR [#40](https://github.com/Rei1000/PWE/pull/40) — Merge `b1dbc56` (Feature `2955ca6`, Fix `8568c5e`) · 8.2b2, 8.2c1 |
 | 8.3 | Foto / Storage (`DateiSpeicherPort`) | ✅ | P2 | 8.3a, 8.3b |
-| 8.3a | Storage-Port und Nachweis-Integration | ✅ | P2 | PR [#42](https://github.com/Rei1000/PWE/pull/42) — Merge `f6cb6a0` (Feature `ba1ed79`, Fix `a61235c`, `e6f1f27`), [ADR-0022](adr/0022-foto-nachweis-dateispeicher.md) | 8.3 |
-| 8.3b | Frontend Foto-Upload | ✅ | P3 | PR [#44](https://github.com/Rei1000/PWE/pull/44) — Merge `2f874c0` (Feature `4df576f`, Fix `9d80632`) | 8.3a |
-| 8.4 | Protokoll öffnen / Browserdruck (PDF-Viewer) | ✅ | P3 | PR [#46](https://github.com/Rei1000/PWE/pull/46) — Merge `3f5b0e8` (Feature `d2c02d4`, Fix `ce78f1e`) | PDF vorhanden (Gate 5.5) |
-| 8.1 | Identity / Auth (Middleware, Rollen) | ⏸ | P2 | Vor echtem Mehrbenutzerbetrieb; nach 8.2a empfohlen |
+| 8.3a | Storage-Port und Nachweis-Integration | ✅ | P2 | PR [#42](https://github.com/Rei1000/PWE/pull/42) — Merge `f6cb6a0` (Feature `ba1ed79`, Fix `a61235c`, `e6f1f27`), [ADR-0022](adr/0022-foto-nachweis-dateispeicher.md) · 8.3 |
+| 8.3b | Frontend Foto-Upload | ✅ | P3 | PR [#44](https://github.com/Rei1000/PWE/pull/44) — Merge `2f874c0` (Feature `4df576f`, Fix `9d80632`) · 8.3a |
+| 8.4 | Protokoll öffnen / Browserdruck (PDF-Viewer) | ✅ | P3 | PR [#46](https://github.com/Rei1000/PWE/pull/46) — Merge `3f5b0e8` (Feature `d2c02d4`, Fix `ce78f1e`) · PDF (Gate 5.5) |
+| 8.1 | **Identity & Qualification** (gesliced) | ⏳ | **P1** | 8.1a–8.1c · nach 8.2–8.4 ✅ |
+| 8.1a | **Identity Foundation** — Benutzer, Login, Authentifizierung, Systemrollen, Middleware, Session/JWT (ADR), Benutzerstatus, Route Guards; `pruefer_id` = authentifizierter Benutzer | ⏳ | **P1** | 8.1 |
+| 8.1b | **Qualification Engine** — Berechtigungsprofile ↔ Produktdefinition; Einweisungsnachweise ↔ ProduktdefinitionsVersion; Start nur mit Qualifikation; Publish-Regel „Einweisung übernehmen“ | ⏳ | **P1** | 8.1a |
+| 8.1c | **Identity Administration** — Verwaltung Benutzer/Rollen/Profile/Einweisungen; Aktivieren/Sperren/Archivieren; Audit | ⏳ | P2 | 8.1a, 8.1b |
+
+### Roadmap-Anpassung (2026-08-23) — Gate 8.1 Identity & Qualification
+
+**Erkenntnis:** „Auth“ allein deckt den beschlossenen Zielzustand nicht ab. Identity umfasst Systemrollen, Berechtigungsprofile und Einweisungsnachweise (Qualification).
+
+**Entscheidung:** Gate 8.1 heißt **Identity & Qualification**, Zerlegung in **8.1a / 8.1b / 8.1c**. Status von ⏸ (nur Auth deferred) → **⏳** (nächster regulärer Slice: 8.1a). Gate 8.2–8.4 bleiben ✅.
+
+#### Zielmodell (verbindlich für 8.1)
+
+**Systemrollen** (Mehrfachrollen ausdrücklich erlaubt): Administrator · QM · Abteilungsleiter · Prüfer.
+
+**Drei Berechtigungsebenen:**
+
+| Ebene | Bedeutung |
+|-------|-----------|
+| 1. Systemrolle | Administrative Rechte |
+| 2. Berechtigungsprofil | Welche **Produktdefinitionen** (Stamm, nicht Version) grundsätzlich genutzt werden dürfen; n:m Benutzer↔Profile, Profile↔Produktdefinition |
+| 3. Einweisungsnachweis | Bezug auf veröffentlichte **ProduktdefinitionsVersion**; Felder mind. Benutzer, Version, eingewiesen durch, Datum, optional gültig bis, Status, Bemerkung |
+
+**Startregel:** Prüfung starten nur wenn Produktdefinition/Version veröffentlicht, passendes Berechtigungsprofil vorhanden und gültige Einweisung für die Version vorliegt. Administratorrechte ersetzen keine fachliche Qualifikation.
+
+**Benutzerstatus:** Neu · Aktiv · Gesperrt · Archiviert (Archivieren statt Löschen).
+
+**ADRs:** vor Implementierung von 8.1a–c erforderlich (siehe Abschluss der Architekturprüfung) — noch nicht geschrieben.
 
 ### Roadmap-Anpassung (2026-08-22) — Gate 8.2b Zerlegung
 
@@ -233,7 +263,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | P2 | HEIC-Unterstützung | deferred |
 | P2 | PDF-Fotoeinbettung (`ProtokollErzeugungPort`) | deferred; kein nächster Gate-Slice |
 | P2 | Blob-Cache / Galerie / Kamera-Zugriff | deferred; bewusst nicht in 8.3b |
-| P2 | Auth / Download-Schutz | Gate 8.1 ⏸ |
+| P2 | Auth / Download-Schutz | Gate 8.1 Identity & Qualification ⏳ (Fundament in 8.1a) |
 | P2 | Legacy-Storage-Exit (`externes_kommando` physisch entfernen) | separater Slice (Gate 7.4+); Follow-up, nicht nächster Gate-8-Slice |
 
 ---
@@ -242,7 +272,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | # | Schritt | Status | Prio | Begründung Deferred |
 |---|---------|--------|------|---------------------|
-| 9.1 | Auswertung (Read Model, Dashboard) | ⏸ | P4 | Eigener Bounded Context; nach stabilem Run-Time-Kern und Auth |
+| 9.1 | Auswertung (Read Model, Dashboard) | ⏸ | P4 | Eigener Bounded Context; nach stabilem Run-Time-Kern und **Gate 8.1 Identity & Qualification** (mind. 8.1a AuthN; Auswertung mit Nutzerbezug ideal nach 8.1b/c) |
 | 9.2 | Smartphone / Sync | ⏸ | P4 | [ADR-0001](adr/0001-v1-scope-deferrals.md) — Sync-Modell ungeklärt, höchstes technisches Risiko |
 
 ---
@@ -251,12 +281,12 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Thema | Gate | Begründung |
 |-------|------|------------|
-| Auth / Identity-Context | 8.1 | V1 PC-only, ein Prüfer; ADR-0001 — vor Mehrbenutzerbetrieb |
-| Vollständige Katalogverwaltung | 8.2 | 6.3a liefert Minimal-Setup; vollständige Admin-UI später |
+| Identity & Qualification (Gesamtfeature) | 8.1 | Gesliced 8.1a–c; **nächster Slice 8.1a** — nicht mehr pauschal ⏸ |
+| Vollständige Katalogverwaltung | 8.2 | historisch; Gate 8.2 inkl. Admin-UI inzwischen ✅ |
 | Legacy-Storage-Exit (`externes_kommando`) | 7.4+ | Alembic-Basis ✅ (Gate 7.5); physische Feldentfernung + Datenstrategie offen |
 | API In-Memory-Default | 7.1 | Dev/Test ohne `DATABASE_URL`; docker-compose setzt PostgreSQL (Gate 7.2) |
 | OpenAPI-Codegen / erweiterte 422-Details | 6.1+ | Optional mit Frontend Bootstrap |
-| Auswertung / Smartphone | 9.x | ADR-0001, eigener Context / höchstes Risiko |
+| Auswertung / Smartphone | 9.x | ADR-0001, eigener Context / höchstes Risiko; 9.1 nach Gate 8.1 |
 
 ---
 
@@ -264,7 +294,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
-| 2026-08-23 | Gate 8.4 abgeschlossen — PR #46, Merge `3f5b0e8` (Feature `d2c02d4`, Fix `ce78f1e`); Protokoll im Browser-PDF-Viewer öffnen (Frontend-only, kein DruckPort); Gate 8 gesamt ✅ (8.1 Auth bleibt ⏸); kein weiterer ⏳-Slice in Gate 8; CI 110 Frontend / 398 Backend | Nach-Merge-Pflege |
+| 2026-08-23 | Gate 8.1 neu ausgerichtet — **Identity & Qualification**; Slices **8.1a** Foundation, **8.1b** Qualification Engine, **8.1c** Administration; Rollen Admin/QM/Abteilungsleiter/Prüfer (Mehrfachrollen); drei Ebenen Rolle/Profil/Einweisung; Benutzerstatus Neu/Aktiv/Gesperrt/Archiviert; Status ⏳, nächster Slice **8.1a**; Gate 9.1-Bezug auf 8.1 angepasst | Architekturprüfung Identity & Qualification; „Auth“ allein zu eng |
+| 2026-08-23 | Gate 8.4 abgeschlossen — PR #46, Merge `3f5b0e8` (Feature `d2c02d4`, Fix `ce78f1e`); Protokoll im Browser-PDF-Viewer öffnen (Frontend-only, kein DruckPort); Gate 8.2–8.4 ✅ (8.1 war damals Auth ⏸); CI 110 Frontend / 398 Backend | Nach-Merge-Pflege |
 | 2026-08-23 | Gate 8.3b abgeschlossen — PR #44, Merge `2f874c0` (Feature `4df576f`, Fix `9d80632`); Frontend Foto-Upload/-Anzeige; Gate 8.3 gesamt ✅; nächster Slice Gate 8.4 (Druck); Gate 8.1 Auth bleibt ⏸; CI 105 Frontend / 398 Backend | Nach-Merge-Pflege |
 | 2026-08-23 | Gate 8.3a abgeschlossen — PR #42, Merge `f6cb6a0` (Feature `ba1ed79`, Fix `a61235c`, `e6f1f27`); `DateiSpeicherPort`, Multipart-Upload, kontextgebundener Download (ADR-0022); Gate 8.3 gesamt noch ⏳ (8.3b offen); CI 398 Backend | Nach-Merge-Pflege |
 | 2026-08-23 | Gate 8.2c2 abgeschlossen — PR #40, Merge `b1dbc56` (Feature `2955ca6`, Fix `8568c5e`); Entwurfseditor-UI Frontend-only; Gate 8.2c und Gate 8.2 gesamt ✅; CI 86 Frontend / 350 Backend | Nach-Merge-Pflege |
@@ -318,4 +349,8 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 ## Nächster Slice
 
-**Kein weiterer regulärer Gate-8-Slice (⏳).** Gate 8.2–8.4 sind ✅; **Gate 8.1 Auth bleibt ⏸** bis echtem Mehrbenutzerbetrieb (ADR-0001). Nächster Roadmap-Block ist **Gate 9 — V2+** (⏸). Offene Follow-ups (Storage Exit, PDF-Fotoeinbettung, Foto-Löschen, S3, …) bleiben P2 und sind **kein** automatischer nächster Gate-Slice.
+**Gate 8.1a — Identity Foundation** ⏳ (P1).
+
+Reihenfolge: **8.1a → 8.1b → 8.1c**. Gate 8.2–8.4 bleiben ✅. Gate 9 bleibt ⏸ bis nach Gate 8.1 (mind. Foundation). Offene Follow-ups (Storage Exit, PDF-Fotoeinbettung, Foto-Löschen, S3, …) bleiben P2 und sind **kein** Ersatz für 8.1a.
+
+**Vor 8.1a-Implementierung:** ADRs zu Identity-BC, AuthN-Mechanismus, AuthZ-Ebenen und `pruefer_id`-Binding (siehe Architekturprüfung) — noch nicht geschrieben.

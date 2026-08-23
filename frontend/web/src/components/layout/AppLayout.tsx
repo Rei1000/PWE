@@ -5,11 +5,13 @@ import { logout } from "@/adapters/api/auth";
 import { getApiBaseUrl } from "@/adapters/api/client";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser, useInvalidateSession } from "@/hooks/useAuth";
+import { darfIdentityLesen } from "@/lib/identityRoles";
 
 export function AppLayout() {
   const { data: user } = useCurrentUser();
   const invalidate = useInvalidateSession();
   const navigate = useNavigate();
+  const showVerwaltung = darfIdentityLesen(user);
 
   const logoutMutation = useMutation({
     mutationFn: logout,
@@ -34,12 +36,25 @@ export function AppLayout() {
             <Link to="/katalog" className="text-muted-foreground hover:text-foreground">
               Katalog (Setup)
             </Link>
+            {showVerwaltung && (
+              <Link to="/verwaltung" className="text-muted-foreground hover:text-foreground">
+                Verwaltung
+              </Link>
+            )}
             <Link to="/health" className="text-muted-foreground hover:text-foreground">
               Health
             </Link>
             {user && (
               <>
                 <span className="text-muted-foreground">{user.anzeigename}</span>
+                {!user.passwortwechsel_erforderlich && (
+                  <Link
+                    to="/passwort-aendern"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Passwort ändern
+                  </Link>
+                )}
                 <Button
                   type="button"
                   variant="ghost"

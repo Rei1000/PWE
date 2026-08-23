@@ -1,4 +1,4 @@
-export { ApiError, apiDelete, apiFetch, apiFetchBlob, apiGet, apiPost, apiPut, getApiBaseUrl } from "@/adapters/api/client";
+export { ApiError, apiDelete, apiFetch, apiFetchBlob, apiGet, apiPost, apiPostMultipart, apiPut, getApiBaseUrl } from "@/adapters/api/client";
 export {
   createKommando,
   createRoutine,
@@ -22,7 +22,9 @@ export {
   automatisierungAusfuehren,
   beurteileSchritt,
   erfasseKomponente,
+  erfasseFotoNachweis,
   erfasseNachweis,
+  fetchNachweisDatei,
   fetchProtokollPdf,
   fetchPrueflauf,
   schliessePrueflaufAb,
@@ -38,6 +40,7 @@ export {
 export {
   type AbschlussResponse,
   type AutomatisierungAusfuehrenResponse,
+  type FotoNachweisResponse,
   type PrueflaufDetail,
   type PrueflaufResponse,
   type PrueflaufStartenRequest,

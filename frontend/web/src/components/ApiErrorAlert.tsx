@@ -1,6 +1,7 @@
 import { AlertCircle } from "lucide-react";
 
 import { katalogErrorMessage } from "@/lib/katalogErrors";
+import { prueflaufErrorMessage } from "@/lib/prueflaufErrors";
 
 type ApiErrorAlertProps = {
   error: unknown;
@@ -9,7 +10,9 @@ type ApiErrorAlertProps = {
 export function ApiErrorAlert({ error }: ApiErrorAlertProps) {
   if (!error) return null;
 
-  const message = katalogErrorMessage(error);
+  const message =
+    prueflaufErrorMessage(error) ??
+    katalogErrorMessage(error);
 
   return (
     <div

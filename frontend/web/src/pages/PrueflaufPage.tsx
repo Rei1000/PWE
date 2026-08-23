@@ -11,7 +11,9 @@ import {
   schliessePrueflaufAb,
 } from "@/adapters/api";
 import { ApiErrorAlert } from "@/components/ApiErrorAlert";
+import { FotoNachweisUpload } from "@/components/FotoNachweisUpload";
 import { SchrittAutomatisierung } from "@/components/SchrittAutomatisierung";
+import { SchrittNachweise } from "@/components/SchrittNachweise";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -153,12 +155,7 @@ export function PrueflaufPage() {
                 <p className="text-xs text-muted-foreground font-mono">
                   Soll: {JSON.stringify(schritt.sollvorgaben)}
                 </p>
-                {schritt.nachweise.length > 0 && (
-                  <p className="text-xs">
-                    Nachweise:{" "}
-                    {schritt.nachweise.map((n) => JSON.stringify(n.payload)).join("; ")}
-                  </p>
-                )}
+                <SchrittNachweise prueflaufId={prueflaufId} nachweise={schritt.nachweise} />
 
                 <SchrittAutomatisierung
                   prueflaufId={prueflaufId}
@@ -172,28 +169,34 @@ export function PrueflaufPage() {
                   (schritt.kann_nachweis_erfassen || schritt.kann_beurteilt_werden) && (
                   <div className="space-y-2 border-t pt-3">
                     {schritt.kann_nachweis_erfassen && (
-                      <form
-                        className="flex flex-wrap items-end gap-2"
-                        onSubmit={nachweisForm.handleSubmit((values) =>
-                          nachweisMutation.mutate({
-                            schrittId: schritt.schritt_id,
-                            messwert: values.messwert,
-                          }),
-                        )}
-                      >
-                        <div className="space-y-1">
-                          <Label htmlFor={`messwert-${schritt.schritt_id}`}>Messwert Spannung</Label>
-                          <Input
-                            id={`messwert-${schritt.schritt_id}`}
-                            type="number"
-                            className="w-32"
-                            {...nachweisForm.register("messwert")}
-                          />
-                        </div>
-                        <Button type="submit" size="sm" disabled={nachweisMutation.isPending}>
-                          Nachweis erfassen
-                        </Button>
-                      </form>
+                      <>
+                        <form
+                          className="flex flex-wrap items-end gap-2"
+                          onSubmit={nachweisForm.handleSubmit((values) =>
+                            nachweisMutation.mutate({
+                              schrittId: schritt.schritt_id,
+                              messwert: values.messwert,
+                            }),
+                          )}
+                        >
+                          <div className="space-y-1">
+                            <Label htmlFor={`messwert-${schritt.schritt_id}`}>Messwert Spannung</Label>
+                            <Input
+                              id={`messwert-${schritt.schritt_id}`}
+                              type="number"
+                              className="w-32"
+                              {...nachweisForm.register("messwert")}
+                            />
+                          </div>
+                          <Button type="submit" size="sm" disabled={nachweisMutation.isPending}>
+                            Nachweis erfassen
+                          </Button>
+                        </form>
+                        <FotoNachweisUpload
+                          prueflaufId={prueflaufId}
+                          schrittId={schritt.schritt_id}
+                        />
+                      </>
                     )}
                     {schritt.kann_beurteilt_werden && (
                       <Button

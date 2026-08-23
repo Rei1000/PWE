@@ -1,11 +1,13 @@
-import { apiFetchBlob, apiGet, apiPost } from "@/adapters/api/client";
+import { apiFetchBlob, apiGet, apiPost, apiPostMultipart } from "@/adapters/api/client";
 import {
   abschlussResponseSchema,
   automatisierungAusfuehrenResponseSchema,
+  fotoNachweisResponseSchema,
   prueflaufDetailSchema,
   prueflaufResponseSchema,
   type AbschlussResponse,
   type AutomatisierungAusfuehrenResponse,
+  type FotoNachweisResponse,
   type KomponenteErfassenRequest,
   type NachweisErfassenRequest,
   type PrueflaufDetail,
@@ -36,6 +38,29 @@ export async function erfasseNachweis(
   body: NachweisErfassenRequest,
 ): Promise<void> {
   await apiPost(`/prueflaeufe/${prueflaufId}/schritte/${schrittId}/nachweise`, body);
+}
+
+/** Gate 8.3b — Multipart-Foto-Nachweis (ADR-0022). */
+export async function erfasseFotoNachweis(
+  prueflaufId: string,
+  schrittId: string,
+  datei: File,
+): Promise<FotoNachweisResponse> {
+  const formData = new FormData();
+  formData.append("datei", datei);
+  const data = await apiPostMultipart<unknown>(
+    `/prueflaeufe/${prueflaufId}/schritte/${schrittId}/nachweise/foto`,
+    formData,
+  );
+  return fotoNachweisResponseSchema.parse(data);
+}
+
+/** Gate 8.3b — kontextgebundener Foto-Download. */
+export async function fetchNachweisDatei(prueflaufId: string, nachweisId: string): Promise<Blob> {
+  return apiFetchBlob(
+    `/prueflaeufe/${prueflaufId}/nachweise/${nachweisId}/datei`,
+    "image/jpeg, image/png, */*",
+  );
 }
 
 export async function beurteileSchritt(prueflaufId: string, schrittId: string): Promise<void> {

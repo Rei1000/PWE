@@ -18,7 +18,7 @@ from application.katalog.routine_zuweisen import RoutineProzedurSchrittZuweisen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from application.pruefausfuehrung.routine_ausfuehren import RoutineAusfuehren
 from application.pruefausfuehrung.kommando_ausfuehrung_kern import KommandoFehlerart
 from domain.katalog.errors import MaterialisierteAutomatisierungInkonsistent
@@ -103,7 +103,7 @@ def test_routine_eine_aktion_happy_path():
     katalog = InMemoryKatalogRepository()
     _katalog_mit_legacy_kommando(katalog)
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1111111111",
         pruefobjekt_kennung="GER-1",
         pruefer_id="pruefer-1",
@@ -131,7 +131,7 @@ def test_routine_eine_aktion_happy_path():
 
 def test_routine_mehrere_aktionen_reihenfolge():
     katalog, prueflauf_repo, _, _, routine_id = _setup_zweistufige_routine()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="2222222222",
         pruefobjekt_kennung="GER-2",
         pruefer_id="pruefer-1",
@@ -163,7 +163,7 @@ def test_routine_mehrere_aktionen_reihenfolge():
 
 def test_teilfehler_aktion1_ok_aktion2_transport_ohne_roh():
     katalog, prueflauf_repo, _, _, _ = _setup_zweistufige_routine()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="2222222222",
         pruefobjekt_kennung="GER-3",
         pruefer_id="pruefer-1",
@@ -190,7 +190,7 @@ def test_teilfehler_aktion1_ok_aktion2_transport_ohne_roh():
 
 def test_teilfehler_aktion1_ok_aktion2_geraete_err():
     katalog, prueflauf_repo, _, _, _ = _setup_zweistufige_routine()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="2222222222",
         pruefobjekt_kennung="GER-4",
         pruefer_id="pruefer-1",
@@ -217,7 +217,7 @@ def test_parserfehler_mit_rohantwort_bricht_ab():
     katalog = InMemoryKatalogRepository()
     _katalog_mit_legacy_kommando(katalog, kommandocode="PARSE")
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1111111111",
         pruefobjekt_kennung="GER-5",
         pruefer_id="pruefer-1",
@@ -245,7 +245,7 @@ def test_fehler_erste_aktion_transport_liefert_ergebnis():
     katalog = InMemoryKatalogRepository()
     _katalog_mit_legacy_kommando(katalog)
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1111111111",
         pruefobjekt_kennung="GER-6",
         pruefer_id="pruefer-1",
@@ -280,7 +280,7 @@ def test_keine_automatisierung_vor_ausfuehrungsbeginn():
         )
     )
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="3333333333",
         pruefobjekt_kennung="GER-7",
         pruefer_id="pruefer-1",
@@ -329,7 +329,7 @@ def test_inkonsistente_materialisierung_vor_ausfuehrungsbeginn():
         )
     )
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="4444444444",
         pruefobjekt_kennung="GER-8",
         pruefer_id="pruefer-1",
@@ -346,7 +346,7 @@ def test_abgeschlossener_prueflauf_vor_ausfuehrungsbeginn():
     _katalog_mit_legacy_kommando(katalog)
     prueflauf_repo = InMemoryPrueflaufRepository()
     protokoll_repo = InMemoryProtokollRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1111111111",
         pruefobjekt_kennung="GER-9",
         pruefer_id="pruefer-1",
@@ -365,7 +365,7 @@ def test_erneuter_routineaufruf_neue_ausfuehrung_id():
     katalog = InMemoryKatalogRepository()
     _katalog_mit_legacy_kommando(katalog)
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1111111111",
         pruefobjekt_kennung="GER-10",
         pruefer_id="pruefer-1",
@@ -387,7 +387,7 @@ def test_legacy_ek_only_verwendet_dasselbe_audit_schema():
     katalog = InMemoryKatalogRepository()
     _katalog_mit_legacy_kommando(katalog, kommando_id="cmd-legacy")
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1111111111",
         pruefobjekt_kennung="GER-11",
         pruefer_id="pruefer-1",
@@ -411,7 +411,7 @@ def test_manueller_nachweis_ohne_automatisierungsblock():
     katalog = InMemoryKatalogRepository()
     _katalog_mit_legacy_kommando(katalog)
     prueflauf_repo = InMemoryPrueflaufRepository()
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1111111111",
         pruefobjekt_kennung="GER-12",
         pruefer_id="pruefer-1",

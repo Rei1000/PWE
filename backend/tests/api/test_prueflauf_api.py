@@ -7,6 +7,7 @@ from adapters.persistence.in_memory import InMemoryKatalogRepository
 from api.app import create_app
 from api.deps import in_memory_deps
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
+from tests.support.qualification import qualify_client_for_kodierung
 
 
 @pytest.fixture
@@ -32,6 +33,7 @@ def client():
     )
     app = create_app(deps)
     with TestClient(app) as http_client:
+        qualify_client_for_kodierung(http_client, "1234567890")
         yield http_client
 
 
@@ -88,4 +90,3 @@ def test_api_start_ohne_version_404(client: TestClient):
     assert response.status_code == 404
     body = response.json()
     assert body["code"] == "version_nicht_gefunden"
-from tests.support.auth import login_as_admin

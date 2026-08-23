@@ -22,7 +22,7 @@ from api.persistence import (
     initialize_postgresql_engine,
     postgres_deps,
 )
-from api.routes import auth, katalog, prueflaeufe
+from api.routes import auth, identity_qualification, katalog, prueflaeufe
 from adapters.security.argon2_hasher import Argon2PasswortHasher
 from adapters.persistence.postgresql.identity_repository import PostgresBenutzerRepository
 
@@ -104,4 +104,5 @@ def create_app(
     app.include_router(auth.router)
     app.include_router(katalog.router)
     app.include_router(prueflaeufe.router)
+    app.include_router(identity_qualification.router)
     return app

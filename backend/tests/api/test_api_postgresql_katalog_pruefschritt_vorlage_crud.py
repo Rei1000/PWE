@@ -9,6 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.app import create_app
+from tests.support.qualification import qualify_client_for_kodierung
 
 SCHRIITT_ID = "schritt-a"
 
@@ -61,6 +62,7 @@ def test_postgresql_pruefschritt_vorlage_crud_und_version_snapshot(pg_api_client
 
     assert client.delete(f"/katalog/bibliothek/vorlagen/{vorlage_id}").status_code == 409
 
+    qualify_client_for_kodierung(client, kodierung)
     start = client.post(
         "/prueflaeufe",
         json={
@@ -69,4 +71,3 @@ def test_postgresql_pruefschritt_vorlage_crud_und_version_snapshot(pg_api_client
         },
     )
     assert start.status_code == 201
-from tests.support.auth import login_as_admin

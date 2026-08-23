@@ -13,15 +13,22 @@ from adapters.persistence.in_memory import (
     InMemoryPrueflaufRepository,
 )
 from adapters.persistence.in_memory_abschluss import InMemoryPrueflaufAbschlussPersistenz
-from adapters.persistence.in_memory_identity import InMemoryBenutzerRepository, InMemorySessionStore
+from adapters.persistence.in_memory_identity import (
+    InMemoryBenutzerRepository,
+    InMemoryBerechtigungsprofilRepository,
+    InMemoryEinweisungsnachweisRepository,
+    InMemorySessionStore,
+)
 from adapters.pdf.protokoll_erzeugung import PdfProtokollErzeugungAdapter
 from adapters.security.argon2_hasher import Argon2PasswortHasher
 from adapters.storage.in_memory import InMemoryDateiSpeicher
 from api.identity_seed import ensure_seed_administrator
 from api.kommando_wiring import create_kommando_port
 from ports.benutzer_repository import BenutzerRepository
+from ports.berechtigungsprofil_repository import BerechtigungsprofilRepository
 from ports.bibliothek_repository import BibliothekRepository
 from ports.datei_speicher_port import DateiSpeicherPort
+from ports.einweisungsnachweis_repository import EinweisungsnachweisRepository
 from ports.externes_kommando_port import ExternesKommandoPort
 from ports.katalog_repository import KatalogRepository
 from ports.passwort_hasher import PasswortHasher
@@ -45,6 +52,8 @@ class ApiDeps:
     benutzer_repo: BenutzerRepository
     passwort_hasher: PasswortHasher
     session_store: SessionStore
+    profile_repo: BerechtigungsprofilRepository
+    einweisung_repo: EinweisungsnachweisRepository
 
 
 def in_memory_deps(
@@ -61,6 +70,8 @@ def in_memory_deps(
     hasher = Argon2PasswortHasher()
     benutzer_repo = InMemoryBenutzerRepository()
     session_store = InMemorySessionStore()
+    profile_repo = InMemoryBerechtigungsprofilRepository()
+    einweisung_repo = InMemoryEinweisungsnachweisRepository()
     deps = ApiDeps(
         katalog=katalog,
         bibliothek=bibliothek,
@@ -76,6 +87,8 @@ def in_memory_deps(
         benutzer_repo=benutzer_repo,
         passwort_hasher=hasher,
         session_store=session_store,
+        profile_repo=profile_repo,
+        einweisung_repo=einweisung_repo,
     )
     if seed_admin:
         ensure_seed_administrator(benutzer_repo, hasher)

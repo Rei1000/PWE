@@ -380,3 +380,54 @@ class PruefschrittVorlageAktualisierenRequest(BaseModel):
     beschreibung: str | None = None
 
     model_config = ConfigDict(extra="forbid")
+
+
+class VeroeffentlichenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    einweisung_uebernehmen: bool = False
+
+
+class ProfilAnlegenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    bezeichnung: str
+    beschreibung: str | None = None
+    produktdefinition_ids: list[str] | None = None
+
+
+class ProfilAktualisierenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    bezeichnung: str
+    beschreibung: str | None = None
+    produktdefinition_ids: list[str] | None = None
+
+
+class ProfilResponse(BaseModel):
+    profil_id: str
+    bezeichnung: str
+    beschreibung: str | None = None
+    produktdefinition_ids: list[str]
+
+
+class EinweisungAnlegenRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    benutzer_id: str
+    version_id: str
+    gueltig_bis: str | None = None  # ISO date
+    bemerkung: str | None = None
+
+
+class EinweisungResponse(BaseModel):
+    einweisung_id: str
+    benutzer_id: str
+    version_id: str
+    eingewiesen_durch: str
+    datum: datetime
+    status: str
+    gueltig_bis: str | None = None
+    bemerkung: str | None = None
+    herkunft_einweisung_id: str | None = None
+    uebernommen_bei_publish: bool = False

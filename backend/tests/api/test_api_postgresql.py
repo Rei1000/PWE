@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from api.app import create_app
 from api.persistence import PersistenceConfigurationError, PersistenceSettings
 from helpers import vorlage_anlegen_http
+from tests.support.qualification import qualify_client_for_kodierung
 
 pytestmark = pytest.mark.postgresql
 
@@ -80,6 +81,7 @@ def test_prueflauf_happy_path_over_postgresql(pg_api_client: TestClient):
     version = pg_api_client.post(f"/katalog/entwuerfe/{produktdefinition_id}/veroeffentlichen")
     assert version.status_code == 201
 
+    qualify_client_for_kodierung(pg_api_client, kodierung)
     start = pg_api_client.post(
         "/prueflaeufe",
         json={
@@ -118,4 +120,3 @@ def test_prueflauf_happy_path_over_postgresql(pg_api_client: TestClient):
     pdf = pg_api_client.get(f"/prueflaeufe/{prueflauf_id}/protokoll/pdf")
     assert pdf.status_code == 200
     assert pdf.headers["content-type"] == "application/pdf"
-from tests.support.auth import login_as_admin

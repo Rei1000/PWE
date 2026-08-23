@@ -13,7 +13,7 @@ from application.protokoll.erzeugen import ProtokollErzeugen
 from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 
 
@@ -39,7 +39,7 @@ def test_protokoll_pdf_slice_nach_laufabschluss():
     prueflauf_repo = InMemoryPrueflaufRepository()
     protokoll_repo = InMemoryProtokollRepository()
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1234567890",
         pruefobjekt_kennung="GER-700",
         pruefer_id="pruefer-1",

@@ -2,7 +2,7 @@
 
 Ordnerstruktur orientiert sich an **`docs/architecture.md`**; Fachbegriffe gemäß **`docs/domain-model.md`**.
 
-**Stand:** Gate 8.2–8.4 ✅ (Katalog-Admin, Foto/Storage, Browser-PDF); Gate **8.1 Identity & Qualification** geplant — ADRs [0023](adr/0023-identity-bounded-context.md)–[0027](adr/0027-authenticated-pruefer-id.md) angenommen, Implementierung ab **8.1a**. PostgreSQL-Schema ausschließlich via Alembic. Auswertung bleibt Platzhalter.
+**Stand:** Gate 8.2–8.4 ✅ (Katalog-Admin, Foto/Storage, Browser-PDF); Gate **8.1a** ✅; **8.1b** Qualification Engine 🔄 (`feat/gate-8-1b-qualification-engine`); Gate 8.1 gesamt ⏳. ADRs [0023](adr/0023-identity-bounded-context.md)–[0027](adr/0027-authenticated-pruefer-id.md). PostgreSQL-Schema ausschließlich via Alembic. Auswertung bleibt Platzhalter.
 
 ---
 
@@ -58,12 +58,12 @@ backend/
 │   │   ├── katalog/              # Produktdefinition, Version, Bibliothek
 │   │   ├── pruefausfuehrung/     # Prüflauf, PrüfschrittDurchführung, Nachweis
 │   │   ├── protokoll/            # ProtokollSnapshot
-│   │   └── identity/             # Benutzer, Profile, Einweisungen (Gate 8.1; ADRs 0023–0027)
+│   │   └── identity/             # Benutzer, Profile, Einweisungen (8.1a ✅ / 8.1b 🔄)
 │   ├── application/
 │   │   ├── katalog/
 │   │   ├── pruefausfuehrung/
 │   │   ├── protokoll/
-│   │   ├── identity/             # Login, Qualifikation, Verwaltung (ab 8.1a–c)
+│   │   ├── identity/             # Login (8.1a); Profil-/Einweisungs-Use-Cases (8.1b)
 │   │   └── auswertung/           # Platzhalter Gate 9
 │   ├── ports/
 │   ├── adapters/
@@ -103,4 +103,4 @@ frontend/
 
 - Interne Aufteilung von `domain/katalog/` bei wachsender Komplexität.
 - Mobile-Technologie (responsive Web vs. native/hybrid).
-- Konkrete Datei-/Modulaufteilung unter `domain/identity/` mit Gate 8.1a.
+- Identity-Administrations-UI und ggf. weitere Module unter Gate 8.1c.

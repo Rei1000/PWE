@@ -47,11 +47,22 @@ Neu · Aktiv · Gesperrt · Archiviert — Archivieren statt Löschen. Login und
 | Entwurf anlegen / bearbeiten | ✅ | ✅ | ✅ | ❌ |
 | Version veröffentlichen | ✅ | ✅ | ❌ | ❌ |
 | Publish-Flag „Einweisung übernehmen“ | ✅ | ✅ | ❌ | ❌ |
-| Run-Time: Start / Nachweise / Foto / Abschluss / Protokoll | — | — | — | ✅* |
+| Run-Time: Start / Nachweise / Foto / Abschluss (Schreiben) | — | — | — | ✅* |
+| Run-Time: Prüflauf / Protokoll / PDF / Foto lesen | ✅† | ✅† | ✅† | ✅† |
 
-\*Nur wenn Startregel erfüllt ([ADR-0026](0026-qualification-model.md)): Status Aktiv, Rolle **Prüfer** in der Rollenmenge, passendes Profil, gültige Einweisung, aktive veröffentlichte Version.
+\*Schreiben und Start nur wenn Startregel erfüllt ([ADR-0026](0026-qualification-model.md)): Status Aktiv, Rolle **Prüfer**, passendes Profil, gültige Einweisung, aktive veröffentlichte Version. Mutationen am laufenden Prüflauf zusätzlich nur durch den Eigentümer (`pruefer_id`).
+
+†**Read broadly:** jede aktive authentifizierte Session — **ohne** Ownership-, Profil- oder Einweisungsprüfung. Prüfergebnisse sind Qualitätsnachweise für den organisationsweiten Informationsfluss, keine personenbezogenen Geheimdaten. Feinere Leserechte (Werk, Mandant, …) bleiben später möglich.
 
 **Admin, QM und Abteilungsleiter** können selbst prüfen, **wenn** sie zusätzlich die Rolle **Prüfer** sowie Profil und Einweisung besitzen. Ohne Prüfer-Rolle: kein fachliches Prüfen.
+
+### Write narrowly / Read broadly (V1)
+
+| Zugriff | Policy |
+|---------|--------|
+| **Start** | Qualifikation (AND) |
+| **Schreiben** am Prüflauf | AuthN + Ownership (`aktueller Benutzer == pruefer_id`) |
+| **Lesen** (Prüflauf, Protokoll, PDF, Foto-Download) | AuthN (Status Aktiv) — bewusst **ohne** Ownership |
 
 ### Verbindliche Regeln (Kurz)
 

@@ -6,7 +6,7 @@ Die FastAPI-Runtime erzeugt oder verändert kein Datenbankschema (Gate 7.5b).
 
 from __future__ import annotations
 
-from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy import Boolean, ForeignKey, Index, String, Text, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -102,3 +102,52 @@ class IdentitySessionRow(Base):
     csrf_token: Mapped[str] = mapped_column(String(128), nullable=False)
     erzeugt_am: Mapped[str] = mapped_column(String(64), nullable=False)
     zuletzt_gesehen_am: Mapped[str] = mapped_column(String(64), nullable=False)
+
+
+class BerechtigungsprofilRow(Base):
+    __tablename__ = "berechtigungsprofil"
+
+    profil_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    bezeichnung: Mapped[str] = mapped_column(String(256), nullable=False)
+    beschreibung: Mapped[str | None] = mapped_column(String(512), nullable=True)
+
+
+class ProfilProduktdefinitionRow(Base):
+    __tablename__ = "profil_produktdefinition"
+
+    profil_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    produktdefinition_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+
+
+class BenutzerProfilRow(Base):
+    __tablename__ = "benutzer_profil"
+
+    benutzer_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    profil_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+
+
+class EinweisungsnachweisRow(Base):
+    __tablename__ = "einweisungsnachweis"
+    __table_args__ = (
+        Index("ix_einweisungsnachweis_benutzer_id", "benutzer_id"),
+        Index("ix_einweisungsnachweis_version_id", "version_id"),
+        Index("ix_einweisungsnachweis_benutzer_version", "benutzer_id", "version_id"),
+        Index(
+            "uq_einweisung_gueltig_benutzer_version",
+            "benutzer_id",
+            "version_id",
+            unique=True,
+            postgresql_where=text("status = 'gueltig'"),
+        ),
+    )
+
+    einweisung_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    benutzer_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    version_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    eingewiesen_durch: Mapped[str] = mapped_column(String(36), nullable=False)
+    datum: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    gueltig_bis: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    bemerkung: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    herkunft_einweisung_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    uebernommen_bei_publish: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

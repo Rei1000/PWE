@@ -23,12 +23,20 @@ def http_status_for_domain_error(exc: DomainError) -> int:
     name = type(exc).__name__
     if name in {"UngueltigeAnmeldedaten", "NichtAuthentifiziert", "SessionAbgelaufen", "LoginNichtErlaubt"}:
         return 401
+    if name in {
+        "QualifikationUnzureichend",
+        "NichtBerechtigt",
+        "PrueflaufNichtEigentuemer",
+    }:
+        return 403
     if name == "UngueltigerDateityp":
         return 415
     if name == "DateiZuGross":
         return 413
     if name == "DateiSpeicherungFehlgeschlagen":
         return 503
+    if name == "EinweisungBereitsGueltig":
+        return 409
     if name.endswith("NichtGefunden") or name == "NachweisKeinFoto":
         return 404
     return 409
@@ -42,6 +50,12 @@ def oeffentliche_fehlermeldung(exc: DomainError) -> str:
         return "Anmeldung fehlgeschlagen."
     if name in {"NichtAuthentifiziert", "SessionAbgelaufen"}:
         return "Nicht angemeldet."
+    if name == "QualifikationUnzureichend":
+        return "Qualifikation unzureichend."
+    if name in {"NichtBerechtigt", "PrueflaufNichtEigentuemer"}:
+        return "Keine Berechtigung für diese Aktion."
+    if name == "EinweisungBereitsGueltig":
+        return "Es existiert bereits eine gültige Einweisung."
     if name == "PrueflaufNichtGefunden":
         return "Der angeforderte Prüflauf wurde nicht gefunden."
     if name == "VersionNichtGefunden":

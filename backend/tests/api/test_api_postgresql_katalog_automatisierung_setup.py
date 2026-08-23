@@ -19,6 +19,7 @@ from api.persistence import postgres_deps
 from domain.katalog.routine import MaterialisierteRoutineHerkunft
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
 from helpers import vorlage_anlegen_http
+from tests.support.qualification import qualify_client_for_kodierung
 
 KOMMANDOCODE = "READ_VOLTAGE_PG"
 SCHRIITT_ID = "schritt-a"
@@ -85,6 +86,7 @@ def test_postgresql_http_katalog_setup_und_automatisierung():
         assert version.status_code == 201
         version_id = version.json()["version_id"]
 
+        qualify_client_for_kodierung(client, kodierung)
         start = client.post(
             "/prueflaeufe",
             json={
@@ -110,4 +112,3 @@ def test_postgresql_http_katalog_setup_und_automatisierung():
     assert schritt is not None
     assert schritt.materialisierte_routine is not None
     assert schritt.materialisierte_routine.herkunft == MaterialisierteRoutineHerkunft.EINZELKOMMANDO
-from tests.support.auth import login_as_admin

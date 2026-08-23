@@ -47,3 +47,7 @@ class NachweisNichtGefunden(DomainError):
 
 class NachweisKeinFoto(DomainError):
     pass
+
+
+class PrueflaufNichtEigentuemer(DomainError):
+    """Aktueller Benutzer ist nicht der Prüfer des Prüflaufs."""

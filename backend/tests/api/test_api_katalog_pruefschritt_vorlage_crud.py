@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from api.app import create_app
 from api.deps import in_memory_deps
+from tests.support.qualification import qualify_client_for_kodierung
 
 SCHRIITT_ID = "schritt-a"
 
@@ -119,12 +120,13 @@ def test_veroeffentlichen_mit_vorlage_snapshot(client: TestClient):
     assert delete.status_code == 409
     assert delete.json()["code"] == "vorlage_in_verwendung"
 
+    kodierung = version.json()["produktkodierung"]
+    qualify_client_for_kodierung(client, kodierung)
     start = client.post(
         "/prueflaeufe",
         json={
-            "produktkodierung": version.json()["produktkodierung"],
+            "produktkodierung": kodierung,
             "pruefobjekt_kennung": "GER-V",
         },
     )
     assert start.status_code == 201
-from tests.support.auth import login_as_admin

@@ -11,7 +11,7 @@ from adapters.persistence.in_memory import (
 from application.pruefausfuehrung.komponente_erfassen import KomponenteErfassen
 from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
+from tests.support.qualification import make_pruefung_starten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 
 
@@ -48,7 +48,7 @@ def _setup():
 def test_vertical_slice_gueltiger_lauf_mit_protokoll():
     katalog, prueflauf_repo, protokoll_repo = _setup()
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1234567890",
         pruefobjekt_kennung="GER-999",
         pruefer_id="pruefer-1",
@@ -72,7 +72,7 @@ def test_vertical_slice_gueltiger_lauf_mit_protokoll():
 def test_vertical_slice_ungueltiger_lauf_erhaelt_trotzdem_protokoll():
     katalog, prueflauf_repo, protokoll_repo = _setup()
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1234567890",
         pruefobjekt_kennung="GER-999",
         pruefer_id="pruefer-1",
@@ -96,7 +96,7 @@ def test_vertical_slice_ungueltiger_lauf_erhaelt_trotzdem_protokoll():
 def test_vertical_slice_fehlende_bestueckung_ungueltig():
     katalog, prueflauf_repo, protokoll_repo = _setup()
 
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
+    prueflauf = make_pruefung_starten(katalog, prueflauf_repo).execute(
         produktkodierung="1234567890",
         pruefobjekt_kennung="GER-999",
         pruefer_id="pruefer-1",

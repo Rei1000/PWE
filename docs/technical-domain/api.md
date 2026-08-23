@@ -48,6 +48,14 @@ Brücke Application → HTTP. Fachliche Referenz: `docs/architecture.md` §6–�
 | POST | `/prueflaeufe/{id}/schritte/{schritt_id}/beurteilung` | `SchrittBeurteilen` |
 | POST | `/prueflaeufe/{id}/abschluss` | `PruefungAbschliessen` |
 | GET | `/prueflaeufe/{id}/protokoll/pdf` | `ProtokollErzeugen` |
+| POST | `/identity/profile` | `ProfilAnlegen` (Gate 8.1b) |
+| GET | `/identity/profile/{profil_id}` | `ProfilLesen` (Gate 8.1b) |
+| PUT | `/identity/profile/{profil_id}` | `ProfilAktualisieren` (Gate 8.1b) |
+| PUT | `/identity/profile/{profil_id}/benutzer/{benutzer_id}` | `ProfilBenutzerZuordnen` (Gate 8.1b) |
+| DELETE | `/identity/profile/{profil_id}/benutzer/{benutzer_id}` | `ProfilBenutzerEntfernen` (Gate 8.1b) |
+| POST | `/identity/einweisungen` | `EinweisungAnlegen` (Gate 8.1b) |
+| GET | `/identity/einweisungen/{einweisung_id}` | `EinweisungLesen` (Gate 8.1b) |
+| POST | `/identity/einweisungen/{einweisung_id}/widerrufen` | `EinweisungWiderrufen` (Gate 8.1b) |
 
 ## Fehlerformat
 
@@ -59,8 +67,10 @@ Alle API-Fehler (Domain und Validierung) liefern ein einheitliches JSON-Objekt:
 
 | HTTP | `code` (Beispiele) | Auslöser |
 |------|---------------------|----------|
+| 401 | `ungueltige_anmeldedaten`, `nicht_authentifiziert`, `session_abgelaufen`, … | AuthN (Gate 8.1a) |
+| 403 | `qualifikation_unzureichend`, `nicht_berechtigt`, `prueflauf_nicht_eigentuemer` | Qualifikation / Ownership / Rollen (Gate 8.1b) |
 | 404 | `version_nicht_gefunden`, `prueflauf_nicht_gefunden`, `nachweis_nicht_gefunden`, `datei_nicht_gefunden`, `nachweis_kein_foto`, … | `DomainError`-Subklassen mit Suffix `NichtGefunden` bzw. `NachweisKeinFoto` |
-| 409 | `invariant_verletzt`, `foto_nur_per_multipart`, `kommando_in_verwendung`, `routine_in_verwendung`, … | `InvariantViolation` und übrige fachliche Konflikte |
+| 409 | `invariant_verletzt`, `foto_nur_per_multipart`, `kommando_in_verwendung`, `routine_in_verwendung`, `einweisung_bereits_gueltig`, … | `InvariantViolation` und übrige fachliche Konflikte |
 | 413 | `datei_zu_gross` | `DateiZuGross` |
 | 415 | `ungueltiger_dateityp` | `UngueltigerDateityp` |
 | 503 | `datei_speicherung_fehlgeschlagen` | Storage-Infrastrukturfehler |
@@ -258,7 +268,7 @@ Antworten (`NachweisResponse`, Read Model) liefern `art` als denselben String-We
 
 Fachliche Kontextvalidierung: Nachweis muss zum Prüflauf gehören und `art=foto` sein. Response: Binärinhalt, `Content-Type` aus Payload, `Content-Disposition: inline`.
 
-Download unterliegt ab Gate 8.1 der Session-Authentifizierung ([ADR-0024](../adr/0024-authentication-v1.md)); fachliche Kontextvalidierung (Nachweis gehört zum Prüflauf) bleibt bestehen ([ADR-0022](../adr/0022-foto-nachweis-dateispeicher.md)). Rollen- und Qualifikationsprüfung folgen den Identity-Slices (8.1a/8.1b).
+Download unterliegt der Session-Authentifizierung ([ADR-0024](../adr/0024-authentication-v1.md)); fachliche Kontextvalidierung (Nachweis gehört zum Prüflauf) bleibt bestehen ([ADR-0022](../adr/0022-foto-nachweis-dateispeicher.md)). Qualifikation wird **nur beim Start** geprüft (nicht erneut bei Download/Mutationen); Mutationen erfordern Prüflauf-Ownership (siehe unten).
 
 ## Read Model (Gate 6.0)
 
@@ -293,27 +303,43 @@ Keine Fachlogik in der Route — Use Case `PrueflaufLesen` in `application/pruef
 
 ## Authentifizierung / Identity
 
-Zielarchitektur Gate **8.1** ([ADR-0023](../adr/0023-identity-bounded-context.md)–[0027](../adr/0027-authenticated-pruefer-id.md)). **Implementierungsstand:** ADRs angenommen; Code folgt ab Slice **8.1a** (Foundation), Qualifikation in **8.1b**.
+Gate **8.1** ([ADR-0023](../adr/0023-identity-bounded-context.md)–[0027](../adr/0027-authenticated-pruefer-id.md)). **Stand:** **8.1a** ✅ (AuthN, Session, `pruefer_id`-Binding); **8.1b** Qualification Engine 🔄 auf Feature-Branch (Startregel, Profile/Einweisungen-HTTP, Publish-Übernahme).
 
-| Thema | Architektur (verbindlich) | Slice |
-|-------|---------------------------|-------|
-| Authentifizierung | Serverseitige **Session** + Cookie (**HttpOnly**, **Secure**, **SameSite**); **kein** JWT / LocalStorage-Token in V1 ([ADR-0024](../adr/0024-authentication-v1.md)) | 8.1a |
-| Authentifizierter Benutzer | Request-Kontext aus Session; Status muss **Aktiv** sein | 8.1a |
-| `pruefer_id` | Bei **neuen** Prüfläufen aus dem Session-Benutzer abgeleitet — **kein** Trust in clientgelieferte freie Strings ([ADR-0027](../adr/0027-authenticated-pruefer-id.md)); historische freie Werte bleiben lesbar | 8.1a |
-| Systemrollen | Administrator, QM, Abteilungsleiter, Prüfer (Mehrfachrollen); API erzwingt Policies, Frontend-Guards nur UX ([ADR-0025](../adr/0025-authorization.md)) | 8.1a (Rollen am User); feine Katalog-Matrix mit Guards |
-| Qualification | Profil ↔ Produktdefinition; Einweisung ↔ ProduktdefinitionsVersion; Startregel ([ADR-0026](../adr/0026-qualification-model.md)) | **8.1b** — hier noch nicht als implementiert beschreiben |
+| Thema | Stand | Slice |
+|-------|-------|-------|
+| Authentifizierung | Serverseitige **Session** + Cookie (**HttpOnly**, **Secure**, **SameSite**); **kein** JWT / LocalStorage-Token in V1 ([ADR-0024](../adr/0024-authentication-v1.md)); `/auth/login`, `/auth/logout`, `/auth/me` | 8.1a ✅ |
+| Authentifizierter Benutzer | Request-Kontext aus Session; Status muss **Aktiv** sein | 8.1a ✅ |
+| `pruefer_id` | Bei **neuen** Prüfläufen aus dem Session-Benutzer abgeleitet — **kein** Trust in clientgelieferte freie Strings ([ADR-0027](../adr/0027-authenticated-pruefer-id.md)); historische freie Werte bleiben lesbar | 8.1a ✅ |
+| Systemrollen | Administrator, QM, Abteilungsleiter, Prüfer (Mehrfachrollen); API erzwingt Policies, Frontend-Guards nur UX ([ADR-0025](../adr/0025-authorization.md)) | 8.1a ✅ (Rollen); feine Katalog-Matrix weiter ausbaubar |
+| Qualification | Profil ↔ Produktdefinition; Einweisung ↔ ProduktdefinitionsVersion; Startregel ([ADR-0026](../adr/0026-qualification-model.md)) | **8.1b** 🔄 |
 
-Keine neuen Identity-HTTP-Endpunkte in diesem Dokument vorwegnehmen, solange sie nicht existieren.
+### Identity-HTTP (Gate 8.1b)
+
+Unter `/identity` (Session erforderlich; Rollen je Endpoint):
+
+| Ressource | Operationen |
+|-----------|-------------|
+| Profile | Anlegen / Lesen / Aktualisieren; Benutzer zuordnen / entfernen |
+| Einweisungen | Anlegen / Lesen; **Widerrufen** (`POST …/widerrufen`) |
+
+Verwaltungs-UI folgt Gate **8.1c**.
+
+### Prüflauf: Qualifikation, Ownership und Lesen (Gate 8.1b)
+
+- **Start** (`POST /prueflaeufe`): nur mit gültiger Qualifikation (Prüfer-Rolle + passendes Profil + gültige Einweisung). Sonst **403** `qualifikation_unzureichend`. Qualifikation **nur hier** — nicht bei späteren Mutationen oder Reads.
+- **Schreiben** (Nachweise, Foto, Automatisierung, Beurteilung, Abschluss): AuthN + Ownership (`Session-Benutzer == pruefer_id`) — sonst **403** `prueflauf_nicht_eigentuemer`.
+- **Lesen** (`GET` Prüflauf, Protokoll/PDF, Foto-Download): AuthN (Status Aktiv) — **bewusst ohne** Ownership, Qualifikation oder Profil. Ziel: Wissensfluss (Prüfer lernen voneinander; QM/Abteilungen brauchen Transparenz). Feinere Leserechte später möglich ([ADR-0025](../adr/0025-authorization.md)).
+- **Publish:** `POST /katalog/entwuerfe/{id}/veroeffentlichen` akzeptiert optional `einweisung_uebernehmen` (Default `false`) — übernimmt gültige Einweisungen auf die neue Version ([ADR-0026](../adr/0026-qualification-model.md)).
 
 ## Frontend-Vorbereitung (Katalog)
 
 Ohne veröffentlichte Produktdefinition schlägt `POST /prueflaeufe` mit `version_nicht_gefunden` fehl. Der minimale Katalog-Flow:
 
 1. `POST /katalog/entwuerfe` — Entwurf anlegen
-2. `POST /katalog/entwuerfe/{id}/veroeffentlichen` — aktive Version materialisieren
-3. `POST /prueflaeufe` — Prüfung starten (nach 8.1a: authentifizierter Benutzer; nach 8.1b: Qualifikation)
+2. `POST /katalog/entwuerfe/{id}/veroeffentlichen` — aktive Version materialisieren (optional `einweisung_uebernehmen`)
+3. `POST /prueflaeufe` — Prüfung starten (authentifiziert + Qualifikation)
 
 ## Bewusst offen (nach Merge)
 
 - OpenAPI-Versionierung / erweiterte Validierungsdetails (`errors[]` bei 422)
-- Identity-HTTP-Verwaltungsendpunkte und vollständige Policy-Enforcement (Gate 8.1a–c)
+- Identity-Administrations-UI und Audit (Gate 8.1c)

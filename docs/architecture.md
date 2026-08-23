@@ -75,6 +75,8 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 
 **Context-Grenzen Identity:** Identity besitzt die Zuordnung **Profil ↔ Produktdefinition**. Zwischen Identity, Katalog, Prüfausführung und Protokoll nur **IDs** — **keine Domain-Imports** zwischen den Contexts ([ADR-0023](adr/0023-identity-bounded-context.md)). Authentifizierung V1: Session-Cookie ([ADR-0024](adr/0024-authentication-v1.md)); Qualifikation: [ADR-0026](adr/0026-qualification-model.md).
 
+**Prüflauf-Zugriff (V1):** Start = Qualifikation; Schreiben = Ownership; Lesen = AuthN ohne Ownership ([ADR-0025](adr/0025-authorization.md) „Write narrowly / Read broadly“).
+
 **Keine eigenständigen Wurzeln:** Einzelne Nachweise, Beurteilungen — Teil von PrüfschrittDurchführung bzw. Prüflauf.
 
 ---
@@ -112,7 +114,8 @@ Aus **`docs/domain-model.md`** — technische Aggregate sind in `docs/technical-
 | `ProtokollErzeugungPort` | PDF-Erzeugung aus ProtokollSnapshot |
 | `DruckPort` | Druck (zukünftig; Gate 8.4 nutzt Browser-PDF-Viewer, kein DruckPort) |
 | `DateiSpeicherPort` | Fotos, Dateien — Gate 8.3a ✅ ([ADR-0022](adr/0022-foto-nachweis-dateispeicher.md)) |
-| Identity-Repositories / Session-Ports | Benutzer, Profile, Einweisungen, Session — Gate 8.1 ([ADR-0023](adr/0023-identity-bounded-context.md), [ADR-0024](adr/0024-authentication-v1.md)); Implementierung ab 8.1a |
+| `BenutzerRepository` / `SessionStore` | Benutzer, Session — Gate **8.1a** ✅ ([ADR-0023](adr/0023-identity-bounded-context.md), [ADR-0024](adr/0024-authentication-v1.md)) |
+| `BerechtigungsprofilRepository` / `EinweisungsnachweisRepository` | Profile ↔ Produktdefinition-IDs, Einweisungen ↔ Versions-IDs — Gate **8.1b** 🔄 ([ADR-0026](adr/0026-qualification-model.md)) |
 
 ### Adapter
 

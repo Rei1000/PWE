@@ -16,6 +16,7 @@ from api.kommando_wiring import (
 )
 from api.persistence import postgres_deps
 from helpers import vorlage_anlegen_http
+from tests.support.qualification import qualify_client_for_kodierung
 
 SCHRITT_ID = "demo-schritt-1"
 KODIERUNG = "9000000001"
@@ -70,6 +71,7 @@ def test_postgresql_http_demo_seed_und_automatisierung(monkeypatch):
         )
         assert client.post(f"/katalog/entwuerfe/{pd_id}/veroeffentlichen").status_code == 201
 
+        qualify_client_for_kodierung(client, KODIERUNG)
         start = client.post(
             "/prueflaeufe",
             json={
@@ -103,4 +105,3 @@ def test_postgresql_http_demo_seed_und_automatisierung(monkeypatch):
         assert len(nachweise) >= 1
 
     reset_kommando_adapter_cache_for_tests()
-from tests.support.auth import login_as_admin

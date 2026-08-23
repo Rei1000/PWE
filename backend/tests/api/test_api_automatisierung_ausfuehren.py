@@ -18,6 +18,7 @@ from domain.katalog.routine import (
 from domain.katalog.version import MaterialisierterProzedurSchritt, ProduktdefinitionsVersion
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
 from helpers import CountingKommandoPort, CountingPrueflaufRepository
+from tests.support.qualification import qualify_client_for_kodierung
 
 KOMMANDO_ID = "cmd-api-auto"
 KOMMANDOCODE = "READ_VOLTAGE"
@@ -62,10 +63,12 @@ def client():
     )
     app = create_app(deps)
     with TestClient(app) as http_client:
+        qualify_client_for_kodierung(http_client, "1234567890")
         yield http_client
 
 
 def _start_prueflauf(client: TestClient) -> str:
+    qualify_client_for_kodierung(client, "1234567890")
     response = client.post(
         "/prueflaeufe",
         json={
@@ -142,6 +145,7 @@ def test_api_automatisierung_bibliotheksroutine_mehrere_aktionen():
         ExternesKommandoAntwort(rohdaten="RAW:2", extrahierte_werte={"b": 2}),
     )
     with TestClient(create_app(deps)) as client:
+        qualify_client_for_kodierung(client, "2222222222")
         start = client.post(
             "/prueflaeufe",
             json={
@@ -209,6 +213,7 @@ def test_api_teilfehler_transport_ohne_roh_http_200():
     )
     deps.kommando_port = port
     with TestClient(create_app(deps)) as client:
+        qualify_client_for_kodierung(client, "3333333333")
         start = client.post(
             "/prueflaeufe",
             json={
@@ -261,6 +266,7 @@ def test_api_teilfehler_geraete_err_http_200():
         ExternesKommandoAntwort(rohdaten="ERR FAIL", erfolgreich=False),
     )
     with TestClient(create_app(deps)) as client:
+        qualify_client_for_kodierung(client, "4444444444")
         start = client.post(
             "/prueflaeufe",
             json={
@@ -312,6 +318,7 @@ def test_api_parserfehler_http_200():
         ),
     )
     with TestClient(create_app(deps)) as client:
+        qualify_client_for_kodierung(client, "5555555555")
         start = client.post(
             "/prueflaeufe",
             json={
@@ -366,6 +373,7 @@ def test_api_keine_automatisierung_409():
     port = CountingKommandoPort()
     deps.kommando_port = port
     with TestClient(create_app(deps)) as client:
+        qualify_client_for_kodierung(client, "6666666666")
         start = client.post(
             "/prueflaeufe",
             json={
@@ -469,6 +477,7 @@ def test_api_inkonsistente_materialisierung_409():
     port = CountingKommandoPort()
     deps.kommando_port = port
     with TestClient(create_app(deps)) as client:
+        qualify_client_for_kodierung(client, "7777777777")
         start = client.post(
             "/prueflaeufe",
             json={
@@ -562,4 +571,3 @@ def test_legacy_transport_ohne_roh_ueber_adr0016_commit():
     body = response.json()
     assert body["fehlgeschlagen"] is True
     assert body["fehlerart"] == "keine_geraeteantwort"
-from tests.support.auth import login_as_admin

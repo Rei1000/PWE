@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Body, Request, Response
 
+from api.authz import require_katalog_bearbeiten, require_katalog_veroeffentlichen
+from api.current_user import RequestCurrentUserProvider
 from api.deps import get_request_deps
 from api.schemas import (
     AutomatisierungZuweisenRequest,
@@ -35,6 +37,7 @@ from api.schemas import (
     RoutineDetailResponse,
     RoutineListeResponse,
     RoutineListenEintragResponse,
+    VeroeffentlichenRequest,
     VersionResponse,
 )
 from application.katalog.automatisierung_entfernen import AutomatisierungEntfernen
@@ -99,6 +102,7 @@ def externes_kommando_anlegen(
     body: ExternesKommandoAnlegenRequest,
     request: Request,
 ) -> ExternesKommandoAnlegenResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     kommando = ExternesKommandoAnlegen(deps.bibliothek).execute(
         bezeichnung=body.bezeichnung,
@@ -153,6 +157,7 @@ def externes_kommando_aktualisieren(
     body: ExternesKommandoAktualisierenRequest,
     request: Request,
 ) -> ExternesKommandoDetailResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     kommando = ExternesKommandoAktualisieren(deps.bibliothek).execute(
         kommando_id,
@@ -173,6 +178,7 @@ def externes_kommando_aktualisieren(
     responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
 )
 def externes_kommando_loeschen(kommando_id: str, request: Request) -> Response:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     ExternesKommandoLoeschen(deps.katalog, deps.bibliothek).execute(kommando_id)
     return Response(status_code=204)
@@ -185,6 +191,7 @@ def externes_kommando_loeschen(kommando_id: str, request: Request) -> Response:
     responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}, 422: {"model": ErrorResponse}},
 )
 def routine_anlegen(body: RoutineAnlegenRequest, request: Request) -> RoutineAnlegenResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     routine = RoutineAnlegen(deps.bibliothek).execute(
         bezeichnung=body.bezeichnung,
@@ -241,6 +248,7 @@ def routine_aktualisieren(
     body: RoutineAktualisierenRequest,
     request: Request,
 ) -> RoutineDetailResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     routine = RoutineAktualisieren(deps.bibliothek).execute(
         routine_id,
@@ -261,6 +269,7 @@ def routine_aktualisieren(
     responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
 )
 def routine_loeschen(routine_id: str, request: Request) -> Response:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     RoutineLoeschen(deps.katalog, deps.bibliothek).execute(routine_id)
     return Response(status_code=204)
@@ -276,6 +285,7 @@ def pruefschritt_vorlage_anlegen(
     body: PruefschrittVorlageAnlegenRequest,
     request: Request,
 ) -> PruefschrittVorlageAnlegenResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     vorlage = PruefschrittVorlageAnlegen(deps.bibliothek).execute(
         bezeichnung=body.bezeichnung,
@@ -332,6 +342,7 @@ def pruefschritt_vorlage_aktualisieren(
     body: PruefschrittVorlageAktualisierenRequest,
     request: Request,
 ) -> PruefschrittVorlageDetailResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     vorlage = PruefschrittVorlageAktualisieren(deps.bibliothek).execute(
         vorlage_id,
@@ -352,6 +363,7 @@ def pruefschritt_vorlage_aktualisieren(
     responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
 )
 def pruefschritt_vorlage_loeschen(vorlage_id: str, request: Request) -> Response:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     PruefschrittVorlageLoeschen(deps.katalog, deps.bibliothek).execute(vorlage_id)
     return Response(status_code=204)
@@ -373,6 +385,7 @@ def automatisierung_zuweisen(
     body: AutomatisierungZuweisenRequest,
     request: Request,
 ) -> AutomatisierungZuweisenResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
 
     if body.kommando_id is not None:
@@ -446,6 +459,7 @@ def prozedur_schritt_anlegen(
     body: ProzedurSchrittAnlegenRequest,
     request: Request,
 ) -> ProzedurSchrittEntwurfResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     schritt = ProzedurSchrittAnlegen(deps.katalog, deps.bibliothek).execute(
         produktdefinition_id,
@@ -467,6 +481,7 @@ def prozedur_schritt_reihenfolge_aendern(
     body: ProzedurSchrittReihenfolgeRequest,
     request: Request,
 ) -> EntwurfDetailResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     entwurf = ProzedurSchrittReihenfolgeAendern(deps.katalog).execute(
         produktdefinition_id,
@@ -486,6 +501,7 @@ def prozedur_schritt_aktualisieren(
     body: ProzedurSchrittAktualisierenRequest,
     request: Request,
 ) -> ProzedurSchrittEntwurfResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     schritt = ProzedurSchrittAktualisieren(deps.katalog, deps.bibliothek).execute(
         produktdefinition_id,
@@ -507,6 +523,7 @@ def prozedur_schritt_loeschen(
     schritt_id: str,
     request: Request,
 ) -> Response:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     ProzedurSchrittLoeschen(deps.katalog).execute(produktdefinition_id, schritt_id)
     return Response(status_code=204)
@@ -514,6 +531,7 @@ def prozedur_schritt_loeschen(
 
 @router.post("/entwuerfe", status_code=201, response_model=EntwurfResponse)
 def entwurf_anlegen(body: EntwurfAnlegenRequest, request: Request) -> EntwurfResponse:
+    require_katalog_bearbeiten(RequestCurrentUserProvider(request).require())
     deps = get_request_deps(request)
     schritte = tuple(
         ProzedurSchrittEntwurf(
@@ -545,11 +563,19 @@ def entwurf_anlegen(body: EntwurfAnlegenRequest, request: Request) -> EntwurfRes
     response_model=VersionResponse,
 )
 def entwurf_veroeffentlichen(
-    produktdefinition_id: str, request: Request
+    produktdefinition_id: str,
+    request: Request,
+    body: VeroeffentlichenRequest = Body(default_factory=VeroeffentlichenRequest),
 ) -> VersionResponse:
+    aktueller = RequestCurrentUserProvider(request).require()
+    require_katalog_veroeffentlichen(aktueller)
     deps = get_request_deps(request)
+    flag = body.einweisung_uebernehmen
     version = ProduktdefinitionVeroeffentlichen(deps.katalog, deps.bibliothek).execute(
-        produktdefinition_id
+        produktdefinition_id,
+        einweisung_uebernehmen=flag,
+        eingewiesen_durch=aktueller.benutzer_id if flag else None,
+        einweisungen=deps.einweisung_repo if flag else None,
     )
     return VersionResponse(
         version_id=version.version_id,

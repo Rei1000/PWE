@@ -8,6 +8,7 @@ from api.auth_settings import CSRF_HEADER
 from api.deps import in_memory_deps
 from api.identity_seed import DEFAULT_ADMIN_LOGIN, DEFAULT_ADMIN_PASSWORD
 from tests.support.auth import login_as_admin
+from tests.support.qualification import qualify_client_for_kodierung
 
 
 def test_login_logout_me():
@@ -74,6 +75,7 @@ def test_prueflauf_start_uses_session_user_not_body():
         )
         assert forbidden.status_code == 422, forbidden.text
 
+        qualify_client_for_kodierung(client, "1234567890")
         response = client.post(
             "/prueflaeufe",
             json={

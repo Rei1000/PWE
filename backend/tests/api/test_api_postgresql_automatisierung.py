@@ -20,7 +20,6 @@ from application.katalog.entwurf_anlegen import EntwurfAnlegen
 from application.katalog.externes_kommando_anlegen import ExternesKommandoAnlegen
 from application.katalog.kommando_zuweisen import KommandoProzedurSchrittZuweisen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
-from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from domain.katalog.produktdefinition import ProzedurSchrittEntwurf
 from domain.pruefausfuehrung.kommando_ausfuehrung import ExternesKommandoAntwort
 from domain.pruefausfuehrung.prueflauf import NachweisArt
@@ -65,13 +64,7 @@ def test_api_automatisierung_postgresql_happy_path():
         kommando.kommando_id,
     )
     ProduktdefinitionVeroeffentlichen(katalog, bibliothek).execute(entwurf.produktdefinition_id)
-    prueflauf = PruefungStarten(katalog, prueflauf_repo).execute(
-        produktkodierung=kodierung,
-        pruefobjekt_kennung="GER-PG-AUTO",
-        pruefer_id="pruefer-pg",
-    )
     session.commit()
-    prueflauf_id = prueflauf.prueflauf_id
     session.close()
 
     def simulation_postgres_deps(pg_session, datei_speicher):
@@ -89,6 +82,15 @@ def test_api_automatisierung_postgresql_happy_path():
         return deps
 
     with TestClient(create_app(postgres_deps_factory=simulation_postgres_deps)) as client:
+        from tests.support.qualification import qualify_client_for_kodierung
+
+        qualify_client_for_kodierung(client, kodierung)
+        start = client.post(
+            "/prueflaeufe",
+            json={"produktkodierung": kodierung, "pruefobjekt_kennung": "GER-PG-AUTO"},
+        )
+        assert start.status_code == 201, start.text
+        prueflauf_id = start.json()["prueflauf_id"]
         response = client.post(
             f"/prueflaeufe/{prueflauf_id}/schritte/schritt-a/automatisierung/ausfuehren",
             json={},
@@ -111,4 +113,3 @@ def test_api_automatisierung_postgresql_happy_path():
     assert nachweise[0].art == NachweisArt.ROHANTWORT
     assert nachweise[0].payload["kommandocode"] == KOMMANDOCODE
     assert nachweise[1].art == NachweisArt.EXTRAHIERTER_WERT
-from tests.support.auth import login_as_admin

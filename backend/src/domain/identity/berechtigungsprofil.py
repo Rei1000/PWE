@@ -1,8 +1,8 @@
-"""Identity — Aggregate Berechtigungsprofil (Gate 8.1b, ADR-0023/0026)."""
+"""Identity — Aggregate Berechtigungsprofil (Gate 8.1b/8.1c1, ADR-0023/0026)."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from uuid import uuid4
 
 from domain.shared.errors import InvariantViolation
@@ -16,6 +16,7 @@ class Berechtigungsprofil:
     bezeichnung: str
     beschreibung: str | None
     produktdefinition_ids: frozenset[str]
+    aktiv: bool = True
 
     @classmethod
     def anlegen(
@@ -25,6 +26,7 @@ class Berechtigungsprofil:
         beschreibung: str | None = None,
         produktdefinition_ids: frozenset[str] | set[str] | None = None,
         profil_id: str | None = None,
+        aktiv: bool = True,
     ) -> Berechtigungsprofil:
         name = bezeichnung.strip()
         if not name:
@@ -36,6 +38,7 @@ class Berechtigungsprofil:
             bezeichnung=name,
             beschreibung=desc,
             produktdefinition_ids=ids,
+            aktiv=aktiv,
         )
 
     def mit_bezeichnung(self, bezeichnung: str, beschreibung: str | None = None) -> Berechtigungsprofil:
@@ -44,18 +47,20 @@ class Berechtigungsprofil:
             beschreibung=beschreibung if beschreibung is not None else self.beschreibung,
             produktdefinition_ids=self.produktdefinition_ids,
             profil_id=self.profil_id,
+            aktiv=self.aktiv,
         )
 
     def mit_produktdefinitionen(
         self, produktdefinition_ids: frozenset[str] | set[str]
     ) -> Berechtigungsprofil:
         ids = frozenset(i.strip() for i in produktdefinition_ids if i and i.strip())
-        return Berechtigungsprofil(
-            profil_id=self.profil_id,
-            bezeichnung=self.bezeichnung,
-            beschreibung=self.beschreibung,
-            produktdefinition_ids=ids,
-        )
+        return replace(self, produktdefinition_ids=ids)
+
+    def deaktivieren(self) -> Berechtigungsprofil:
+        return replace(self, aktiv=False)
+
+    def aktivieren(self) -> Berechtigungsprofil:
+        return replace(self, aktiv=True)
 
     def deckt_produktdefinition(self, produktdefinition_id: str) -> bool:
-        return produktdefinition_id in self.produktdefinition_ids
+        return self.aktiv and produktdefinition_id in self.produktdefinition_ids

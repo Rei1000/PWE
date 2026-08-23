@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from adapters.persistence.postgresql.bibliothek_repository import PostgresBibliothekRepository
 from adapters.persistence.postgresql.abschluss_persistenz import PostgresPrueflaufAbschlussPersistenz
+from adapters.persistence.postgresql.audit_repository import PostgresIdentityAuditRepository
 from adapters.persistence.postgresql.identity_repository import (
     PostgresBenutzerRepository,
     PostgresSessionStore,
@@ -113,6 +114,7 @@ def postgres_deps(session: Session, datei_speicher: DateiSpeicherPort) -> ApiDep
         session_store=PostgresSessionStore(session),
         profile_repo=PostgresBerechtigungsprofilRepository(session),
         einweisung_repo=PostgresEinweisungsnachweisRepository(session),
+        audit_repo=PostgresIdentityAuditRepository(session),
     )
 
 

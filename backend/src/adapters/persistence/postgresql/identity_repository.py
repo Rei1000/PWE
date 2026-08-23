@@ -1,17 +1,20 @@
-"""PostgreSQL — Benutzer + Session (Gate 8.1a)."""
+"""PostgreSQL — Benutzer + Session (Gate 8.1a/8.1c1)."""
 
 from __future__ import annotations
 
 import json
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from adapters.persistence.postgresql.schema import BenutzerRow, IdentitySessionRow
 from domain.identity.benutzer import Benutzer, PasswortHash
 from domain.identity.typen import BenutzerStatus, Systemrolle
 from ports.session_store import SessionDaten
+
+# Advisory lock key für Letzter-Admin-Invariante (Gate 8.1c1).
+_ADMIN_INVARIANT_LOCK_KEY = 812_001
 
 
 def _benutzer_to_row(b: Benutzer) -> BenutzerRow:
@@ -22,6 +25,7 @@ def _benutzer_to_row(b: Benutzer) -> BenutzerRow:
         status=b.status.value,
         passwort_hash=b.passwort_hash.wert,
         rollen_json=json.dumps(sorted(r.value for r in b.rollen)),
+        passwortwechsel_erforderlich=b.passwortwechsel_erforderlich,
     )
 
 
@@ -34,6 +38,7 @@ def _row_to_benutzer(row: BenutzerRow) -> Benutzer:
         status=BenutzerStatus(row.status),
         rollen=rollen,
         passwort_hash=PasswortHash(row.passwort_hash),
+        passwortwechsel_erforderlich=bool(row.passwortwechsel_erforderlich),
     )
 
 
@@ -52,6 +57,7 @@ class PostgresBenutzerRepository:
             existing.status = row.status
             existing.passwort_hash = row.passwort_hash
             existing.rollen_json = row.rollen_json
+            existing.passwortwechsel_erforderlich = row.passwortwechsel_erforderlich
 
     def get(self, benutzer_id: str) -> Benutzer | None:
         row = self._session.get(BenutzerRow, benutzer_id)
@@ -61,6 +67,15 @@ class PostgresBenutzerRepository:
         stmt = select(BenutzerRow).where(BenutzerRow.login == login.strip())
         row = self._session.scalars(stmt).first()
         return _row_to_benutzer(row) if row else None
+
+    def list_all(self, *, for_update: bool = False) -> list[Benutzer]:
+        if for_update:
+            self._session.execute(
+                text("SELECT pg_advisory_xact_lock(:k)"),
+                {"k": _ADMIN_INVARIANT_LOCK_KEY},
+            )
+        rows = self._session.scalars(select(BenutzerRow)).all()
+        return [_row_to_benutzer(r) for r in rows]
 
 
 class PostgresSessionStore:

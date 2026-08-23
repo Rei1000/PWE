@@ -8,6 +8,7 @@ from domain.identity.benutzer import Benutzer
 from domain.identity.berechtigungsprofil import Berechtigungsprofil
 from domain.identity.einweisungsnachweis import EinweisungBereitsGueltig, Einweisungsnachweis
 from domain.identity.typen import EinweisungsStatus
+from domain.shared.errors import InvariantViolation
 from ports.session_store import SessionDaten
 
 
@@ -28,6 +29,25 @@ class InMemoryBenutzerRepository:
         if bid is None:
             return None
         return self._by_id.get(bid)
+
+    def list_all(self, *, for_update: bool = False) -> list[Benutzer]:
+        return list(self._by_id.values())
+
+
+class InMemoryIdentityAuditRepository:
+    def __init__(self) -> None:
+        self._items: dict[str, object] = {}
+
+    def append(self, eintrag) -> None:
+        if eintrag.audit_id in self._items:
+            raise ValueError(f"Audit {eintrag.audit_id} existiert bereits")
+        self._items[eintrag.audit_id] = eintrag
+
+    def get(self, audit_id: str):
+        return self._items.get(audit_id)
+
+    def list_all(self) -> list:
+        return sorted(self._items.values(), key=lambda e: e.zeitpunkt, reverse=True)
 
 
 class InMemorySessionStore:
@@ -76,11 +96,9 @@ class InMemoryBerechtigungsprofilRepository:
         return list(self._profile.values())
 
     def delete(self, profil_id: str) -> None:
-        self._profile.pop(profil_id, None)
-        for bid, pids in list(self._benutzer_profile.items()):
-            pids.discard(profil_id)
-            if not pids:
-                del self._benutzer_profile[bid]
+        raise InvariantViolation(
+            "Berechtigungsprofile dürfen in V1 nicht hart gelöscht werden — deaktivieren"
+        )
 
     def profil_ids_fuer_benutzer(self, benutzer_id: str) -> frozenset[str]:
         return frozenset(self._benutzer_profile.get(benutzer_id, ()))
@@ -157,3 +175,6 @@ class InMemoryEinweisungsnachweisRepository:
             for e in self._by_id.values()
             if e.benutzer_id == benutzer_id and e.version_id == version_id
         ]
+
+    def list_fuer_benutzer(self, benutzer_id: str) -> list[Einweisungsnachweis]:
+        return [e for e in self._by_id.values() if e.benutzer_id == benutzer_id]

@@ -24,6 +24,12 @@ _PUBLIC_EXACT = frozenset({
     "/redoc",
 })
 
+_FORCE_CHANGE_ALLOWED = frozenset({
+    "/auth/me",
+    "/auth/logout",
+    "/auth/passwort",
+})
+
 
 def is_public_path(path: str) -> bool:
     if path in _PUBLIC_EXACT:
@@ -68,6 +74,15 @@ async def apply_authentication(request: Request, call_next) -> Response:
         return JSONResponse(
             status_code=401,
             content=fehler_response(detail="Nicht angemeldet", code="nicht_authentifiziert"),
+        )
+
+    if benutzer.passwortwechsel_erforderlich and path not in _FORCE_CHANGE_ALLOWED:
+        return JSONResponse(
+            status_code=403,
+            content=fehler_response(
+                detail="Passwortwechsel erforderlich.",
+                code="passwort_wechsel_erforderlich",
+            ),
         )
 
     request.state.aktueller_benutzer = benutzer

@@ -17,6 +17,7 @@ from adapters.persistence.in_memory_identity import (
     InMemoryBenutzerRepository,
     InMemoryBerechtigungsprofilRepository,
     InMemoryEinweisungsnachweisRepository,
+    InMemoryIdentityAuditRepository,
     InMemorySessionStore,
 )
 from adapters.pdf.protokoll_erzeugung import PdfProtokollErzeugungAdapter
@@ -30,6 +31,7 @@ from ports.bibliothek_repository import BibliothekRepository
 from ports.datei_speicher_port import DateiSpeicherPort
 from ports.einweisungsnachweis_repository import EinweisungsnachweisRepository
 from ports.externes_kommando_port import ExternesKommandoPort
+from ports.identity_audit_repository import IdentityAuditRepository
 from ports.katalog_repository import KatalogRepository
 from ports.passwort_hasher import PasswortHasher
 from ports.prueflauf_abschluss_persistenz import PrueflaufAbschlussPersistenz
@@ -54,6 +56,7 @@ class ApiDeps:
     session_store: SessionStore
     profile_repo: BerechtigungsprofilRepository
     einweisung_repo: EinweisungsnachweisRepository
+    audit_repo: IdentityAuditRepository
 
 
 def in_memory_deps(
@@ -72,6 +75,7 @@ def in_memory_deps(
     session_store = InMemorySessionStore()
     profile_repo = InMemoryBerechtigungsprofilRepository()
     einweisung_repo = InMemoryEinweisungsnachweisRepository()
+    audit_repo = InMemoryIdentityAuditRepository()
     deps = ApiDeps(
         katalog=katalog,
         bibliothek=bibliothek,
@@ -89,6 +93,7 @@ def in_memory_deps(
         session_store=session_store,
         profile_repo=profile_repo,
         einweisung_repo=einweisung_repo,
+        audit_repo=audit_repo,
     )
     if seed_admin:
         ensure_seed_administrator(benutzer_repo, hasher)

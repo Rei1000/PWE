@@ -28,9 +28,10 @@ Identity-Context: [ADR-0023](0023-identity-bounded-context.md).
 
 ### Login / Logout
 
-- **Login:** Benutzerkennung + Passwort; Session nur bei Status **Aktiv** ([ADR-0025](0025-authorization.md) / Benutzerstatus).
+- **Login:** Benutzerkennung + Passwort; Session nur bei Status **Aktiv** ([ADR-0025](0025-authorization.md) / Benutzerstatus). Status **Neu** darf sich nicht anmelden.
 - **Logout:** Session serverseitig invalidieren und Cookie entfernen.
 - Nach erfolgreichem Login: **neue Session-ID** (Schutz vor Session Fixation).
+- **`passwortwechsel_erforderlich`:** nach Login nur `/auth/me`, Logout und Passwort ändern erlaubt, bis das Flag gelöscht ist (Gate 8.1c1).
 
 ### Session-Invalidierung
 
@@ -38,7 +39,7 @@ Sessions werden invalidiert zumindest bei:
 
 - Logout
 - Wechsel in Status **Gesperrt** oder **Archiviert**
-- Passwort-Änderung (durch Benutzer oder Administrator), soweit in dem Slice umgesetzt
+- Passwort-Änderung (Self) und Admin-Passwort-Reset — **alle** Sessions des Benutzers inkl. aktueller
 
 ### Statusprüfung
 

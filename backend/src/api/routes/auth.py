@@ -7,9 +7,10 @@ from fastapi import APIRouter, Request, Response
 from api.auth_settings import CSRF_COOKIE, SESSION_COOKIE, AuthCookieSettings
 from api.current_user import RequestCurrentUserProvider
 from api.deps import get_request_deps
-from api.schemas import LoginRequest, LoginResponse, MeResponse
+from api.schemas import LoginRequest, LoginResponse, MeResponse, PasswortAendernRequest
 from application.identity.login import Login
 from application.identity.logout import Logout
+from application.identity.passwort_verwaltung import PasswortAendern
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -87,4 +88,23 @@ def auth_me(request: Request) -> MeResponse:
         anzeigename=benutzer.anzeigename,
         status=benutzer.status.value,
         rollen=sorted(r.value for r in benutzer.rollen),
+        passwortwechsel_erforderlich=benutzer.passwortwechsel_erforderlich,
     )
+
+
+@router.post("/passwort", status_code=204)
+def auth_passwort_aendern(
+    body: PasswortAendernRequest, request: Request, response: Response
+) -> Response:
+    benutzer = RequestCurrentUserProvider(request).require()
+    deps = get_request_deps(request)
+    settings: AuthCookieSettings = request.app.state.auth_cookie_settings
+    PasswortAendern(
+        deps.benutzer_repo, deps.passwort_hasher, deps.session_store, deps.audit_repo
+    ).execute(
+        benutzer_id=benutzer.benutzer_id,
+        altes_passwort=body.altes_passwort,
+        neues_passwort=body.neues_passwort,
+    )
+    _clear_auth_cookies(response, settings)
+    return Response(status_code=204)

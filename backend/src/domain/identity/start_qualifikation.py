@@ -40,6 +40,7 @@ def start_qualifikation_erlaubt(ctx: StartQualifikationKontext) -> None:
     if not ctx.version_ist_aktive_veroeffentlichte:
         raise QualifikationUnzureichend("Qualifikation unzureichend")
 
+    # deckt_produktdefinition berücksichtigt nur aktive Profile (Gate 8.1c1).
     profil_ok = any(
         p.deckt_produktdefinition(ctx.produktdefinition_id) for p in ctx.profile_des_benutzers
     )

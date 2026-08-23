@@ -27,6 +27,8 @@ def http_status_for_domain_error(exc: DomainError) -> int:
         "QualifikationUnzureichend",
         "NichtBerechtigt",
         "PrueflaufNichtEigentuemer",
+        "PasswortWechselErforderlich",
+        "AltesPasswortUngueltig",
     }:
         return 403
     if name == "UngueltigerDateityp":
@@ -35,7 +37,12 @@ def http_status_for_domain_error(exc: DomainError) -> int:
         return 413
     if name == "DateiSpeicherungFehlgeschlagen":
         return 503
-    if name == "EinweisungBereitsGueltig":
+    if name in {
+        "EinweisungBereitsGueltig",
+        "LoginBereitsVergeben",
+        "LetzterAdministratorVerletzt",
+        "UngueltigerStatusuebergang",
+    }:
         return 409
     if name.endswith("NichtGefunden") or name == "NachweisKeinFoto":
         return 404
@@ -54,8 +61,18 @@ def oeffentliche_fehlermeldung(exc: DomainError) -> str:
         return "Qualifikation unzureichend."
     if name in {"NichtBerechtigt", "PrueflaufNichtEigentuemer"}:
         return "Keine Berechtigung für diese Aktion."
+    if name == "PasswortWechselErforderlich":
+        return "Passwortwechsel erforderlich."
+    if name == "AltesPasswortUngueltig":
+        return "Altes Passwort ist ungültig."
     if name == "EinweisungBereitsGueltig":
         return "Es existiert bereits eine gültige Einweisung."
+    if name == "LoginBereitsVergeben":
+        return "Login bereits vergeben."
+    if name == "LetzterAdministratorVerletzt":
+        return "Mindestens ein aktiver Administrator muss erhalten bleiben."
+    if name == "UngueltigerStatusuebergang":
+        return "Der Statusübergang ist nicht erlaubt."
     if name == "PrueflaufNichtGefunden":
         return "Der angeforderte Prüflauf wurde nicht gefunden."
     if name == "VersionNichtGefunden":

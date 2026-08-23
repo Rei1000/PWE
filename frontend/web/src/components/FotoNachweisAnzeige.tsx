@@ -33,8 +33,13 @@ export function FotoNachweisAnzeige({
       try {
         const blob = await fetchNachweisDatei(prueflaufId, nachweisId);
         if (cancelled) return;
-        url = URL.createObjectURL(blob);
-        setObjectUrl(url);
+        const created = URL.createObjectURL(blob);
+        if (cancelled) {
+          URL.revokeObjectURL(created);
+          return;
+        }
+        url = created;
+        setObjectUrl(created);
       } catch (err) {
         if (!cancelled) {
           setError(err);

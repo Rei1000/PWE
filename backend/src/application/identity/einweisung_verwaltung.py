@@ -48,17 +48,16 @@ class EinweisungAnlegen:
         if self.katalog.get_version(version_id) is None:
             raise VersionNichtGefundenFuerEinweisung(f"Version {version_id} nicht gefunden")
 
-        # Abgelaufene gültige Records lazy markieren
-        existing_gueltig = self.einweisungen.get_gueltige(
+        # Gültige Einweisung blockiert; abgelaufene (Status noch GUELTIG) lazy markieren
+        if self.einweisungen.get_gueltige(benutzer_id=benutzer_id, version_id=version_id) is not None:
+            raise EinweisungBereitsGueltig(
+                "Es existiert bereits eine gültige Einweisung für Benutzer und Version"
+            )
+        for existing in self.einweisungen.list_fuer_benutzer_version(
             benutzer_id=benutzer_id, version_id=version_id
-        )
-        if existing_gueltig is not None:
-            if existing_gueltig.ist_gueltig():
-                raise EinweisungBereitsGueltig(
-                    "Es existiert bereits eine gültige Einweisung für Benutzer und Version"
-                )
-            # Status war GUELTIG aber Datum abgelaufen → markieren und Slot freigeben
-            self.einweisungen.save(existing_gueltig.als_abgelaufen())
+        ):
+            if existing.status == EinweisungsStatus.GUELTIG and not existing.ist_gueltig():
+                self.einweisungen.save(existing.als_abgelaufen())
 
         neu = Einweisungsnachweis.anlegen(
             benutzer_id=benutzer_id,

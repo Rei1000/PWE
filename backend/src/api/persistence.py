@@ -20,6 +20,10 @@ from adapters.persistence.postgresql.identity_repository import (
 from adapters.persistence.postgresql.katalog_repository import PostgresKatalogRepository
 from adapters.persistence.postgresql.protokoll_repository import PostgresProtokollRepository
 from adapters.persistence.postgresql.prueflauf_repository import PostgresPrueflaufRepository
+from adapters.persistence.postgresql.qualification_repository import (
+    PostgresBerechtigungsprofilRepository,
+    PostgresEinweisungsnachweisRepository,
+)
 from adapters.pdf.protokoll_erzeugung import PdfProtokollErzeugungAdapter
 from adapters.security.argon2_hasher import Argon2PasswortHasher
 from api.deps import ApiDeps
@@ -107,6 +111,8 @@ def postgres_deps(session: Session, datei_speicher: DateiSpeicherPort) -> ApiDep
         benutzer_repo=PostgresBenutzerRepository(session),
         passwort_hasher=hasher,
         session_store=PostgresSessionStore(session),
+        profile_repo=PostgresBerechtigungsprofilRepository(session),
+        einweisung_repo=PostgresEinweisungsnachweisRepository(session),
     )
 
 

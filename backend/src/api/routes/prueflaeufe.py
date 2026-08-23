@@ -40,11 +40,22 @@ from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschlies
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
 from domain.pruefausfuehrung.datei_verweis import DateiVerweis
+from domain.pruefausfuehrung.errors import PrueflaufNichtEigentuemer, PrueflaufNichtGefunden
 from domain.pruefausfuehrung.typen import NachweisArt
 from domain.shared.errors import DomainError
 
 
 router = APIRouter(prefix="/prueflaeufe", tags=["Prüflauf"])
+
+
+def _require_prueflauf_eigentuemer(request: Request, prueflauf_id: str) -> None:
+    deps = get_request_deps(request)
+    prueflauf = deps.prueflauf_repo.get(prueflauf_id)
+    if prueflauf is None:
+        raise PrueflaufNichtGefunden(f"Prüflauf {prueflauf_id} nicht gefunden")
+    benutzer = RequestCurrentUserProvider(request).require()
+    if benutzer.benutzer_id != prueflauf.pruefer_id:
+        raise PrueflaufNichtEigentuemer("Nicht Eigentümer des Prüflaufs")
 
 
 def _prueflauf_response(prueflauf) -> PrueflaufResponse:
@@ -122,7 +133,13 @@ def prueflauf_lesen(prueflauf_id: str, request: Request) -> PrueflaufDetailRespo
 def prueflauf_starten(body: PrueflaufStartenRequest, request: Request) -> PrueflaufResponse:
     deps = get_request_deps(request)
     benutzer = RequestCurrentUserProvider(request).require()
-    prueflauf = PruefungStarten(deps.katalog, deps.prueflauf_repo).execute(
+    prueflauf = PruefungStarten(
+        deps.katalog,
+        deps.prueflauf_repo,
+        deps.benutzer_repo,
+        deps.profile_repo,
+        deps.einweisung_repo,
+    ).execute(
         produktkodierung=body.produktkodierung,
         pruefobjekt_kennung=body.pruefobjekt_kennung,
         pruefer_id=benutzer.benutzer_id,
@@ -136,6 +153,7 @@ def komponente_erfassen(
     body: KomponenteErfassenRequest,
     request: Request,
 ) -> NachweisResponse:
+    _require_prueflauf_eigentuemer(request, prueflauf_id)
     deps = get_request_deps(request)
     nachweis = KomponenteErfassen(deps.prueflauf_repo).execute(
         prueflauf_id, body.komponenten_typ, body.seriennummer
@@ -163,6 +181,7 @@ def automatisierung_ausfuehren(
 ) -> AutomatisierungAusfuehrenResponse:
     deps = get_request_deps(request)
     try:
+        _require_prueflauf_eigentuemer(request, prueflauf_id)
         ergebnis = RoutineAusfuehren(
             deps.katalog,
             deps.prueflauf_repo,
@@ -190,6 +209,7 @@ def nachweis_erfassen(
     body: NachweisErfassenRequest,
     request: Request,
 ) -> NachweisResponse:
+    _require_prueflauf_eigentuemer(request, prueflauf_id)
     deps = get_request_deps(request)
     nachweis = NachweisErfassen(deps.prueflauf_repo).execute(
         prueflauf_id,
@@ -242,6 +262,7 @@ async def foto_nachweis_erfassen(
     request: Request,
     datei: UploadFile = File(...),
 ) -> FotoNachweisResponse:
+    _require_prueflauf_eigentuemer(request, prueflauf_id)
     deps = get_request_deps(request)
     inhalt = await datei.read()
     mime_type = datei.content_type or "application/octet-stream"
@@ -287,6 +308,7 @@ def nachweis_datei_lesen(
     response_class=Response,
 )
 def schritt_beurteilen(prueflauf_id: str, schritt_id: str, request: Request) -> Response:
+    _require_prueflauf_eigentuemer(request, prueflauf_id)
     deps = get_request_deps(request)
     SchrittBeurteilen(deps.katalog, deps.prueflauf_repo).execute(prueflauf_id, schritt_id)
     return Response(status_code=204)
@@ -294,6 +316,7 @@ def schritt_beurteilen(prueflauf_id: str, schritt_id: str, request: Request) -> 
 
 @router.post("/{prueflauf_id}/abschluss", response_model=AbschlussResponse)
 def prueflauf_abschliessen(prueflauf_id: str, request: Request) -> AbschlussResponse:
+    _require_prueflauf_eigentuemer(request, prueflauf_id)
     deps = get_request_deps(request)
     prueflauf, snapshot = PruefungAbschliessen(
         deps.katalog, deps.prueflauf_repo, deps.abschluss_persistenz

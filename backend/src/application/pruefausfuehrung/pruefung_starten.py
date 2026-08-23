@@ -50,17 +50,18 @@ class PruefungStarten:
             raise QualifikationUnzureichend("Qualifikation unzureichend")
 
         profile = tuple(self.profile.profile_fuer_benutzer(pruefer_id))
+        jetzt = datetime.now(UTC)
+        for existing in self.einweisungen.list_fuer_benutzer_version(
+            benutzer_id=pruefer_id, version_id=version.version_id
+        ):
+            if (
+                existing.status == EinweisungsStatus.GUELTIG
+                and not existing.ist_gueltig(jetzt=jetzt)
+            ):
+                self.einweisungen.save(existing.als_abgelaufen())
         einweisung = self.einweisungen.get_gueltige(
             benutzer_id=pruefer_id, version_id=version.version_id
         )
-        jetzt = datetime.now(UTC)
-        if (
-            einweisung is not None
-            and einweisung.status == EinweisungsStatus.GUELTIG
-            and not einweisung.ist_gueltig(jetzt=jetzt)
-        ):
-            self.einweisungen.save(einweisung.als_abgelaufen())
-            einweisung = None
 
         start_qualifikation_erlaubt(
             StartQualifikationKontext(

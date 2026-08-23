@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Body, Request, Response
 
+from api.authz import require_rollen
+from api.current_user import RequestCurrentUserProvider
 from api.deps import get_request_deps
 from api.schemas import (
     AutomatisierungZuweisenRequest,
@@ -35,6 +37,7 @@ from api.schemas import (
     RoutineDetailResponse,
     RoutineListeResponse,
     RoutineListenEintragResponse,
+    VeroeffentlichenRequest,
     VersionResponse,
 )
 from application.katalog.automatisierung_entfernen import AutomatisierungEntfernen
@@ -62,6 +65,7 @@ from application.katalog.routine_loeschen import RoutineLoeschen
 from application.katalog.routine_zuweisen import RoutineProzedurSchrittZuweisen
 from application.katalog.routinen_listen import RoutinenListen
 from application.katalog.veroeffentlichen import ProduktdefinitionVeroeffentlichen
+from domain.identity.typen import Systemrolle
 from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittEntwurf
 from domain.katalog.routine import Routine
 
@@ -545,11 +549,19 @@ def entwurf_anlegen(body: EntwurfAnlegenRequest, request: Request) -> EntwurfRes
     response_model=VersionResponse,
 )
 def entwurf_veroeffentlichen(
-    produktdefinition_id: str, request: Request
+    produktdefinition_id: str,
+    request: Request,
+    body: VeroeffentlichenRequest = Body(default_factory=VeroeffentlichenRequest),
 ) -> VersionResponse:
+    aktueller = RequestCurrentUserProvider(request).require()
+    require_rollen(aktueller, Systemrolle.ADMINISTRATOR, Systemrolle.QM)
     deps = get_request_deps(request)
+    flag = body.einweisung_uebernehmen
     version = ProduktdefinitionVeroeffentlichen(deps.katalog, deps.bibliothek).execute(
-        produktdefinition_id
+        produktdefinition_id,
+        einweisung_uebernehmen=flag,
+        eingewiesen_durch=aktueller.benutzer_id if flag else None,
+        einweisungen=deps.einweisung_repo if flag else None,
     )
     return VersionResponse(
         version_id=version.version_id,

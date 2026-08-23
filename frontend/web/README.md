@@ -104,7 +104,7 @@ Katalog- und Prüflauf-UI erfordern eine gültige Session (Gate 8.1a); Qualifika
 | `npm run dev` | Vite Dev-Server mit API-Proxy |
 | `npm run build` | Produktions-Build |
 | `npm run lint` | ESLint |
-| `npm run test` | Vitest (Schemas, Adapter, Komponenten) |
+| `npm run test` | Vitest (Schemas, Adapter, Komponenten) — Stand Gate 8.1: **127** Tests (40 Dateien) |
 
 ## Architektur
 

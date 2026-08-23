@@ -40,6 +40,16 @@ In der Prüflauf-Schrittkarte:
 - Kein Katalog-Setup in der Prüfer-UI; Automatisierung ausschließlich über ADR-0016 (`…/automatisierung/ausfuehren`, Gate 7.4a)
 - Demo mit automatisierbarem Seed: Gate 6.3c
 
+### Foto-Nachweis (Gate 8.3b)
+
+In der bestehenden Prüflauf-Seite (`/prueflaeufe/:id`) — **keine** neue Route:
+
+- Upload nur bei `kann_nachweis_erfassen` (Backend-Read-Model)
+- JPEG/PNG, Vorschau vor Upload, expliziter Multipart-Upload (`POST …/nachweise/foto`)
+- Inline-Anzeige gespeicherter Foto-Nachweise (`GET …/nachweise/{id}/datei`)
+- Backend bleibt Source of Truth (Client nur MIME-/Größen-Komfortprüfung)
+- Bewusst **nicht**: HEIC, Foto-Delete, Galerie, PDF-Einbettung
+
 ### Katalog-Admin Bibliothek (Gate 8.2c1)
 
 Design-Time-Verwaltung der Bibliothek:
@@ -86,4 +96,5 @@ Design-Time-Editor für Produktdefinitions-Entwürfe — **kein** Prüflaufstart
 - `src/forms/` — UI-Formularschemas (keine Domain-Regeln)
 - `src/pages/` — Präsentation; delegiert an Adapter via TanStack Query
 - `src/components/SchrittAutomatisierung.tsx` / `AutomatisierungErgebnis.tsx` — Gate 6.3b
+- `src/components/FotoNachweisUpload.tsx` / `FotoNachweisAnzeige.tsx` / `SchrittNachweise.tsx` — Gate 8.3b
 - Keine Fachlogik, keine Domain-Regeln im Frontend

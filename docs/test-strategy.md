@@ -31,6 +31,7 @@ Operationalisierung von TDD (projektrules). Stack: ADR-0002.
 - **Katalog-Admin Bibliothek UI** (Gate 8.2c1): Frontend Adapter `tests/api/bibliothek.test.ts`, `client-put-delete.test.ts`, Flow `katalog-bibliothek-flow.test.ts`; Hooks `useKommandos.test.ts`; Komponenten/Pages — kein Backend-Diff.
 - **Entwurfseditor UI** (Gate 8.2c2): Frontend Adapter `tests/api/entwurf.test.ts`, Flow `katalog-entwurf-flow.test.ts`; Hooks `useEntwurf.test.ts`; Lib `entwurf-editor.test.ts`, `entwurf-recents.test.ts`; Komponenten `sollvorgaben-editor.test.tsx`, `entwurf-automatisierung.test.tsx`; Pages `entwurf-neu.test.tsx` — kein Backend-Diff.
 - **Foto-Nachweis / DateiSpeicher** (Gate 8.3a): Domain `test_datei_verweis.py`; Adapter `test_datei_speicher_contract.py`; Application `test_foto_nachweis_erfassen.py`, `test_nachweis_datei_lesen.py`; API `test_api_foto_nachweis.py`; NachweisArt-Contract erweitert (`foto_nur_per_multipart`); PostgreSQL in `test_api_foto_nachweis.py` — kein Alembic.
+- **Frontend Foto-Upload/-Anzeige** (Gate 8.3b): Multipart-Adapter und Blob-Download `frontend/web/tests/api/foto-nachweis.test.ts`; Hook `tests/hooks/useFotoNachweisErfassen.test.ts`; Upload-/Anzeige-Komponenten, Fehlerfälle (MIME/413), Blob-Anzeige und integrativer Upload-Flow `tests/components/foto-nachweis.test.tsx`; Client-Komfortprüfung `tests/lib/foto-konstanten.test.ts`; Fehler-Mapping `tests/lib/prueflauf-errors.test.ts` — kein Backend-Diff; Vitest-Stand **105** Tests (28 Dateien).
 
 ## V1-Pflicht vor Merge
 

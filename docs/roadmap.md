@@ -197,7 +197,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | 8.2c1 | Bibliothek-Admin-UI (Kommandos, Routinen, Vorlagen) | ✅ | P3 | PR [#38](https://github.com/Rei1000/PWE/pull/38) — Merge `3ab3bfd` (Feature `5a3d930`) | 8.2a, 8.2b1 |
 | 8.2c2 | Entwurfseditor-UI | ✅ | P3 | PR [#40](https://github.com/Rei1000/PWE/pull/40) — Merge `b1dbc56` (Feature `2955ca6`, Fix `8568c5e`) | 8.2b2, 8.2c1 |
 | 8.3 | Foto / Storage (`DateiSpeicherPort`) | ⏳ | P2 | 8.3a ✅, 8.3b offen |
-| 8.3a | Storage-Port und Nachweis-Integration | ✅ | P2 | [ADR-0022](adr/0022-foto-nachweis-dateispeicher.md) |
+| 8.3a | Storage-Port und Nachweis-Integration | ✅ | P2 | PR [#42](https://github.com/Rei1000/PWE/pull/42) — Merge `f6cb6a0` (Feature `ba1ed79`, Fix `a61235c`, `e6f1f27`), [ADR-0022](adr/0022-foto-nachweis-dateispeicher.md) | 8.3 |
 | 8.3b | Frontend Foto-Upload | ⏳ | P3 | 8.3a |
 | 8.4 | Druck-Adapter (`DruckPort`) | ⏳ | P3 | PDF vorhanden (Gate 5.5) |
 | 8.1 | Identity / Auth (Middleware, Rollen) | ⏸ | P2 | Vor echtem Mehrbenutzerbetrieb; nach 8.2a empfohlen |
@@ -222,6 +222,18 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 | P2 | Storage Exit (`externes_kommando` physisch entfernen) | separater Slice (siehe Gate 7.4) |
 | P2 | Pagination, Suche, Bulk-Operationen Bibliothek-HTTP | bewusst nicht in 8.2a (ADR-0019) |
 | P2 | Optionale `detail`-Texte für `schritt_id_bereits_vorhanden` / `ungueltige_schritt_reihenfolge` in `api/fehler.py` | kosmetisch; Codes funktionieren generisch |
+
+### Offene Punkte nach Gate 8.3a
+
+| Prio | Thema | Status |
+|------|-------|--------|
+| P1/P2 | SHA-256-Hash für `DateiVerweis` | optional; bewusst nicht in 8.3a (ADR-0022) |
+| P2 | `FotoNachweisEntfernen` (Use Case + API) | offen |
+| P2 | S3-/Object-Storage-Adapter für `DateiSpeicherPort` | späterer Adapter; V1 lokales FS |
+| P2 | HEIC-Unterstützung | deferred |
+| P2 | PDF-Fotoeinbettung (`ProtokollErzeugungPort`) | deferred |
+| P2 | Auth / Download-Schutz | Gate 8.1 ⏸ |
+| P2 | Legacy-Storage-Exit (`externes_kommando` physisch entfernen) | separater Slice (Gate 7.4+) |
 
 ---
 
@@ -251,6 +263,7 @@ Frontend-Stack verbindlich: [ADR-0009](adr/0009-frontend-stack.md).
 
 | Datum | Änderung | Begründung |
 |-------|----------|------------|
+| 2026-08-23 | Gate 8.3a abgeschlossen — PR #42, Merge `f6cb6a0` (Feature `ba1ed79`, Fix `a61235c`, `e6f1f27`); `DateiSpeicherPort`, Multipart-Upload, kontextgebundener Download (ADR-0022); Gate 8.3 gesamt noch ⏳ (8.3b offen); CI 398 Backend | Nach-Merge-Pflege |
 | 2026-08-23 | Gate 8.2c2 abgeschlossen — PR #40, Merge `b1dbc56` (Feature `2955ca6`, Fix `8568c5e`); Entwurfseditor-UI Frontend-only; Gate 8.2c und Gate 8.2 gesamt ✅; CI 86 Frontend / 350 Backend | Nach-Merge-Pflege |
 | 2026-08-22 | Gate 8.2c1 abgeschlossen — PR #38, Merge `3ab3bfd` (Feature `5a3d930`); Bibliothek-Admin-UI Frontend-only; CI 50 Frontend / 350 Backend | Nach-Merge-Pflege |
 | 2026-08-22 | Gate 8.2b2 abgeschlossen — PR #36, Merge `61da712` (Feature `41aa6d4`); Entwurfsbearbeitung HTTP GET/Schritt-CRUD/Reihenfolge (ADR-0021); CI 350/350 | Nach-Merge-Pflege |

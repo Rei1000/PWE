@@ -50,6 +50,14 @@ In der bestehenden Prüflauf-Seite (`/prueflaeufe/:id`) — **keine** neue Route
 - Backend bleibt Source of Truth (Client nur MIME-/Größen-Komfortprüfung)
 - Bewusst **nicht**: HEIC, Foto-Delete, Galerie, PDF-Einbettung
 
+### Protokoll öffnen / Browserdruck (Gate 8.4)
+
+Auf der Abschlussseite (`/prueflaeufe/:id/abschluss`) — zusätzlich zur bestehenden Download-Aktion:
+
+- „Anzeigen & Drucken“ öffnet das vorhandene Protokoll-PDF im nativen Browser-PDF-Viewer
+- Drucken über die Funktionen des PDF-Viewers; „Speichern“ (Download) bleibt unverändert
+- Bewusst **nicht**: `window.print()`, DruckPort, HTML-Druckansicht
+
 ### Katalog-Admin Bibliothek (Gate 8.2c1)
 
 Design-Time-Verwaltung der Bibliothek:
@@ -97,4 +105,5 @@ Design-Time-Editor für Produktdefinitions-Entwürfe — **kein** Prüflaufstart
 - `src/pages/` — Präsentation; delegiert an Adapter via TanStack Query
 - `src/components/SchrittAutomatisierung.tsx` / `AutomatisierungErgebnis.tsx` — Gate 6.3b
 - `src/components/FotoNachweisUpload.tsx` / `FotoNachweisAnzeige.tsx` / `SchrittNachweise.tsx` — Gate 8.3b
+- `src/lib/protokollPdfAktion.ts` / `src/pages/AbschlussPage.tsx` — Gate 8.4
 - Keine Fachlogik, keine Domain-Regeln im Frontend

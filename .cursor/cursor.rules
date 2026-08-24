@@ -28,6 +28,21 @@ Weitere: `docs/pflichtenheft.md`, `docs/projectstructure.md`, `docs/test-strateg
 
 ---
 
+## Dokumentationspflege
+
+Verbindlich für jeden Vertical Slice (Ergänzung zu `docs/projektrules.md` §7):
+
+- Jede **funktionale Änderung** auf betroffene Dokumentation prüfen (Roadmap, Domain, Technical Domain, API, Architektur, …).
+- Ein Slice ist erst **vollständig abgeschlossen**, wenn **Code, Tests und Dokumentation** konsistent sind.
+- Dokumentation im **selben Slice** oder **unmittelbar nach Merge** in einem eigenen Dokumentations-Slice nachziehen.
+- **UI- oder Workflowänderungen** zusätzlich in `docs/user-guide.md` nachführen.
+- **Historische ADRs** und **Changelog-Einträge** nicht rückwirkend umschreiben, sofern sie den damaligen Stand korrekt dokumentieren.
+- Dokumentation beschreibt die **reale Implementierung** — keine geplanten Funktionen.
+
+Ablaufübersicht: `docs/projectstructure.md` §8.
+
+---
+
 ## Cursor-spezifisch
 
 - Nur explizit erlaubte Dateien ändern

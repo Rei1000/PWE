@@ -112,3 +112,19 @@ frontend/
 - Interne Aufteilung von `domain/katalog/` bei wachsender Komplexität.
 - Mobile-Technologie (responsive Web vs. native/hybrid).
 - Audit-Dashboard-UI (Backend-Read-API vorhanden; bewusst nicht in Gate 8.1c2).
+
+---
+
+## 8. Dokumentationsprozess
+
+Entwicklungsablauf je **Vertical Slice** (Roadmap-Punkt). Slice-Regeln, Architekturprüfung und Dokumentationspflichten: `docs/projektrules.md` §7; Agent-Hinweise: `.cursor/cursor.rules`.
+
+| Phase | Inhalt |
+|-------|--------|
+| **Vertical Slice** | Nächsten Roadmap-Punkt identifizieren; Scope auf diesen Slice begrenzen |
+| **Implementierung** | Feature-Branch; Änderungen gemäß Slice in Domain, Application, API, Frontend |
+| **Tests** | Betroffenes Verhalten abdecken oder anpassen (`docs/test-strategy.md`) |
+| **Review** | Architektur-Review vor PR; adversariale Selbstkritik |
+| **Merge** | Nach Review-Freigabe und grünem CI |
+| **Nach-Merge-Dokumentation** | Roadmap-Status, Changelog, betroffene Fach- und Technikdocs — im Slice oder im unmittelbar folgenden Dokumentations-Slice |
+| **Benutzerhandbuch** | Bei Änderungen an Bedienung oder Workflow: `docs/user-guide.md` aktualisieren |

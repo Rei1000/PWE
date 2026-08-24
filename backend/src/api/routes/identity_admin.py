@@ -33,7 +33,7 @@ from domain.identity.typen import Systemrolle
 router = APIRouter(prefix="/identity", tags=["Identity"])
 
 
-def _benutzer_response(b) -> BenutzerResponse:
+def _benutzer_response(b, *, profil_ids: list[str] | None = None) -> BenutzerResponse:
     return BenutzerResponse(
         benutzer_id=b.benutzer_id,
         login=b.login,
@@ -41,6 +41,7 @@ def _benutzer_response(b) -> BenutzerResponse:
         status=b.status.value,
         rollen=sorted(r.value for r in b.rollen),
         passwortwechsel_erforderlich=b.passwortwechsel_erforderlich,
+        profil_ids=profil_ids if profil_ids is not None else [],
     )
 
 
@@ -54,7 +55,15 @@ def benutzer_listen(request: Request) -> BenutzerListeResponse:
     require_identity_lesen(aktueller)
     deps = get_request_deps(request)
     liste = BenutzerListen(deps.benutzer_repo).execute()
-    return BenutzerListeResponse(benutzer=[_benutzer_response(b) for b in liste])
+    return BenutzerListeResponse(
+        benutzer=[
+            _benutzer_response(
+                b,
+                profil_ids=sorted(deps.profile_repo.profil_ids_fuer_benutzer(b.benutzer_id)),
+            )
+            for b in liste
+        ]
+    )
 
 
 @router.get("/benutzer/{benutzer_id}", response_model=BenutzerResponse)
@@ -63,7 +72,8 @@ def benutzer_lesen(benutzer_id: str, request: Request) -> BenutzerResponse:
     require_identity_lesen(aktueller)
     deps = get_request_deps(request)
     b = BenutzerLesen(deps.benutzer_repo).execute(benutzer_id)
-    return _benutzer_response(b)
+    profil_ids = sorted(deps.profile_repo.profil_ids_fuer_benutzer(benutzer_id))
+    return _benutzer_response(b, profil_ids=profil_ids)
 
 
 @router.post("/benutzer", status_code=201, response_model=BenutzerResponse)

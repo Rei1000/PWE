@@ -46,6 +46,9 @@ class InMemoryKatalogRepository:
     def list_entwuerfe(self) -> list[Produktdefinition]:
         return list(self._entwuerfe.values())
 
+    def list_aktive_versionen(self) -> list[ProduktdefinitionsVersion]:
+        return list(self._aktive_versionen.values())
+
 
 class InMemoryBibliothekRepository:
     def __init__(self) -> None:

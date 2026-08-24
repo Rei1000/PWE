@@ -345,20 +345,16 @@ Unter `/identity` (Session erforderlich; Rollen je Endpoint). Verwaltungs-**UI**
 
 **Identity-Lesematrix:** Benutzer/Profile/Einweisungen lesen — Administrator, QM, Abteilungsleiter; **Prüfer** ❌. Audit und Login-Metadaten nur Administrator ([ADR-0025](../adr/0025-authorization.md)).
 
-### Bekannte API-Einschränkung: Benutzer ↔ Berechtigungsprofil (Gate 8.1c2, P2)
+**Benutzer-Detail und -Liste (V1 Operational Polish A):** `GET /identity/benutzer` und `GET /identity/benutzer/{benutzer_id}` liefern `profil_ids: list[str]` — persistierte Profilzuordnungen aus der Join-Tabelle (unabhängig vom Profil-Status aktiv/inaktiv). Schreiben unverändert über Profile-Endpunkte.
 
-Für die Zuordnung **Benutzer ↔ Berechtigungsprofil** existieren Write-Operationen (`PUT`/`DELETE` `/identity/profile/{profil_id}/benutzer/{benutzer_id}`), aber **kein dedizierter Read-Endpunkt**, über den die UI beim ersten Laden die bestehenden Profilzuordnungen eines Benutzers vollständig abrufen kann.
+### Discovery-Reads (V1 Operational Polish A — Backend ✅, Frontend ⏸)
 
-| Aspekt | Einordnung |
-|--------|------------|
-| Backend | Bleibt fachliche Source of Truth für Zuweisen und Entfernen |
-| UI (Gate 8.1c2) | `sessionStorage` nur als **temporärer UX-Cache** für in der aktuellen Sitzung vorgenommene Zuordnungsänderungen |
-| Erstes Laden | Bestehende serverseitige Zuordnungen sind in der UI **nicht vollständig rekonstruierbar** |
-| Security | Kein Security-Problem — Zuweisung/Entfernen bleibt serverseitig autorisiert |
-| Architektur | Kein Architekturbruch |
-| Gate 8.1c2 | **Kein Bestandteil von Gate 8.1** — bekannte API-/UX-Einschränkung außerhalb des Scopes |
+| Endpoint | Zweck | Lesen |
+|----------|-------|-------|
+| `GET /katalog/aktive-produkte` | Aktive veröffentlichte Produkte (`produktkodierung`, `produktdefinition_id`, `version_id`) für Einweisungs-Auswahl | Admin, QM, Abteilungsleiter |
+| `GET /prueflaeufe/startbar` | Startbare Prüfungen des Session-Benutzers (nur `produktkodierung`; Qualifikation serverseitig) | AuthN (aktiver Benutzer) |
 
-**Mögliche spätere Verbesserung (noch kein verbindliches Design):** dedizierter Read-Contract, z. B. Benutzer-Detail inklusive `profil_ids` oder eigener Read-Endpunkt für Benutzer↔Profile.
+`POST /prueflaeufe` bleibt autoritative Startprüfung. Die Startliste ist Discovery, keine Security Boundary.
 
 **Passwort:**
 

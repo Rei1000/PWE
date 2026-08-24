@@ -82,6 +82,27 @@ def test_postgresql_version_insert_only(pg_session):
 
 
 @pytest.mark.postgresql
+def test_postgresql_list_aktive_versionen(pg_session):
+    katalog = PostgresKatalogRepository(pg_session)
+    v1 = _sample_version(version_id="ver-pg-aktiv-1")
+    v2 = ProduktdefinitionsVersion(
+        version_id="ver-pg-aktiv-2",
+        produktdefinition_id="pd-1",
+        produktkodierung="9999999999",
+        prozedur_schritte=v1.prozedur_schritte,
+        sollbestueckung=v1.sollbestueckung,
+    )
+    katalog.save_version(v1)
+    katalog.save_version(v2)
+    pg_session.commit()
+
+    aktiv = katalog.list_aktive_versionen()
+    assert len(aktiv) == 1
+    assert aktiv[0].version_id == "ver-pg-aktiv-2"
+    assert katalog.get_version("ver-pg-aktiv-1") is not None
+
+
+@pytest.mark.postgresql
 def test_postgresql_protokoll_insert_only(pg_session):
     protokoll = PostgresProtokollRepository(pg_session)
     snapshot = _sample_snapshot(snapshot_id="snap-pg", prueflauf_id="run-pg")

@@ -76,6 +76,7 @@ class BenutzerResponse(BaseModel):
     status: str
     rollen: list[str]
     passwortwechsel_erforderlich: bool
+    profil_ids: list[str] = Field(default_factory=list)
 
 
 class BenutzerListeResponse(BaseModel):
@@ -103,6 +104,14 @@ class PrueflaufResponse(BaseModel):
     pruefobjekt_kennung: str
     pruefer_id: str
     status: str
+
+
+class StartbarePruefungResponse(BaseModel):
+    produktkodierung: str
+
+
+class StartbarePruefungenListeResponse(BaseModel):
+    pruefungen: list[StartbarePruefungResponse]
 
 
 class KomponenteErfassenRequest(BaseModel):
@@ -247,6 +256,16 @@ class VersionResponse(BaseModel):
     version_id: str
     produktdefinition_id: str
     produktkodierung: str
+
+
+class AktivesProduktResponse(BaseModel):
+    produktkodierung: str
+    produktdefinition_id: str
+    version_id: str
+
+
+class AktiveProdukteListeResponse(BaseModel):
+    produkte: list[AktivesProduktResponse]
 
 
 class ExternesKommandoAnlegenRequest(BaseModel):

@@ -93,3 +93,12 @@ class PostgresKatalogRepository:
     def list_entwuerfe(self) -> list[Produktdefinition]:
         rows = self._session.query(ProduktdefinitionEntwurfRow).all()
         return [entwurf_from_payload(row.payload) for row in rows]
+
+    def list_aktive_versionen(self) -> list[ProduktdefinitionsVersion]:
+        rows = self._session.query(AktiveVersionRow).all()
+        result: list[ProduktdefinitionsVersion] = []
+        for aktiv in rows:
+            version = self.get_version(aktiv.version_id)
+            if version is not None:
+                result.append(version)
+        return result

@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
 
-from domain.identity.start_qualifikation import (
-    QualifikationUnzureichend,
-    StartQualifikationKontext,
-    start_qualifikation_erlaubt,
+from application.pruefausfuehrung.start_qualifikation_hilfe import (
+    pruefe_start_qualifikation_fuer_version,
 )
-from domain.identity.typen import EinweisungsStatus
+from domain.identity.start_qualifikation import QualifikationUnzureichend
 from domain.pruefausfuehrung.prueflauf import Prueflauf
 from domain.shared.errors import DomainError
 from ports.benutzer_repository import BenutzerRepository
@@ -45,34 +42,15 @@ class PruefungStarten:
         if version is None:
             raise VersionNichtGefunden(f"Keine aktive Version für {produktkodierung}")
 
-        benutzer = self.benutzer_repo.get(pruefer_id)
-        if benutzer is None:
+        if self.benutzer_repo.get(pruefer_id) is None:
             raise QualifikationUnzureichend("Qualifikation unzureichend")
 
-        profile = tuple(self.profile.profile_fuer_benutzer(pruefer_id))
-        jetzt = datetime.now(UTC)
-        for existing in self.einweisungen.list_fuer_benutzer_version(
-            benutzer_id=pruefer_id, version_id=version.version_id
-        ):
-            if (
-                existing.status == EinweisungsStatus.GUELTIG
-                and not existing.ist_gueltig(jetzt=jetzt)
-            ):
-                self.einweisungen.save(existing.als_abgelaufen())
-        einweisung = self.einweisungen.get_gueltige(
-            benutzer_id=pruefer_id, version_id=version.version_id
-        )
-
-        start_qualifikation_erlaubt(
-            StartQualifikationKontext(
-                benutzer=benutzer,
-                produktdefinition_id=version.produktdefinition_id,
-                version_id=version.version_id,
-                version_ist_aktive_veroeffentlichte=True,
-                profile_des_benutzers=profile,
-                gueltige_einweisung=einweisung,
-                jetzt=jetzt,
-            )
+        pruefe_start_qualifikation_fuer_version(
+            benutzer_repo=self.benutzer_repo,
+            profile=self.profile,
+            einweisungen=self.einweisungen,
+            benutzer_id=pruefer_id,
+            version=version,
         )
 
         schritt_ids = [s.schritt_id for s in version.aktive_schritte()]

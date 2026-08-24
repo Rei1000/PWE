@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Body, Request, Response
 
-from api.authz import require_katalog_bearbeiten, require_katalog_veroeffentlichen
+from api.authz import require_identity_lesen, require_katalog_bearbeiten, require_katalog_veroeffentlichen
 from api.current_user import RequestCurrentUserProvider
 from api.deps import get_request_deps
 from api.schemas import (
+    AktiveProdukteListeResponse,
+    AktivesProduktResponse,
     AutomatisierungZuweisenRequest,
     AutomatisierungZuweisenResponse,
     EntwurfAnlegenRequest,
@@ -40,6 +42,7 @@ from api.schemas import (
     VeroeffentlichenRequest,
     VersionResponse,
 )
+from application.katalog.aktive_produkte_listen import AktiveProdukteListen
 from application.katalog.automatisierung_entfernen import AutomatisierungEntfernen
 from application.katalog.entwurf_anlegen import EntwurfAnlegen
 from application.katalog.entwurf_lesen import EntwurfLesen
@@ -69,6 +72,23 @@ from domain.katalog.produktdefinition import Produktdefinition, ProzedurSchrittE
 from domain.katalog.routine import Routine
 
 router = APIRouter(prefix="/katalog", tags=["Katalog"])
+
+
+@router.get("/aktive-produkte", response_model=AktiveProdukteListeResponse)
+def aktive_produkte_listen(request: Request) -> AktiveProdukteListeResponse:
+    require_identity_lesen(RequestCurrentUserProvider(request).require())
+    deps = get_request_deps(request)
+    produkte = AktiveProdukteListen(deps.katalog).execute()
+    return AktiveProdukteListeResponse(
+        produkte=[
+            AktivesProduktResponse(
+                produktkodierung=p.produktkodierung,
+                produktdefinition_id=p.produktdefinition_id,
+                version_id=p.version_id,
+            )
+            for p in produkte
+        ]
+    )
 
 
 def _routine_aktionen_response(routine: Routine) -> list[RoutineAktionResponse]:

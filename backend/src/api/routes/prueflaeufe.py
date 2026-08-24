@@ -28,6 +28,8 @@ from api.schemas import (
     PrueflaufResponse,
     PrueflaufStartenRequest,
     SchrittDurchfuehrungResponse,
+    StartbarePruefungResponse,
+    StartbarePruefungenListeResponse,
 )
 from application.pruefausfuehrung.prueflauf_lesen import PrueflaufDetailAnsicht, PrueflaufLesen
 from application.protokoll.erzeugen import ProtokollErzeugen
@@ -39,6 +41,7 @@ from application.pruefausfuehrung.nachweis_erfassen import NachweisErfassen
 from application.pruefausfuehrung.pruefung_abschliessen import PruefungAbschliessen
 from application.pruefausfuehrung.pruefung_starten import PruefungStarten
 from application.pruefausfuehrung.schritt_beurteilen import SchrittBeurteilen
+from application.pruefausfuehrung.startbare_pruefungen_listen import StartbarePruefungenListen
 from domain.pruefausfuehrung.datei_verweis import DateiVerweis
 from domain.pruefausfuehrung.errors import PrueflaufNichtEigentuemer, PrueflaufNichtGefunden
 from domain.pruefausfuehrung.typen import NachweisArt
@@ -119,6 +122,24 @@ def _prueflauf_detail_response(detail: PrueflaufDetailAnsicht) -> PrueflaufDetai
         fehlende_komponenten=list(detail.fehlende_komponenten),
         kann_komponente_erfassen=detail.kann_komponente_erfassen,
         kann_abgeschlossen_werden=detail.kann_abgeschlossen_werden,
+    )
+
+
+@router.get("/startbar", response_model=StartbarePruefungenListeResponse)
+def startbare_pruefungen_listen(request: Request) -> StartbarePruefungenListeResponse:
+    benutzer = RequestCurrentUserProvider(request).require()
+    deps = get_request_deps(request)
+    pruefungen = StartbarePruefungenListen(
+        deps.katalog,
+        deps.benutzer_repo,
+        deps.profile_repo,
+        deps.einweisung_repo,
+    ).execute(benutzer_id=benutzer.benutzer_id)
+    return StartbarePruefungenListeResponse(
+        pruefungen=[
+            StartbarePruefungResponse(produktkodierung=p.produktkodierung)
+            for p in pruefungen
+        ]
     )
 
 

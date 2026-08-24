@@ -345,7 +345,7 @@ Unter `/identity` (Session erforderlich; Rollen je Endpoint). Verwaltungs-**UI**
 
 **Identity-Lesematrix:** Benutzer/Profile/Einweisungen lesen — Administrator, QM, Abteilungsleiter; **Prüfer** ❌. Audit und Login-Metadaten nur Administrator ([ADR-0025](../adr/0025-authorization.md)).
 
-**Benutzer-Detail (V1 Operational Polish A):** `GET /identity/benutzer/{benutzer_id}` liefert `profil_ids: list[str]` — persistierte Profilzuordnungen aus Identity (Detail-Read; Listen-Endpunkt ohne `profil_ids`). Schreiben unverändert über Profile-Endpunkte.
+**Benutzer-Detail und -Liste (V1 Operational Polish A):** `GET /identity/benutzer` und `GET /identity/benutzer/{benutzer_id}` liefern `profil_ids: list[str]` — persistierte Profilzuordnungen aus der Join-Tabelle (unabhängig vom Profil-Status aktiv/inaktiv). Schreiben unverändert über Profile-Endpunkte.
 
 ### Discovery-Reads (V1 Operational Polish A — Backend ✅, Frontend ⏸)
 

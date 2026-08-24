@@ -55,7 +55,15 @@ def benutzer_listen(request: Request) -> BenutzerListeResponse:
     require_identity_lesen(aktueller)
     deps = get_request_deps(request)
     liste = BenutzerListen(deps.benutzer_repo).execute()
-    return BenutzerListeResponse(benutzer=[_benutzer_response(b) for b in liste])
+    return BenutzerListeResponse(
+        benutzer=[
+            _benutzer_response(
+                b,
+                profil_ids=sorted(deps.profile_repo.profil_ids_fuer_benutzer(b.benutzer_id)),
+            )
+            for b in liste
+        ]
+    )
 
 
 @router.get("/benutzer/{benutzer_id}", response_model=BenutzerResponse)

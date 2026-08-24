@@ -89,6 +89,40 @@ def test_benutzer_detail_profil_ids_nach_entfernen():
         assert r.json()["profil_ids"] == []
 
 
+def test_benutzer_liste_profil_ids_gefuellt():
+    deps = in_memory_deps()
+    app = create_app(deps)
+    with TestClient(app) as client:
+        me = client.get("/auth/me").json()
+        profil = Berechtigungsprofil.anlegen(
+            bezeichnung="P", produktdefinition_ids={"pd-1"}
+        )
+        deps.profile_repo.save(profil)
+        deps.profile_repo.benutzer_zuordnen(
+            profil_id=profil.profil_id, benutzer_id=me["benutzer_id"]
+        )
+        liste = client.get("/identity/benutzer").json()["benutzer"]
+        admin = next(b for b in liste if b["benutzer_id"] == me["benutzer_id"])
+        assert admin["profil_ids"] == [profil.profil_id]
+
+
+def test_benutzer_detail_inaktives_profil_bleibt_in_profil_ids():
+    deps = in_memory_deps()
+    app = create_app(deps)
+    with TestClient(app) as client:
+        me = client.get("/auth/me").json()
+        profil = Berechtigungsprofil.anlegen(
+            bezeichnung="P", produktdefinition_ids={"pd-1"}
+        )
+        deps.profile_repo.save(profil)
+        deps.profile_repo.benutzer_zuordnen(
+            profil_id=profil.profil_id, benutzer_id=me["benutzer_id"]
+        )
+        deps.profile_repo.save(profil.deaktivieren())
+        r = client.get(f"/identity/benutzer/{me['benutzer_id']}")
+        assert r.json()["profil_ids"] == [profil.profil_id]
+
+
 def test_pruefer_darf_benutzer_detail_nicht_lesen():
     deps = in_memory_deps(seed_admin=False)
     hasher = deps.passwort_hasher
@@ -211,3 +245,51 @@ def test_startbare_abgelaufene_einweisung():
         )
         r = client.get("/prueflaeufe/startbar")
         assert r.json()["pruefungen"] == []
+
+
+def test_toctou_startbar_dann_widerruf_post_403():
+    deps = in_memory_deps()
+    assert isinstance(deps.katalog, InMemoryKatalogRepository)
+    deps.katalog.register_aktive_version(_version())
+    app = create_app(deps)
+    with TestClient(app) as client:
+        me = client.get("/auth/me").json()
+        qualify_client_for_kodierung(client, "1234567890")
+        assert client.get("/prueflaeufe/startbar").json()["pruefungen"] != []
+        einweisung = deps.einweisung_repo.get_gueltige(
+            benutzer_id=me["benutzer_id"], version_id="ver-1"
+        )
+        assert einweisung is not None
+        deps.einweisung_repo.save(einweisung.widerrufen())
+        r = client.post(
+            "/prueflaeufe",
+            json={"produktkodierung": "1234567890", "pruefobjekt_kennung": "X"},
+        )
+        assert r.status_code == 403
+        assert r.json()["code"] == "qualifikation_unzureichend"
+
+
+def test_startbar_route_kein_konflikt_mit_prueflauf_detail():
+    deps = in_memory_deps()
+    assert isinstance(deps.katalog, InMemoryKatalogRepository)
+    deps.katalog.register_aktive_version(_version())
+    app = create_app(deps)
+    with TestClient(app) as client:
+        qualify_client_for_kodierung(client, "1234567890")
+        startbar = client.get("/prueflaeufe/startbar")
+        assert startbar.status_code == 200
+        assert "pruefungen" in startbar.json()
+
+        created = client.post(
+            "/prueflaeufe",
+            json={"produktkodierung": "1234567890", "pruefobjekt_kennung": "GER-1"},
+        )
+        assert created.status_code == 201
+        prueflauf_id = created.json()["prueflauf_id"]
+
+        detail = client.get(f"/prueflaeufe/{prueflauf_id}")
+        assert detail.status_code == 200
+        assert detail.json()["prueflauf_id"] == prueflauf_id
+
+        missing = client.get("/prueflaeufe/nicht-existente-id")
+        assert missing.status_code == 404
